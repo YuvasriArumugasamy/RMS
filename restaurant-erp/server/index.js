@@ -6,12 +6,15 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const menuRoutes = require('./routes/menu');
-const tableRoutes = require('./routes/tables');
-const orderRoutes = require('./routes/orders');
+const authRoutes      = require('./routes/auth');
+const menuRoutes      = require('./routes/menu');
+const tableRoutes     = require('./routes/tables');
+const orderRoutes     = require('./routes/orders');
 const inventoryRoutes = require('./routes/inventory');
-const staffRoutes = require('./routes/staff');
+const staffRoutes     = require('./routes/staff');
+const supplierRoutes  = require('./routes/suppliers');
+const customerRoutes  = require('./routes/customers');
+const settingsRoutes  = require('./routes/settings');
 
 const app = express();
 const server = http.createServer(app);
@@ -29,12 +32,15 @@ app.set('io', io);
 
 // Routes
 app.get('/', (req, res) => res.json({ message: 'Restaurant ERP API v1.0', status: 'online' }));
-app.use('/api/auth', authRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/tables', tableRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/auth',      authRoutes);
+app.use('/api/menu',      menuRoutes);
+app.use('/api/tables',    tableRoutes);
+app.use('/api/orders',    orderRoutes);
 app.use('/api/inventory', inventoryRoutes);
-app.use('/api/staff', staffRoutes);
+app.use('/api/staff',     staffRoutes);
+app.use('/api/suppliers', supplierRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/settings',  settingsRoutes);
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));

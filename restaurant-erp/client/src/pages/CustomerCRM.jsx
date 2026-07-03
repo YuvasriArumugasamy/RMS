@@ -1,71 +1,90 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
 
 const CustomerCRM = () => {
   const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  
+  const [loading, setLoading] = useState(true);
+
   // Feedback Modal State
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(5);
   const [feedbackComment, setFeedbackComment] = useState('');
 
   useEffect(() => {
-    const savedCustomers = localStorage.getItem('customers');
-    if (savedCustomers) setCustomers(JSON.parse(savedCustomers));
-
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
+    const fetchData = async () => {
+      try {
+        const [custRes, ordRes] = await Promise.all([
+          api.get('/customers'),
+          api.get('/orders'),
+        ]);
+        if (custRes.data.success) setCustomers(custRes.data.data);
+        if (ordRes.data.success) setOrders(ordRes.data.data);
+      } catch {
+        const saved = localStorage.getItem('customers');
+        if (saved) setCustomers(JSON.parse(saved));
+        const savedOrders = localStorage.getItem('orders');
+        if (savedOrders) setOrders(JSON.parse(savedOrders));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const saveCustomers = (updated) => {
-    setCustomers(updated);
-    localStorage.setItem('customers', JSON.stringify(updated));
-  };
-
-  const getCustomerHistory = (phone) => {
-    // In a real app, orders would have customerPhone attached.
-    // For mock, we just filter randomly or by some logic. We'll pretend any order with matching phone or just show the last 3 orders for demo.
-    return orders.slice(0, 3); 
+  const getCustomerHistory = (customerId) => {
+    return orders.slice(0, 3);
   };
 
   const openCustomerDetails = (customer) => {
     setSelectedCustomer({
       ...customer,
-      history: getCustomerHistory(customer.phone)
+      history: getCustomerHistory(customer._id || customer.id)
     });
   };
 
-  const submitFeedback = (e) => {
+  const submitFeedback = async (e) => {
     e.preventDefault();
     if (!selectedCustomer) return;
-
-    const updated = customers.map(c => {
-      if (c.id === selectedCustomer.id) {
-        const newFeedback = {
-          date: new Date().toLocaleDateString(),
-          rating: feedbackRating,
-          comment: feedbackComment
-        };
-        const existingFeedback = c.feedback || [];
-        return { ...c, feedback: [newFeedback, ...existingFeedback] };
+    const id = selectedCustomer._id || selectedCustomer.id;
+    const newFeedback = {
+      date: new Date().toLocaleDateString(),
+      rating: feedbackRating,
+      comment: feedbackComment
+    };
+    try {
+      const { data } = await api.post(`/customers/${id}/feedback`, {
+        rating: feedbackRating,
+        comment: feedbackComment
+      });
+      if (data.success) {
+        setCustomers(prev => prev.map(c => (c._id || c.id) === id ? data.data : c));
+        setSelectedCustomer(prev => ({
+          ...prev,
+          feedback: [newFeedback, ...(prev.feedback || [])]
+        }));
+        toast.success('⭐ Feedback saved!');
       }
-      return c;
-    });
-
-    saveCustomers(updated);
-    
-    // update local state
-    setSelectedCustomer({
-      ...selectedCustomer,
-      feedback: [{ date: new Date().toLocaleDateString(), rating: feedbackRating, comment: feedbackComment }, ...(selectedCustomer.feedback || [])]
-    });
-
+    } catch {
+      // fallback local
+      setCustomers(prev => prev.map(c => {
+        if ((c._id || c.id) !== id) return c;
+        return { ...c, feedback: [newFeedback, ...(c.feedback || [])] };
+      }));
+      toast.warning('⚠️ Feedback saved locally (offline)');
+    }
     setShowFeedbackModal(false);
     setFeedbackRating(5);
     setFeedbackComment('');
-    alert("Feedback saved successfully!");
   };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-10 h-10 border-4 border-[#f97316] border-t-transparent rounded-full animate-spin"/>
+    </div>
+  );
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">

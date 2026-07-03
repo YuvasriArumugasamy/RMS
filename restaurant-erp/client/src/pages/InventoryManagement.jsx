@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
 
 const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState('stock'); // 'stock' | 'suppliers'
@@ -10,11 +12,22 @@ const InventoryManagement = () => {
   const [newSupplier, setNewSupplier] = useState({ name: '', contact: '', items: '' });
 
   useEffect(() => {
-    const savedIngredients = localStorage.getItem('ingredients');
-    if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
-
-    const savedSuppliers = localStorage.getItem('suppliers');
-    if (savedSuppliers) setSuppliers(JSON.parse(savedSuppliers));
+    const fetchData = async () => {
+      try {
+        const [ingRes, supRes] = await Promise.all([
+          api.get('/inventory'),
+          api.get('/suppliers'),
+        ]);
+        if (ingRes.data.success) setIngredients(ingRes.data.data);
+        if (supRes.data.success) setSuppliers(supRes.data.data);
+      } catch {
+        const savedIngredients = localStorage.getItem('ingredients');
+        if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
+        const savedSuppliers = localStorage.getItem('suppliers');
+        if (savedSuppliers) setSuppliers(JSON.parse(savedSuppliers));
+      }
+    };
+    fetchData();
   }, []);
 
   const saveIngredients = (updated) => {
@@ -27,59 +40,69 @@ const InventoryManagement = () => {
     localStorage.setItem('suppliers', JSON.stringify(updated));
   };
 
-  const handleAddIngredient = (e) => {
+  const handleAddIngredient = async (e) => {
     e.preventDefault();
-    const stockVal = Number(newIngredient.stock);
-    const added = [
-      ...ingredients,
-      {
-        id: Date.now(),
-        name: newIngredient.name,
-        stock: stockVal,
-        unit: newIngredient.unit,
-        threshold: newIngredient.threshold,
-        status: stockVal <= newIngredient.threshold ? 'Low Stock' : 'In Stock'
+    try {
+      const { data } = await api.post('/inventory', {
+        name: newIngredient.name, stock: Number(newIngredient.stock),
+        unit: newIngredient.unit, threshold: newIngredient.threshold,
+      });
+      if (data.success) {
+        setIngredients(prev => [...prev, data.data]);
+        toast.success(`✅ "${newIngredient.name}" added to inventory!`);
+        setNewIngredient({ name: '', stock: '', unit: 'kg', threshold: 5 });
       }
-    ];
-    saveIngredients(added);
-    setNewIngredient({ name: '', stock: '', unit: 'kg', threshold: 5 });
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Failed to add ingredient'}`);
+    }
   };
 
-  const deleteIngredient = (id) => {
-    saveIngredients(ingredients.filter(i => i.id !== id));
+  const deleteIngredient = async (id) => {
+    if (!window.confirm('Delete this ingredient?')) return;
+    try {
+      await api.delete(`/inventory/${id}`);
+      setIngredients(prev => prev.filter(i => (i._id || i.id) !== id));
+      toast.success('🗑️ Ingredient deleted');
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
+    }
   };
 
-  const updateStock = (id, change) => {
-    saveIngredients(ingredients.map(i => {
-      if (i.id === id) {
-        const newStock = Math.max(0, i.stock + change);
-        return {
-          ...i,
-          stock: newStock,
-          status: newStock <= i.threshold ? 'Low Stock' : 'In Stock'
-        };
-      }
-      return i;
-    }));
+  const updateStock = async (id, change) => {
+    const item = ingredients.find(i => (i._id || i.id) === id);
+    if (!item) return;
+    const newStock = Math.max(0, item.stock + change);
+    try {
+      const { data } = await api.put(`/inventory/${id}`, { stock: newStock });
+      if (data.success) setIngredients(prev => prev.map(i => (i._id || i.id) === id ? data.data : i));
+    } catch {
+      // fallback local update
+      setIngredients(prev => prev.map(i => (i._id || i.id) === id ? { ...i, stock: newStock } : i));
+    }
   };
 
-  const handleAddSupplier = (e) => {
+  const handleAddSupplier = async (e) => {
     e.preventDefault();
-    const added = [
-      ...suppliers,
-      {
-        id: Date.now(),
-        name: newSupplier.name,
-        contact: newSupplier.contact,
-        items: newSupplier.items
+    try {
+      const { data } = await api.post('/suppliers', newSupplier);
+      if (data.success) {
+        setSuppliers(prev => [...prev, data.data]);
+        toast.success(`✅ Supplier "${newSupplier.name}" added!`);
+        setNewSupplier({ name: '', contact: '', items: '' });
       }
-    ];
-    saveSuppliers(added);
-    setNewSupplier({ name: '', contact: '', items: '' });
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Failed to add supplier'}`);
+    }
   };
 
-  const deleteSupplier = (id) => {
-    saveSuppliers(suppliers.filter(s => s.id !== id));
+  const deleteSupplier = async (id) => {
+    try {
+      await api.delete(`/suppliers/${id}`);
+      setSuppliers(prev => prev.filter(s => (s._id || s.id) !== id));
+      toast.success('🗑️ Supplier removed');
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
+    }
   };
 
   const lowStockCount = ingredients.filter(i => i.status === 'Low Stock').length;

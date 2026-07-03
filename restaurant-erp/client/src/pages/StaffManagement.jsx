@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
 
 const StaffManagement = () => {
   const [staffList, setStaffList] = useState([]);
@@ -28,11 +30,22 @@ const StaffManagement = () => {
   const [editPhone, setEditPhone] = useState('');
 
   useEffect(() => {
-    const savedStaff = localStorage.getItem('staff');
-    if (savedStaff) setStaffList(JSON.parse(savedStaff));
-
-    const savedRoles = localStorage.getItem('rolePermissions');
-    if (savedRoles) setRolePermissions(JSON.parse(savedRoles));
+    const fetchData = async () => {
+      try {
+        const [staffRes, permRes] = await Promise.all([
+          api.get('/staff'),
+          api.get('/settings/permissions'),
+        ]);
+        if (staffRes.data.success) setStaffList(staffRes.data.data);
+        if (permRes.data.success) setRolePermissions(permRes.data.data);
+      } catch {
+        const savedStaff = localStorage.getItem('staff');
+        if (savedStaff) setStaffList(JSON.parse(savedStaff));
+        const savedRoles = localStorage.getItem('rolePermissions');
+        if (savedRoles) setRolePermissions(JSON.parse(savedRoles));
+      }
+    };
+    fetchData();
   }, []);
 
   const saveStaff = (updated) => {
@@ -40,37 +53,39 @@ const StaffManagement = () => {
     localStorage.setItem('staff', JSON.stringify(updated));
   };
 
-  const saveRoles = (updated) => {
+  const saveRoles = async (updated) => {
     setRolePermissions(updated);
     localStorage.setItem('rolePermissions', JSON.stringify(updated));
-    // Usually need a reload or state broadcast to update sidebar, for demo alert suffices
+    try {
+      // Persist each changed role
+      for (const [role, perms] of Object.entries(updated)) {
+        await api.put('/settings/permissions', { role, permissions: perms });
+      }
+    } catch { /* silent — local state already updated */ }
   };
 
-  const markAttendance = (id, status) => {
-    const updated = staffList.map(s => {
-      if (s.id === id) {
-        const attList = s.attendance || [];
-        const existingIdx = attList.findIndex(a => a.date === selectedDate);
-        let updatedAtt = [...attList];
-        if (existingIdx > -1) {
-          updatedAtt[existingIdx] = { ...updatedAtt[existingIdx], status };
-        } else {
-          updatedAtt.push({ date: selectedDate, status });
+  const markAttendance = async (id, status) => {
+    try {
+      const { data } = await api.put(`/staff/${id}/attendance`, { date: selectedDate, status });
+      if (data.success) {
+        setStaffList(prev => prev.map(s => (s._id || s.id) === id ? data.data : s));
+        if (selectedStaffForHistory?._id === id || selectedStaffForHistory?.id === id) {
+          setSelectedStaffForHistory(data.data);
         }
-        
-        // Update general status if it is today's date
-        const todayStr = new Date().toISOString().split('T')[0];
-        const newStatus = selectedDate === todayStr ? status : s.status;
-
-        return { ...s, status: newStatus, attendance: updatedAtt };
+        toast.success(`${status === 'Present' ? '✅' : '❌'} Attendance marked: ${status}`);
       }
-      return s;
-    });
-    saveStaff(updated);
-
-    if (selectedStaffForHistory && selectedStaffForHistory.id === id) {
-      const updatedStaff = updated.find(s => s.id === id);
-      setSelectedStaffForHistory(updatedStaff);
+    } catch {
+      // fallback local
+      const updated = staffList.map(s => {
+        if ((s._id || s.id) !== id) return s;
+        const att = [...(s.attendance || [])];
+        const idx = att.findIndex(a => a.date === selectedDate);
+        if (idx > -1) att[idx] = { ...att[idx], status };
+        else att.push({ date: selectedDate, status });
+        return { ...s, attendance: att };
+      });
+      saveStaff(updated);
+      toast.warning('⚠️ Offline — attendance saved locally');
     }
   };
 
@@ -79,29 +94,35 @@ const StaffManagement = () => {
     return record ? record.status : '';
   };
 
-  const deleteStaff = (id) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
-      const updated = staffList.filter(s => s.id !== id);
-      saveStaff(updated);
+  const deleteStaff = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this employee?')) return;
+    try {
+      await api.delete(`/staff/${id}`);
+      setStaffList(prev => prev.filter(s => (s._id || s.id) !== id));
+      toast.success('🗑️ Employee deleted');
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
     }
   };
 
-  const addStaff = (e) => {
+  const addStaff = async (e) => {
     e.preventDefault();
     if (!newStaffName || !newStaffPhone) return;
-    const newEmployee = {
-      id: Date.now(),
-      name: newStaffName,
-      role: newStaffRole,
-      phone: newStaffPhone,
-      status: 'Active',
-      shift: 'None',
-      attendance: []
-    };
-    saveStaff([...staffList, newEmployee]);
-    setNewStaffName('');
-    setNewStaffRole('Waiter');
-    setNewStaffPhone('');
+    try {
+      const { data } = await api.post('/staff', {
+        name: newStaffName, role: newStaffRole, phone: newStaffPhone
+      });
+      if (data.success) {
+        setStaffList(prev => [...prev, data.data]);
+        toast.success(`✅ ${newStaffName} added! Login: ${data.credentials?.username || ''}`);
+        if (data.credentials) {
+          toast.info(`🔑 Default password: ${data.credentials.defaultPassword || 'Staff@123'}`, { autoClose: 8000 });
+        }
+        setNewStaffName(''); setNewStaffRole('Waiter'); setNewStaffPhone('');
+      }
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Failed to add staff'}`);
+    }
   };
 
   const openEditModal = (staff) => {
@@ -111,49 +132,51 @@ const StaffManagement = () => {
     setEditPhone(staff.phone || '');
   };
 
-  const saveEdit = (e) => {
+  const saveEdit = async (e) => {
     e.preventDefault();
     if (!editingStaff) return;
-    const updated = staffList.map(s => 
-      s.id === editingStaff.id 
-        ? { ...s, name: editName, role: editRole, phone: editPhone }
-        : s
-    );
-    saveStaff(updated);
-    setEditingStaff(null);
+    const id = editingStaff._id || editingStaff.id;
+    try {
+      const { data } = await api.put(`/staff/${id}`, {
+        name: editName, role: editRole, phone: editPhone
+      });
+      if (data.success) {
+        setStaffList(prev => prev.map(s => (s._id || s.id) === id ? data.data : s));
+        toast.success(`✅ ${editName} updated!`);
+      }
+      setEditingStaff(null);
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Update failed'}`);
+    }
   };
 
-  const assignShift = (e) => {
+  const assignShift = async (e) => {
     e.preventDefault();
     if (!selectedStaffForShift || !shiftStart || !shiftEnd) return;
-
-    const updated = staffList.map(s => {
-      if (s.id === Number(selectedStaffForShift)) {
-        return { ...s, shift: `${shiftStart} - ${shiftEnd}` };
+    try {
+      const { data } = await api.put(`/staff/${selectedStaffForShift}`, {
+        shift: `${shiftStart} - ${shiftEnd}`
+      });
+      if (data.success) {
+        setStaffList(prev => prev.map(s => (s._id || s.id) === selectedStaffForShift ? data.data : s));
+        toast.success(`⏰ Shift assigned: ${shiftStart} - ${shiftEnd}`);
       }
-      return s;
-    });
-
-    saveStaff(updated);
-    setSelectedStaffForShift('');
-    setShiftStart('');
-    setShiftEnd('');
-    alert("Shift assigned successfully!");
+      setSelectedStaffForShift(''); setShiftStart(''); setShiftEnd('');
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Shift assign failed'}`);
+    }
   };
 
-  const togglePermission = (role, perm) => {
+  const togglePermission = async (role, perm) => {
     const currentPerms = rolePermissions[role] || [];
-    let updatedPerms;
-    if (currentPerms.includes(perm)) {
-      updatedPerms = currentPerms.filter(p => p !== perm);
-    } else {
-      updatedPerms = [...currentPerms, perm];
-    }
-    
-    saveRoles({
-      ...rolePermissions,
-      [role]: updatedPerms
-    });
+    const updatedPerms = currentPerms.includes(perm)
+      ? currentPerms.filter(p => p !== perm)
+      : [...currentPerms, perm];
+    const updated = { ...rolePermissions, [role]: updatedPerms };
+    setRolePermissions(updated);
+    try {
+      await api.put('/settings/permissions', { role, permissions: updatedPerms });
+    } catch { /* silent */ }
   };
 
   const allAvailablePermissions = [
@@ -331,7 +354,7 @@ const StaffManagement = () => {
                       <td className="py-4 text-center">
                          <div className="flex justify-center bg-slate-100 rounded-xl p-1 w-fit mx-auto">
                             <button 
-                              onClick={() => markAttendance(staff.id, 'Present')}
+                              onClick={() => markAttendance(staff._id || staff.id, 'Present')}
                               className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${
                                 getAttendanceForDate(staff, selectedDate) === 'Present' 
                                   ? 'bg-green-500 text-white shadow-sm' 
@@ -339,7 +362,7 @@ const StaffManagement = () => {
                               }`}
                             >Present</button>
                             <button 
-                              onClick={() => markAttendance(staff.id, 'Absent')}
+                              onClick={() => markAttendance(staff._id || staff.id, 'Absent')}
                               className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${
                                 getAttendanceForDate(staff, selectedDate) === 'Absent' 
                                   ? 'bg-red-500 text-white shadow-sm' 
@@ -371,7 +394,7 @@ const StaffManagement = () => {
                             </svg>
                           </button>
                           <button
-                            onClick={() => deleteStaff(staff.id)}
+                            onClick={() => deleteStaff(staff._id || staff.id)}
                             className="w-8 h-8 flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-100 rounded-lg transition-all"
                             title="Remove Employee"
                           >

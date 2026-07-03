@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState('items'); // 'items' | 'combos' | 'recipes'
@@ -21,142 +23,159 @@ const MenuManagement = () => {
   const [tempIngredientId, setTempIngredientId] = useState('');
   const [tempQty, setTempQty] = useState('');
 
-  // Load from localStorage
+  // Load from API
   useEffect(() => {
-    const savedMenu = localStorage.getItem('menuItems');
-    if (savedMenu) {
-      setMenuItems(JSON.parse(savedMenu));
-    }
-    const savedIngredients = localStorage.getItem('ingredients');
-    if (savedIngredients) {
-      setIngredients(JSON.parse(savedIngredients));
-    }
+    const fetchData = async () => {
+      try {
+        const [menuRes, ingRes] = await Promise.all([
+          api.get('/menu'),
+          api.get('/inventory'),
+        ]);
+        if (menuRes.data.success) setMenuItems(menuRes.data.data);
+        if (ingRes.data.success) setIngredients(ingRes.data.data);
+      } catch {
+        // fallback localStorage
+        const savedMenu = localStorage.getItem('menuItems');
+        if (savedMenu) setMenuItems(JSON.parse(savedMenu));
+        const savedIngredients = localStorage.getItem('ingredients');
+        if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
+      }
+    };
+    fetchData();
   }, []);
 
-  const saveMenuToStorage = (updatedMenu) => {
-    setMenuItems(updatedMenu);
-    localStorage.setItem('menuItems', JSON.stringify(updatedMenu));
-  };
-
   // Add or Update Single Item
-  const handleAddOrUpdate = (e) => {
+  const handleAddOrUpdate = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      const updated = menuItems.map(item =>
-        item.id === editingId ? { ...item, name: newItem.name, category: newItem.category, price: Number(newItem.price), available: newItem.available, image: newItem.image } : item
-      );
-      saveMenuToStorage(updated);
-      setEditingId(null);
-    } else {
-      const added = [
-        ...menuItems,
-        {
-          id: Date.now(),
-          name: newItem.name,
-          category: newItem.category,
-          price: Number(newItem.price),
-          available: newItem.available,
-          image: newItem.image,
-          recipe: []
+    try {
+      if (editingId) {
+        const { data } = await api.put(`/menu/${editingId}`, {
+          name: newItem.name, category: newItem.category,
+          price: Number(newItem.price), available: newItem.available, image: newItem.image
+        });
+        if (data.success) {
+          setMenuItems(prev => prev.map(item => (item._id || item.id) === editingId ? data.data : item));
+          toast.success(`✅ "${newItem.name}" updated!`);
         }
-      ];
-      saveMenuToStorage(added);
+        setEditingId(null);
+      } else {
+        const { data } = await api.post('/menu', {
+          name: newItem.name, category: newItem.category,
+          price: Number(newItem.price), available: newItem.available, image: newItem.image, recipe: []
+        });
+        if (data.success) {
+          setMenuItems(prev => [...prev, data.data]);
+          toast.success(`✅ "${newItem.name}" added to menu!`);
+        }
+      }
+      setNewItem({ name: '', category: 'Main Course', price: '', available: true, image: '🍔' });
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Failed to save item'}`);
     }
-    setNewItem({ name: '', category: 'Main Course', price: '', available: true, image: '🍔' });
   };
-
   const startEdit = (item) => {
     setNewItem(item);
-    setEditingId(item.id);
+    setEditingId(item._id || item.id);
   };
 
-  const deleteItem = (id) => {
-    const updated = menuItems.filter(item => item.id !== id);
-    saveMenuToStorage(updated);
+  const deleteItem = async (id) => {
+    if (!window.confirm('Delete this item?')) return;
+    try {
+      await api.delete(`/menu/${id}`);
+      setMenuItems(prev => prev.filter(item => (item._id || item.id) !== id));
+      toast.success('🗑️ Item deleted');
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
+    }
   };
 
-  const toggleAvailability = (id) => {
-    const updated = menuItems.map(item =>
-      item.id === id ? { ...item, available: !item.available } : item
-    );
-    saveMenuToStorage(updated);
+  const toggleAvailability = async (item) => {
+    const id = item._id || item.id;
+    try {
+      const { data } = await api.put(`/menu/${id}`, { available: !item.available });
+      if (data.success) {
+        setMenuItems(prev => prev.map(i => (i._id || i.id) === id ? data.data : i));
+        toast.info(`${data.data.available ? '✅' : '❌'} "${item.name}" ${data.data.available ? 'available' : 'unavailable'}`);
+      }
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Update failed'}`);
+    }
   };
 
   // Create Combo Offer
-  const handleCreateCombo = (e) => {
+  const handleCreateCombo = async (e) => {
     e.preventDefault();
     if (!comboName || !comboPrice || selectedItemsForCombo.length === 0) {
-      alert('Please fill out all fields and select items for the combo.');
+      toast.warning('⚠️ Please fill all fields and select items for the combo.');
       return;
     }
-    const added = [
-      ...menuItems,
-      {
-        id: Date.now(),
-        name: comboName,
-        category: 'Combo Offers',
-        price: Number(comboPrice),
-        available: true,
-        image: comboImage,
-        isCombo: true,
-        comboItems: selectedItemsForCombo,
-        recipe: [] // Combos don't have separate recipe ingredients directly; they consume what their children consume
+    try {
+      const { data } = await api.post('/menu', {
+        name: comboName, category: 'Combo Offers',
+        price: Number(comboPrice), available: true,
+        image: comboImage, isCombo: true,
+        comboItems: selectedItemsForCombo, recipe: []
+      });
+      if (data.success) {
+        setMenuItems(prev => [...prev, data.data]);
+        toast.success(`🍱 Combo "${comboName}" created!`);
       }
-    ];
-    saveMenuToStorage(added);
-    setComboName('');
-    setComboPrice('');
+      setComboName(''); setComboPrice(''); setSelectedItemsForCombo([]);
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Combo creation failed'}`);
+    }
+  };
     setSelectedItemsForCombo([]);
     alert('Combo Offer created successfully!');
   };
 
   const toggleComboItemSelection = (id) => {
-    if (selectedItemsForCombo.includes(id)) {
-      setSelectedItemsForCombo(selectedItemsForCombo.filter(item => item !== id));
-    } else {
-      setSelectedItemsForCombo([...selectedItemsForCombo, id]);
-    }
+    setSelectedItemsForCombo(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
   };
 
   // Recipe Editing
   const handleRecipeItemSelect = (e) => {
-    const itemId = Number(e.target.value);
+    const itemId = e.target.value;
     setSelectedRecipeItem(itemId);
-    const item = menuItems.find(i => i.id === itemId);
-    if (item && item.recipe) {
-      setRecipeIngredients(item.recipe);
-    } else {
-      setRecipeIngredients([]);
-    }
+    const item = menuItems.find(i => (i._id || i.id) === itemId || String(i._id || i.id) === itemId);
+    if (item?.recipe) setRecipeIngredients(item.recipe);
+    else setRecipeIngredients([]);
   };
 
   const addIngredientToRecipe = () => {
     if (!tempIngredientId || !tempQty) return;
-    const ingId = Number(tempIngredientId);
-    const qtyVal = Number(tempQty);
-    
-    // Check if already exists
-    const existing = recipeIngredients.find(r => r.ingredientId === ingId);
+    const existing = recipeIngredients.find(r =>
+      String(r.ingredientId) === String(tempIngredientId)
+    );
     if (existing) {
-      setRecipeIngredients(recipeIngredients.map(r => r.ingredientId === ingId ? { ...r, qty: qtyVal } : r));
+      setRecipeIngredients(prev => prev.map(r =>
+        String(r.ingredientId) === String(tempIngredientId) ? { ...r, qty: Number(tempQty) } : r
+      ));
     } else {
-      setRecipeIngredients([...recipeIngredients, { ingredientId: ingId, qty: qtyVal }]);
+      setRecipeIngredients(prev => [...prev, { ingredientId: tempIngredientId, qty: Number(tempQty) }]);
     }
-    setTempIngredientId('');
-    setTempQty('');
+    setTempIngredientId(''); setTempQty('');
   };
 
   const removeIngredientFromRecipe = (ingId) => {
-    setRecipeIngredients(recipeIngredients.filter(r => r.ingredientId !== ingId));
+    setRecipeIngredients(prev => prev.filter(r => String(r.ingredientId) !== String(ingId)));
   };
 
-  const saveRecipe = () => {
+  const saveRecipe = async () => {
     if (!selectedRecipeItem) return;
-    const updated = menuItems.map(item =>
-      item.id === selectedRecipeItem ? { ...item, recipe: recipeIngredients } : item
-    );
-    saveMenuToStorage(updated);
-    alert('Recipe configured successfully!');
+    try {
+      const { data } = await api.put(`/menu/${selectedRecipeItem}`, { recipe: recipeIngredients });
+      if (data.success) {
+        setMenuItems(prev => prev.map(item =>
+          String(item._id || item.id) === String(selectedRecipeItem) ? data.data : item
+        ));
+        toast.success('🍳 Recipe saved successfully!');
+      }
+    } catch (err) {
+      toast.error(`❌ ${err.response?.data?.message || 'Recipe save failed'}`);
+    }
   };
 
   return (
@@ -296,7 +315,7 @@ const MenuManagement = () => {
                       <td className="py-4 font-bold text-slate-800">₹{item.price}</td>
                       <td className="py-4">
                         <button
-                          onClick={() => toggleAvailability(item.id)}
+                          onClick={() => toggleAvailability(item)}
                           className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                             item.available ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
                           }`}
@@ -306,7 +325,7 @@ const MenuManagement = () => {
                       </td>
                       <td className="py-4 text-right space-x-3 font-semibold text-xs">
                         <button onClick={() => startEdit(item)} className="text-indigo-650 hover:underline">Edit</button>
-                        <button onClick={() => deleteItem(item.id)} className="text-red-500 hover:underline">Delete</button>
+                        <button onClick={() => deleteItem(item._id || item.id)} className="text-red-500 hover:underline">Delete</button>
                       </td>
                     </tr>
                   ))}

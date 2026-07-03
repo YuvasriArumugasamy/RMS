@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 
 const StatCard = ({ title, value, icon, subtitle, colorClass }) => (
   <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
@@ -16,12 +19,44 @@ const StatCard = ({ title, value, icon, subtitle, colorClass }) => (
 
 const Dashboard = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { on } = useSocket();
+
+  const fetchOrders = async () => {
+    try {
+      const { data } = await api.get('/orders');
+      if (data.success) setOrders(data.data);
+    } catch {
+      // fallback localStorage
+      const saved = localStorage.getItem('orders');
+      if (saved) setOrders(JSON.parse(saved));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
+    fetchOrders();
   }, []);
+
+  // 🔌 Live new order alert on Dashboard
+  useEffect(() => {
+    const handleNewOrder = (order) => {
+      setOrders(prev => [order, ...prev]);
+      toast.info(`🆕 New Order: ${order.orderId || order.id} — ${order.table}`, {
+        autoClose: 5000,
+      });
+    };
+    const handleStatusUpdate = (update) => {
+      setOrders(prev => prev.map(o =>
+        (o._id || o.id) === (update.id || update._id) ? { ...o, status: update.status } : o
+      ));
+    };
+    const c1 = on?.('new-order', handleNewOrder);
+    const c2 = on?.('order-status-update', handleStatusUpdate);
+    return () => { c1?.(); c2?.(); };
+  }, [on]);
 
   // Compute live stats
   const activeOrders = orders.filter(o => o.status !== 'Completed');
@@ -45,11 +80,13 @@ const Dashboard = () => {
           <p className="text-white/80 text-xs font-medium">Real-time status of your restaurant ERP environment.</p>
         </div>
         <div className="z-10 flex gap-2">
-          <button
-            onClick={() => navigate('/orders')}
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-bold rounded-xl transition-all border border-white/30"
-          >
+          <button onClick={() => navigate('/orders')}
+            className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-bold rounded-xl transition-all border border-white/30">
             Open Order Intake POS
+          </button>
+          <button onClick={fetchOrders}
+            className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-bold rounded-xl transition-all border border-white/30">
+            🔄 Refresh
           </button>
         </div>
       </div>
