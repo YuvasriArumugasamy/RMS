@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 import Layout from './components/Layout';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -40,8 +43,20 @@ const PrivateRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <SocketProvider>
+        <BrowserRouter>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            draggable
+            theme="light"
+            toastStyle={{ fontSize: '13px', fontWeight: '600' }}
+          />
+          <Routes>
           {/* Public Routes */}
           <Route path="/welcome" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -79,7 +94,8 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </SocketProvider>
+  </AuthProvider>
   );
 }
 

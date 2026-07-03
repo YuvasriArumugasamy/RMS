@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { io } from 'socket.io-client';
+
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 /* ─── helpers ─── */
 const GST_RATE = 0.05;
@@ -71,6 +74,34 @@ const CustomerMenu = () => {
     const tables = JSON.parse(localStorage.getItem('tables') || '[]');
     return tables.find(t => String(t.id) === String(tableId)) || { id: tableId, name: `Table ${tableId}` };
   })();
+
+  // 🔌 Socket.io for this customer — join table room for live status updates
+  useEffect(() => {
+    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+
+    socket.on('connect', () => {
+      socket.emit('join-table', tableInfo.name);
+    });
+
+    socket.on('order-status-update', (update) => {
+      setPlacedOrders(prev => prev.map(o =>
+        (o._id || o.id) === (update.id || update._id) ? { ...o, status: update.status } : o
+      ));
+      // Show status notification to customer
+      const msgs = {
+        Preparing: `👨‍🍳 Your order is being prepared!`,
+        Ready:     `✅ Your order is READY! Waiter is on the way 🛎️`,
+        Served:    `🎉 Enjoy your meal!`,
+      };
+      if (msgs[update.status]) {
+        // Simple in-app notification — no toast library needed in customer page
+        setVoiceResult({ notification: msgs[update.status] });
+        setTimeout(() => setVoiceResult(null), 5000);
+      }
+    });
+
+    return () => socket.disconnect();
+  }, [tableInfo.name]);
 
   // Load menu
   useEffect(() => {
@@ -651,8 +682,7 @@ const CustomerMenu = () => {
   );
 
   /* ── VOICE MODAL ── */
-  const VoiceModal = () => (
-    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+  const VoiceModal = () => (    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-[fadeIn_0.2s_ease-out]">
         <button onClick={() => { setShowVoiceModal(false); setIsListening(false); }} 
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
@@ -745,6 +775,14 @@ const CustomerMenu = () => {
   // Main render
   return (
     <>
+      {/* 🔔 Live order status notification banner */}
+      {voiceResult?.notification && (
+        <div className="fixed top-4 left-4 right-4 z-[100] bg-[#1e3a8a] text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-[fadeIn_0.3s_ease-out]">
+          <span className="text-xl">🔔</span>
+          <p className="text-sm font-black flex-1">{voiceResult.notification}</p>
+          <button onClick={() => setVoiceResult(null)} className="text-white/60 hover:text-white font-black text-lg">✕</button>
+        </div>
+      )}
       {stage === 'guests' && <GuestStage />}
       {stage === 'menu' && <MenuStage />}
       {stage === 'cart' && <CartStage />}

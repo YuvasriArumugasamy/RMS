@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 import chefImage  from '../assets/ChatGPT Image Jul 2, 2026, 12_34_37 PM.png';
 import centerLogo from '../assets/Screenshot 2026-07-02 173735.png';
 
@@ -440,7 +441,7 @@ const QRViewContent = ({ onBack }) => (
 );
 
 /* â”€â”€ Login Form Content â”€â”€ */
-const LoginFormContent = ({ role, setRole, email, setEmail, password, setPassword, showPw, setShowPw, remember, setRemember, error, doLogin, altLogin, setView }) => {
+const LoginFormContent = ({ role, setRole, email, setEmail, password, setPassword, showPw, setShowPw, remember, setRemember, error, doLogin, altLogin, setView, loading }) => {
   const ALT = [
     { l:'QR Login',  m:'QR',      qr:true,  ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
     { l:'Staff ID',  m:'StaffID', qr:false, sid:true, ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg> },
@@ -531,6 +532,7 @@ const Login = () => {
   const [role,     setRole]     = useState('Admin');
   const [showPw,   setShowPw]   = useState(false);
   const [remember, setRemember] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error,    setError]    = useState('');
   const [view, setView] = useState('login'); // 'login'|'qr'|'staffid'|'faceid'|'offline'|'help'|'ticket'|'ticket-success'
   const { login } = useAuth();
@@ -538,25 +540,42 @@ const Login = () => {
 
   const doLogin = async (e) => {
     e?.preventDefault();
-    if (!email || !password) { setError('Please enter email and password.'); return; }
+    if (!email || !password) {
+      setError('Please enter email and password.');
+      toast.error('⚠️ Please enter email and password.');
+      return;
+    }
     setError('');
+    setLoading(true);
     try {
       await login(email.split('@')[0] || email, password);
+      toast.success('✅ Welcome back! Redirecting...');
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    }
-  };
-  const altLogin = async (username) => { 
-    try {
-      await login(username.toLowerCase(), 'demo123');
-      navigate('/'); 
-    } catch {
-      setError('Offline/Alt login not configured.');
+      const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      setError(msg);
+      toast.error(`❌ ${msg}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const formProps = { role, setRole, email, setEmail, password, setPassword, showPw, setShowPw, remember, setRemember, error, doLogin, altLogin, setView };
+  const altLogin = async (username) => {
+    setLoading(true);
+    try {
+      await login(username.toLowerCase(), 'demo123');
+      toast.success('✅ Logged in successfully!');
+      navigate('/');
+    } catch {
+      const msg = 'Offline/Alt login not configured.';
+      setError(msg);
+      toast.error(`❌ ${msg}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formProps = { role, setRole, email, setEmail, password, setPassword, showPw, setShowPw, remember, setRemember, error, doLogin, altLogin, setView, loading };
 
   /* â”€â”€ Shared left panel â”€â”€ */
   const LeftPanel = () => (

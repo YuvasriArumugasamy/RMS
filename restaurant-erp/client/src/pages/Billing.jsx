@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 
 const Billing = () => {
+  const { on, connected } = useSocket();
   const [orders, setOrders] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -9,9 +13,38 @@ const Billing = () => {
   const [activeInvoice, setActiveInvoice] = useState(null);
 
   useEffect(() => {
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
+    const fetchOrders = async () => {
+      try {
+        const { data } = await api.get('/orders');
+        if (data.success) setOrders(data.data);
+      } catch {
+        const saved = localStorage.getItem('orders');
+        if (saved) setOrders(JSON.parse(saved));
+      }
+    };
+    fetchOrders();
   }, []);
+
+  // 🔌 Live billing updates via socket
+  useEffect(() => {
+    const handleBillingUpdate = (update) => {
+      setOrders(prev => prev.map(o =>
+        (o._id || o.id) === (update.id || update._id)
+          ? { ...o, billingStatus: 'Paid', status: 'Completed' }
+          : o
+      ));
+    };
+    const handleNewOrder = (order) => {
+      setOrders(prev => {
+        if (prev.find(o => (o._id || o.id) === (order._id || order.id))) return prev;
+        toast.info(`🆕 New order arrived: ${order.orderId || order.id} — ${order.table}`);
+        return [order, ...prev];
+      });
+    };
+    const c1 = on?.('billing-update', handleBillingUpdate);
+    const c2 = on?.('new-order', handleNewOrder);
+    return () => { c1?.(); c2?.(); };
+  }, [on]);
 
   const saveOrders = (updated) => {
     setOrders(updated);
@@ -19,62 +52,53 @@ const Billing = () => {
   };
 
   const toggleOrderSelection = (id) => {
-    if (selectedOrders.includes(id)) {
-      setSelectedOrders(selectedOrders.filter(o => o !== id));
-    } else {
-      setSelectedOrders([...selectedOrders, id]);
-    }
+    setSelectedOrders(prev =>
+      prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id]
+    );
   };
 
-  const markAsPaid = (id) => {
-    saveOrders(orders.map(o => o.id === id ? { ...o, billingStatus: 'Paid' } : o));
+  const markAsPaid = async (order) => {
+    const id = order._id || order.id;
+    try {
+      await api.put(`/orders/${id}/billing`, {});
+      setOrders(prev => prev.map(o =>
+        (o._id || o.id) === id ? { ...o, billingStatus: 'Paid', status: 'Completed' } : o
+      ));
+      toast.success(`💵 Bill paid — ${order.orderId || id} (${order.table})`);
+    } catch {
+      saveOrders(orders.map(o => (o._id || o.id) === id ? { ...o, billingStatus: 'Paid' } : o));
+      toast.warning('⚠️ Offline mode — marked paid locally');
+    }
   };
 
   const mergeBills = () => {
     if (selectedOrders.length < 2) {
-      alert("Select at least 2 unpaid orders to merge.");
+      toast.warning('Select at least 2 unpaid orders to merge.');
       return;
     }
-
-    const ordersToMerge = orders.filter(o => selectedOrders.includes(o.id));
-    
-    // Combine items
+    const ordersToMerge = orders.filter(o => selectedOrders.includes(o._id || o.id));
     let mergedItems = [];
     ordersToMerge.forEach(o => {
       o.items.forEach(item => {
-        const existing = mergedItems.find(i => i.id === item.id);
-        if (existing) {
-          existing.qty += item.qty;
-        } else {
-          mergedItems.push({ ...item });
-        }
+        const existing = mergedItems.find(i => (i._id || i.id) === (item._id || item.id));
+        if (existing) existing.qty += item.qty;
+        else mergedItems.push({ ...item });
       });
     });
-
     const mergedSubtotal = ordersToMerge.reduce((sum, o) => sum + o.subtotal, 0);
     const mergedGst = Math.round(mergedSubtotal * 0.05);
-    const mergedTotal = mergedSubtotal + mergedGst;
-
     const mergedOrder = {
       id: `ORD-MRG-${Date.now().toString().slice(-4)}`,
-      type: 'Merged Bill',
-      table: 'Multiple',
-      items: mergedItems,
-      subtotal: mergedSubtotal,
-      gst: mergedGst,
-      total: mergedTotal,
-      status: 'Completed',
-      billingStatus: 'Unpaid',
+      type: 'Merged Bill', table: 'Multiple', items: mergedItems,
+      subtotal: mergedSubtotal, gst: mergedGst, total: mergedSubtotal + mergedGst,
+      status: 'Completed', billingStatus: 'Unpaid',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      date: new Date().toLocaleDateString(),
-      mergedFrom: selectedOrders
+      date: new Date().toLocaleDateString(), mergedFrom: selectedOrders,
     };
-
-    // Remove the old orders and add the merged one
-    const remainingOrders = orders.filter(o => !selectedOrders.includes(o.id));
-    saveOrders([mergedOrder, ...remainingOrders]);
+    const remaining = orders.filter(o => !selectedOrders.includes(o._id || o.id));
+    saveOrders([mergedOrder, ...remaining]);
     setSelectedOrders([]);
-    alert("Bills merged successfully!");
+    toast.success('🔗 Bills merged successfully!');
   };
 
   const openInvoice = (order) => {
@@ -85,13 +109,13 @@ const Billing = () => {
   const handleWhatsAppSend = (e) => {
     e.preventDefault();
     if (!whatsappNumber) return;
-    alert(`Mock WhatsApp sent to ${whatsappNumber} for Invoice ${activeInvoice?.id}!`);
+    toast.success(`📱 Invoice sent to ${whatsappNumber}!`);
     setShowWhatsAppModal(false);
     setWhatsappNumber('');
   };
 
   const unpaidOrders = orders.filter(o => o.billingStatus !== 'Paid' && o.status !== 'Pending');
-  const paidOrders = orders.filter(o => o.billingStatus === 'Paid');
+  const paidOrders   = orders.filter(o => o.billingStatus === 'Paid');
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">
@@ -144,8 +168,8 @@ const Billing = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <button onClick={() => markAsPaid(o.id)} className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-xs transition-colors">Mark Paid 💵</button>
-                  <button onClick={() => openInvoice(o.id === activeInvoice?.id ? activeInvoice : o)} className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-colors">Invoice 📄</button>
+                  <button onClick={() => markAsPaid(o)} className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-xs transition-colors">Mark Paid 💵</button>
+                  <button onClick={() => openInvoice(o)} className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-colors">Invoice 📄</button>
                 </div>
               </div>
             ))}

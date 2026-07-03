@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
+import { useSocket } from '../context/SocketContext';
 
 const STATUS_COLORS = {
   Available:   { dot:'bg-emerald-500', badge:'bg-emerald-50 text-emerald-700 border-emerald-200',  card:'border-emerald-200 bg-emerald-50/40',  icon:'text-emerald-600' },
@@ -25,13 +27,14 @@ const QRIcon = () => (
 );
 
 const TableManagement = () => {
-  const [tables, setTables]             = useState([]);
-  const [reserveName, setReserveName]   = useState('');
-  const [reserveTime, setReserveTime]   = useState('');
+  const { on, connected } = useSocket();
+  const [tables, setTables]               = useState([]);
+  const [reserveName, setReserveName]     = useState('');
+  const [reserveTime, setReserveTime]     = useState('');
   const [selectedTable, setSelectedTable] = useState(null);
-  const [guestCount, setGuestCount]     = useState('6');
-  const [autoMessage, setAutoMessage]   = useState('');
-  const [editTable, setEditTable] = useState(null);
+  const [guestCount, setGuestCount]       = useState('6');
+  const [autoMessage, setAutoMessage]     = useState('');
+  const [editTable, setEditTable]         = useState(null);
   const [activeQRTable, setActiveQRTable] = useState(null);
 
   useEffect(() => {
@@ -40,24 +43,47 @@ const TableManagement = () => {
       setTables(JSON.parse(saved));
     } else {
       const defaults = [
-        { id:1, name:'Table 01', capacity:2, status:'Available',   reservation:null },
-        { id:2, name:'Table 02', capacity:4, status:'Available',   reservation:null },
-        { id:3, name:'Table 03', capacity:6, status:'Available',   reservation:null },
-        { id:4, name:'Table 04', capacity:8, status:'Available',   reservation:null },
-        { id:5, name:'Table 05', capacity:4, status:'Available',   reservation:null },
+        { id:1, name:'Table 01', capacity:2, status:'Available', reservation:null },
+        { id:2, name:'Table 02', capacity:4, status:'Available', reservation:null },
+        { id:3, name:'Table 03', capacity:6, status:'Available', reservation:null },
+        { id:4, name:'Table 04', capacity:8, status:'Available', reservation:null },
+        { id:5, name:'Table 05', capacity:4, status:'Available', reservation:null },
       ];
       setTables(defaults);
       localStorage.setItem('tables', JSON.stringify(defaults));
     }
   }, []);
 
-  const saveTables = (updated) => { setTables(updated); localStorage.setItem('tables', JSON.stringify(updated)); };
+  // 🔌 Socket — live table status updates from other staff
+  useEffect(() => {
+    const handleTableUpdate = (update) => {
+      setTables(prev => prev.map(t =>
+        (t._id || t.id) === (update.tableId || update._id) || t.name === update.name || t.name === update.table
+          ? { ...t, status: update.status }
+          : t
+      ));
+      const emoji = update.status === 'Occupied' ? '🔴' : update.status === 'Available' ? '🟢' : '🟡';
+      toast.info(`${emoji} ${update.name || update.table} — ${update.status}`, { autoClose: 3000 });
+    };
+    const cleanup = on?.('table-update', handleTableUpdate);
+    return () => cleanup?.();
+  }, [on]);
+
+  const saveTables = (updated) => {
+    setTables(updated);
+    localStorage.setItem('tables', JSON.stringify(updated));
+  };
 
   const handleReserve = (e) => {
     e.preventDefault();
     if (!selectedTable) return;
-    saveTables(tables.map(t => t.id === selectedTable.id ? { ...t, status:'Reserved', reservation:{ name:reserveName, time:reserveTime } } : t));
+    saveTables(tables.map(t => t.id === selectedTable.id
+      ? { ...t, status:'Reserved', reservation:{ name:reserveName, time:reserveTime } }
+      : t
+    ));
+    toast.success(`📅 ${selectedTable.name} reserved for ${reserveName} at ${reserveTime}`);
     setSelectedTable(null); setReserveName(''); setReserveTime('');
+  };
   };
 
   const handleAutoAssign = () => {
@@ -67,16 +93,29 @@ const TableManagement = () => {
     if (best) {
       saveTables(tables.map(t => t.id === best.id ? { ...t, status:'Occupied' } : t));
       setAutoMessage(`Assigned to ${best.name} (Capacity: ${best.capacity})`);
+      toast.success(`✅ Auto-assigned ${guests} guests → ${best.name}`);
     } else {
       setAutoMessage('No suitable table available.');
+      toast.warning('⚠️ No suitable table available for that guest count.');
     }
   };
 
-  const cancelReservation = (id) => saveTables(tables.map(t => t.id === id ? { ...t, status:'Available', reservation:null } : t));
+  const cancelReservation = (id) => {
+    saveTables(tables.map(t => t.id === id ? { ...t, status:'Available', reservation:null } : t));
+    toast.info('🗑️ Reservation cancelled');
+  };
 
-  const freeTable = (id) => saveTables(tables.map(t => t.id === id ? { ...t, status:'Available', reservation:null } : t));
+  const freeTable = (id) => {
+    const t = tables.find(tb => tb.id === id);
+    saveTables(tables.map(tb => tb.id === id ? { ...tb, status:'Available', reservation:null } : tb));
+    toast.success(`🟢 ${t?.name || 'Table'} is now Available`);
+  };
 
-  const resetAllTables = () => { saveTables(tables.map(t => ({ ...t, status:'Available', reservation:null }))); setAutoMessage(''); };
+  const resetAllTables = () => {
+    saveTables(tables.map(t => ({ ...t, status:'Available', reservation:null })));
+    setAutoMessage('');
+    toast.info('🔄 All tables reset to Available');
+  };
 
   const counts = { total:tables.length, available:tables.filter(t=>t.status==='Available').length, reserved:tables.filter(t=>t.status==='Reserved').length, maintenance:tables.filter(t=>t.status==='Maintenance').length };
 
@@ -191,6 +230,13 @@ const TableManagement = () => {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-base font-bold text-slate-800">Interactive Table Map</h3>
             <div className="flex items-center gap-2">
+              {/* Live connection badge */}
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border ${
+                connected ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-400 bg-slate-50 border-slate-200'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}/>
+                {connected ? 'Live Sync' : 'Offline'}
+              </span>
               <button onClick={resetAllTables}
                 className="text-[10px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1 rounded-full transition-all">
                 Reset All

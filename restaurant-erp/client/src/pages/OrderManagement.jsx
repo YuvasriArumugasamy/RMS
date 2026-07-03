@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 
 const OrderManagement = () => {
+  const { on, connected } = useSocket();
   const [activeTab, setActiveTab] = useState('pos'); // 'pos' | 'history'
   
   const [menuItems, setMenuItems] = useState([]);
@@ -25,8 +29,21 @@ const OrderManagement = () => {
     }
   }, []);
 
-  const addToCart = (item) => {
-    const existing = cart.find(i => i.id === item.id);
+  // 🔌 Live order status updates via socket
+  useEffect(() => {
+    const handleStatusUpdate = (update) => {
+      setOrders(prev => prev.map(o =>
+        (o._id || o.id) === (update.id || update._id) ? { ...o, status: update.status } : o
+      ));
+      if (update.status === 'Ready') {
+        toast.success(`🔔 Order ${update.orderId} is READY — ${update.table}!`, { autoClose: 8000 });
+      }
+    };
+    const cleanup = on?.('order-status-update', handleStatusUpdate);
+    return () => cleanup?.();
+  }, [on]);
+
+  const addToCart = (item) => {    const existing = cart.find(i => i.id === item.id);
     if (existing) {
       setCart(cart.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i));
     } else {
@@ -46,66 +63,42 @@ const OrderManagement = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (cart.length === 0) return;
 
+    const sub = cartTotal;
     const newOrder = {
-      id: `ORD-${Date.now().toString().slice(-4)}`,
       type: orderType,
       table: orderType === 'Dine-in' ? selectedTable : 'N/A',
-      items: cart,
-      subtotal: cartTotal,
-      gst: Math.round(cartTotal * 0.05), // 5% GST
-      total: Math.round(cartTotal * 1.05),
-      status: 'Pending',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      date: new Date().toLocaleDateString()
+      items: cart.map(i => ({ ...i, menuItemId: i.id })),
+      subtotal: sub,
+      gst: Math.round(sub * 0.05),
+      total: Math.round(sub * 1.05),
     };
 
-    const updatedOrders = [newOrder, ...orders];
-    setOrders(updatedOrders);
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-
-    // Deduct stock from inventory
-    const ingredients = JSON.parse(localStorage.getItem('ingredients') || '[]');
-    let updatedIngredients = [...ingredients];
-
-    cart.forEach(cartItem => {
-      let recipe = cartItem.recipe || [];
-      if (cartItem.isCombo && cartItem.comboItems) {
-        cartItem.comboItems.forEach(childId => {
-          const childMenu = menuItems.find(m => m.id === childId);
-          if (childMenu && childMenu.recipe) {
-             childMenu.recipe.forEach(r => {
-                const ingIndex = updatedIngredients.findIndex(ing => ing.id === r.ingredientId);
-                if (ingIndex > -1) {
-                  updatedIngredients[ingIndex].stock -= (r.qty * cartItem.qty);
-                  if (updatedIngredients[ingIndex].stock <= 5) updatedIngredients[ingIndex].status = 'Low Stock';
-                }
-             });
-          }
-        });
-      } else {
-        recipe.forEach(r => {
-          const ingIndex = updatedIngredients.findIndex(ing => ing.id === r.ingredientId);
-          if (ingIndex > -1) {
-            updatedIngredients[ingIndex].stock -= (r.qty * cartItem.qty);
-            if (updatedIngredients[ingIndex].stock <= 5) updatedIngredients[ingIndex].status = 'Low Stock';
-          }
-        });
+    try {
+      const { data } = await api.post('/orders', newOrder);
+      if (data.success) {
+        const placed = data.data;
+        setOrders(prev => [placed, ...prev]);
+        setCart([]);
+        toast.success(`✅ Order ${placed.orderId} placed! Kitchen notified.`, { autoClose: 4000 });
       }
-    });
-    localStorage.setItem('ingredients', JSON.stringify(updatedIngredients));
-
-    // Mark table occupied if dine-in
-    if (orderType === 'Dine-in') {
-      const tables = JSON.parse(localStorage.getItem('tables') || '[]');
-      const updatedTables = tables.map(t => t.name === selectedTable && t.status === 'Available' ? { ...t, status: 'Occupied' } : t);
-      localStorage.setItem('tables', JSON.stringify(updatedTables));
+    } catch {
+      // Fallback to localStorage
+      const fallbackOrder = {
+        id: `ORD-${Date.now().toString().slice(-4)}`,
+        ...newOrder,
+        status: 'Pending',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toLocaleDateString(),
+      };
+      const updated = [fallbackOrder, ...orders];
+      setOrders(updated);
+      localStorage.setItem('orders', JSON.stringify(updated));
+      setCart([]);
+      toast.warning(`⚠️ Offline mode — Order ${fallbackOrder.id} saved locally`);
     }
-
-    setCart([]);
-    alert(`Order ${newOrder.id} placed successfully! Kitchen and Inventory synced.`);
   };
 
   const filteredItems = activeCategory === 'All'
@@ -121,7 +114,15 @@ const OrderManagement = () => {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex space-x-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
+        <div className="flex items-center gap-3">
+          {/* Live indicator */}
+          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border ${
+            connected ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-400 bg-slate-50 border-slate-200'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}/>
+            {connected ? 'Live' : 'Offline'}
+          </span>
+          <div className="flex space-x-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
           <button
             onClick={() => setActiveTab('pos')}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
@@ -138,6 +139,7 @@ const OrderManagement = () => {
           >
             📋 Order History
           </button>
+        </div>
         </div>
       </div>
 

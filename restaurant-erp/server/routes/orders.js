@@ -66,6 +66,13 @@ router.post('/', async (req, res) => {
       await ing.save(); // triggers pre-save hook to update status
     }
 
+    // 🔌 Emit to kitchen & staff in real-time
+    const io = req.app.get('io');
+    if (io) {
+      io.to('kitchen').emit('new-order', order);
+      io.to('staff').emit('table-update', { table, status: 'Occupied' });
+    }
+
     res.status(201).json({ success: true, data: order });
   } catch (err) {
     console.error(err);
@@ -86,6 +93,17 @@ router.put('/:id/status', authorize('Admin', 'Manager', 'Chef', 'Waiter'), async
 
     const order = await Order.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
+
+    // 🔌 Emit status update to all connected clients
+    const io = req.app.get('io');
+    if (io) {
+      io.to('kitchen').emit('order-status-update', { id: order._id, orderId: order.orderId, status: order.status, table: order.table });
+      io.to('staff').emit('order-status-update', { id: order._id, orderId: order.orderId, status: order.status, table: order.table });
+      // Notify customer room too (they joined room `table-${tableName}`)
+      if (order.table && order.table !== 'N/A') {
+        io.to(`table-${order.table}`).emit('order-status-update', { id: order._id, orderId: order.orderId, status: order.status });
+      }
+    }
 
     res.json({ success: true, data: order });
   } catch (err) {
@@ -114,8 +132,15 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
       });
       if (unpaidForTable === 0) {
         await Table.findOneAndUpdate({ name: order.table }, { status: 'Available' });
+        // 🔌 Emit table freed
+        const io = req.app.get('io');
+        if (io) io.to('staff').emit('table-update', { table: order.table, status: 'Available' });
       }
     }
+
+    // 🔌 Emit billing update
+    const io = req.app.get('io');
+    if (io) io.to('staff').emit('billing-update', { id: order._id, orderId: order.orderId, billingStatus: 'Paid' });
 
     res.json({ success: true, data: order });
   } catch (err) {

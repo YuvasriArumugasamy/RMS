@@ -43,6 +43,11 @@ router.put('/:id', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => 
   try {
     const table = await Table.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!table) return res.status(404).json({ success: false, message: 'Table not found.' });
+
+    // 🔌 Emit table status update to all staff
+    const io = req.app.get('io');
+    if (io) io.to('staff').emit('table-update', { tableId: table._id, name: table.name, status: table.status });
+
     res.json({ success: true, data: table });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

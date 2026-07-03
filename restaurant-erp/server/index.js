@@ -59,6 +59,12 @@ io.on('connection', (socket) => {
     console.log(`📍 Socket ${socket.id} joined room: ${room}`);
   });
 
+  // Customer joins table-specific room for live order status
+  socket.on('join-table', (tableName) => {
+    socket.join(`table-${tableName}`);
+    console.log(`🍽️  Customer joined table room: table-${tableName}`);
+  });
+
   socket.on('disconnect', () => {
     console.log(`❌ Client disconnected: ${socket.id}`);
   });
