@@ -42,6 +42,35 @@ Full-stack Restaurant ERP with **QR Code Ordering**, **Voice Ordering**, **Real-
 
 ## 📦 Installation & Setup
 
+---
+
+### 🚀 **LOCAL-LA RUN PANUVATHU EPPADI? (HOW TO RUN LOCALLY)**
+
+#### **SYSTEM REQUIREMENTS:**
+- Node.js (v18+) installed
+- MongoDB (local OR MongoDB Atlas account)
+- Internet connection
+
+#### **QUICK START (3 STEPS ONLY):**
+```bash
+# 1️⃣ Clone the project
+git clone https://github.com/YuvasriArumugasamy/RMS.git
+cd RMS/restaurant-erp
+
+# 2️⃣ Backend + Frontend dependencies install
+cd server && npm install && cd ../client && npm install
+
+# 3️⃣ Terminal 1 - Backend start (port 5000)
+cd server && npm run dev
+
+# 4️⃣ Terminal 2 - Frontend start (port 5173)
+cd client && npm run dev
+```
+
+**DONE! Open browser-la:** http://localhost:5173
+
+---
+
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/YuvasriArumugasamy/RMS.git

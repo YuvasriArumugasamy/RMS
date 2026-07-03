@@ -15,6 +15,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Global response error interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const message = error.response?.data?.message || error.message;
+
+    // Auto-logout on 401 (token expired)
+    if (status === 401) {
+      localStorage.removeItem('rms_token');
+      // Reload to trigger session restore → redirect to login
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/welcome') {
+        window.location.href = '/login';
+      }
+    }
+
+    // Log server errors
+    if (status >= 500) {
+      console.error('🔴 Server Error:', message);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Role-based page permissions
 const ROLE_PERMISSIONS = {
   Admin:    ['Dashboard', 'Menu Management', 'Table Management', 'Order Management', 'Kitchen Management',

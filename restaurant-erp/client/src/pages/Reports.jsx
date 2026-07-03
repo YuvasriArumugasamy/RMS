@@ -146,15 +146,6 @@ const Reports = () => {
           </button>
         </div>
       </div>
-        <div className="flex gap-2">
-           <button className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-xs hover:bg-slate-50 transition-colors shadow-sm">
-             Export CSV 📊
-           </button>
-           <button className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-xs hover:bg-indigo-750 transition-colors shadow-md shadow-indigo-600/10">
-             Download Report 📄
-           </button>
-        </div>
-      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

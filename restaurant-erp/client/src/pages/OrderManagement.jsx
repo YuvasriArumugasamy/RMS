@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { PageLoader, SkeletonTableRow, LoadingButton } from '../components/LoadingSkeleton';
 
 const OrderManagement = () => {
   const { on, connected } = useSocket();
-  const [activeTab, setActiveTab] = useState('pos'); // 'pos' | 'history'
+  const [activeTab, setActiveTab] = useState('pos');
+  const [loading, setLoading] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
   
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState(['All']);
@@ -65,7 +68,7 @@ const OrderManagement = () => {
 
   const placeOrder = async () => {
     if (cart.length === 0) return;
-
+    setPlacingOrder(true);
     const sub = cartTotal;
     const newOrder = {
       type: orderType,
@@ -75,7 +78,6 @@ const OrderManagement = () => {
       gst: Math.round(sub * 0.05),
       total: Math.round(sub * 1.05),
     };
-
     try {
       const { data } = await api.post('/orders', newOrder);
       if (data.success) {
@@ -85,7 +87,6 @@ const OrderManagement = () => {
         toast.success(`✅ Order ${placed.orderId} placed! Kitchen notified.`, { autoClose: 4000 });
       }
     } catch {
-      // Fallback to localStorage
       const fallbackOrder = {
         id: `ORD-${Date.now().toString().slice(-4)}`,
         ...newOrder,
@@ -98,6 +99,8 @@ const OrderManagement = () => {
       localStorage.setItem('orders', JSON.stringify(updated));
       setCart([]);
       toast.warning(`⚠️ Offline mode — Order ${fallbackOrder.id} saved locally`);
+    } finally {
+      setPlacingOrder(false);
     }
   };
 
@@ -255,9 +258,18 @@ const OrderManagement = () => {
                   </button>
                   <button
                     onClick={placeOrder}
-                    className="flex-2 py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-2xl text-xs transition-all shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
+                    disabled={placingOrder}
+                    className="flex-2 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-2xl text-xs transition-all shadow-lg shadow-indigo-600/10 flex items-center justify-center gap-2"
                   >
-                    Place Order (₹{Math.round(cartTotal * 1.05)})
+                    {placingOrder ? (
+                      <>
+                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Placing Order...
+                      </>
+                    ) : `Place Order (₹${Math.round(cartTotal * 1.05)})`}
                   </button>
                 </div>
               </div>
@@ -321,7 +333,11 @@ const OrderManagement = () => {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {orders.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <SkeletonTableRow key={i} cols={6} />
+                  ))
+                ) : orders.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center text-slate-400 py-12 font-semibold">
                       No order history available.

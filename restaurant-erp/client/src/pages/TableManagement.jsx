@@ -84,7 +84,6 @@ const TableManagement = () => {
     toast.success(`📅 ${selectedTable.name} reserved for ${reserveName} at ${reserveTime}`);
     setSelectedTable(null); setReserveName(''); setReserveTime('');
   };
-  };
 
   const handleAutoAssign = () => {
     const guests = parseInt(guestCount);

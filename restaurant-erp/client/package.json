@@ -1,4 +1,12 @@
 {
+  "_comments": {
+    "setup": "CLIENT SETUP - Local-la Run Panuvathu Eppadi?",
+    "step1": "cd restaurant-erp/client",
+    "step2": "npm install",
+    "step3": "npm run dev - Frontend 5173 port-la run aakum",
+    "step4": "Browser-la: http://localhost:5173 open pannu",
+    "note": "Backend (server) 5000 port-la running irundhu thanda"
+  },
   "name": "client",
   "version": "0.0.0",
   "private": true,

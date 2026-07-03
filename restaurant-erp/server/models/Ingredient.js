@@ -10,11 +10,10 @@ const ingredientSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Auto-update status based on stock
-ingredientSchema.pre('save', function (next) {
+ingredientSchema.pre('save', function () {
   if (this.stock <= 0) this.status = 'Out of Stock';
   else if (this.stock <= this.threshold) this.status = 'Low Stock';
   else this.status = 'In Stock';
-  next();
 });
 
 module.exports = mongoose.model('Ingredient', ingredientSchema);

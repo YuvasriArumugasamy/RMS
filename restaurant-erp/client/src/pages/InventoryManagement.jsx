@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
+import { PageLoader, LoadingButton } from '../components/LoadingSkeleton';
 
 const InventoryManagement = () => {
-  const [activeTab, setActiveTab] = useState('stock'); // 'stock' | 'suppliers'
+  const [activeTab, setActiveTab] = useState('stock');
   const [ingredients, setIngredients] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Form states
   const [newIngredient, setNewIngredient] = useState({ name: '', stock: '', unit: 'kg', threshold: 5 });
@@ -25,6 +28,8 @@ const InventoryManagement = () => {
         if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
         const savedSuppliers = localStorage.getItem('suppliers');
         if (savedSuppliers) setSuppliers(JSON.parse(savedSuppliers));
+      } finally {
+        setPageLoading(false);
       }
     };
     fetchData();
@@ -42,6 +47,7 @@ const InventoryManagement = () => {
 
   const handleAddIngredient = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
       const { data } = await api.post('/inventory', {
         name: newIngredient.name, stock: Number(newIngredient.stock),
@@ -106,6 +112,8 @@ const InventoryManagement = () => {
   };
 
   const lowStockCount = ingredients.filter(i => i.status === 'Low Stock').length;
+
+  if (pageLoading) return <PageLoader message="Loading Inventory..." />;
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">

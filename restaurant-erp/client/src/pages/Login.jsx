@@ -475,22 +475,38 @@ const LoginFormContent = ({ role, setRole, email, setEmail, password, setPasswor
           ))}
         </div>
       </div>
-      {error&&<div className="mb-2 p-2 bg-red-50 border border-red-100 rounded-xl text-[11px] text-red-600 font-semibold text-center">{error}</div>}
+      {error&&<div className="mb-2 p-2 bg-red-50 border border-red-100 rounded-xl text-[11px] text-red-600 font-semibold text-center flex items-center gap-2 justify-center">⚠️ {error}</div>}
       <form onSubmit={doLogin} className="flex flex-col gap-2.5">
         <div>
-          <p className="text-[11px] font-bold text-gray-700 mb-1">Email address</p>
+          <p className="text-[11px] font-bold text-gray-700 mb-1">Username</p>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><IconEmail/></span>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="yuvasri@restaurant.com"
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-full text-sm placeholder:text-gray-300 focus:outline-none focus:border-orange-400 shadow-sm transition"/>
+            <input
+              type="text"
+              value={email}
+              onChange={e => { setEmail(e.target.value); }}
+              placeholder="admin"
+              required
+              className={`w-full pl-9 pr-4 py-2.5 border rounded-full text-sm placeholder:text-gray-300 focus:outline-none shadow-sm transition ${
+                error && !email ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-orange-400'
+              }`}
+            />
           </div>
         </div>
         <div>
           <p className="text-[11px] font-bold text-gray-700 mb-1">Password</p>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><IconLock/></span>
-            <input type={showPw?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-              className="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-full text-sm placeholder:text-gray-300 focus:outline-none focus:border-orange-400 shadow-sm transition tracking-widest"/>
+            <input
+              type={showPw ? 'text' : 'password'}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••••"
+              required
+              className={`w-full pl-9 pr-10 py-2.5 border rounded-full text-sm placeholder:text-gray-300 focus:outline-none shadow-sm transition tracking-widest ${
+                error && !password ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-orange-400'
+              }`}
+            />
             <button type="button" onClick={()=>setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">{showPw?<IconEyeOff/>:<IconEye/>}</button>
           </div>
         </div>
@@ -501,8 +517,18 @@ const LoginFormContent = ({ role, setRole, email, setEmail, password, setPasswor
           </label>
           <a href="/forgot-password" className="text-[11px] font-bold text-[#f97316]">Forgot password?</a>
         </div>
-        <button type="submit" className="w-full py-3 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-full flex items-center justify-center gap-2 text-sm shadow-lg transition-all">
-          Sign In <IconArrow/>
+        <button type="submit"
+          disabled={loading}
+          className="w-full py-3 bg-[#f97316] hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-full flex items-center justify-center gap-2 text-sm shadow-lg transition-all">
+          {loading ? (
+            <>
+              <svg className="animate-spin w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              Signing in...
+            </>
+          ) : <>Sign In <IconArrow/></>}
         </button>
       </form>
       <div className="flex items-center w-full gap-3 my-2.5">

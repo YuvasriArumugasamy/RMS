@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
+import { PageLoader, LoadingButton } from '../components/LoadingSkeleton';
 
 const MenuManagement = () => {
-  const [activeTab, setActiveTab] = useState('items'); // 'items' | 'combos' | 'recipes'
+  const [activeTab, setActiveTab] = useState('items');
   const [menuItems, setMenuItems] = useState([]);
   const [ingredients, setIngredients] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Form states
   const [newItem, setNewItem] = useState({ name: '', category: 'Main Course', price: '', available: true, image: '🍔' });
@@ -34,11 +37,12 @@ const MenuManagement = () => {
         if (menuRes.data.success) setMenuItems(menuRes.data.data);
         if (ingRes.data.success) setIngredients(ingRes.data.data);
       } catch {
-        // fallback localStorage
         const savedMenu = localStorage.getItem('menuItems');
         if (savedMenu) setMenuItems(JSON.parse(savedMenu));
         const savedIngredients = localStorage.getItem('ingredients');
         if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
+      } finally {
+        setPageLoading(false);
       }
     };
     fetchData();
@@ -47,6 +51,7 @@ const MenuManagement = () => {
   // Add or Update Single Item
   const handleAddOrUpdate = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
       if (editingId) {
         const { data } = await api.put(`/menu/${editingId}`, {
@@ -71,6 +76,8 @@ const MenuManagement = () => {
       setNewItem({ name: '', category: 'Main Course', price: '', available: true, image: '🍔' });
     } catch (err) {
       toast.error(`❌ ${err.response?.data?.message || 'Failed to save item'}`);
+    } finally {
+      setSaving(false);
     }
   };
   const startEdit = (item) => {
@@ -125,9 +132,6 @@ const MenuManagement = () => {
       toast.error(`❌ ${err.response?.data?.message || 'Combo creation failed'}`);
     }
   };
-    setSelectedItemsForCombo([]);
-    alert('Combo Offer created successfully!');
-  };
 
   const toggleComboItemSelection = (id) => {
     setSelectedItemsForCombo(prev =>
@@ -177,6 +181,8 @@ const MenuManagement = () => {
       toast.error(`❌ ${err.response?.data?.message || 'Recipe save failed'}`);
     }
   };
+
+  if (pageLoading) return <PageLoader message="Loading Menu..." />;
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">
@@ -269,12 +275,14 @@ const MenuManagement = () => {
                   onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
                 />
               </div>
-              <button
+              <LoadingButton
                 type="submit"
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-xs"
+                loading={saving}
+                loadingText={editingId ? 'Updating...' : 'Adding...'}
+                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md text-xs"
               >
                 {editingId ? 'Update Menu Item' : 'Add Menu Item'}
-              </button>
+              </LoadingButton>
               {editingId && (
                 <button
                   type="button"

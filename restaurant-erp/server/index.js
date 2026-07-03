@@ -1,3 +1,28 @@
+/*
+╔═══════════════════════════════════════════════════════════════╗
+║     RESTAURANT ERP - BACKEND SERVER                            ║
+║  Local-এ Run Panuvathu Eppadi?                                ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📌 SETUP STEPS:
+1. CD to server folder: cd restaurant-erp/server
+2. Dependencies install: npm install
+3. .env file create pannu:
+   - PORT=5000
+   - MONGODB_URI=mongodb://localhost:27017/restaurant_erp
+   - JWT_SECRET=your_secret_key_here
+   - CLIENT_URL=http://localhost:5173
+
+4. MongoDB start panu (local machine-la)
+5. Run server: npm run dev (development) OR npm start (production)
+6. Server: http://localhost:5000 la run aakum
+
+📡 ENDPOINTS TEST:
+- GET  http://localhost:5000/
+- POST http://localhost:5000/api/auth/login
+- GET  http://localhost:5000/api/menu (protected)
+*/
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');

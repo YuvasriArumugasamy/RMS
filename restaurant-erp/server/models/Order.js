@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Auto-generate orderId before saving
-orderSchema.pre('save', function (next) {
+orderSchema.pre('save', function () {
   if (!this.orderId) {
     const prefix = this.type === 'Dine-in (QR)' ? 'ORD-QR' : 'ORD';
     this.orderId = `${prefix}-${Date.now().toString().slice(-6)}`;
@@ -37,7 +37,6 @@ orderSchema.pre('save', function (next) {
   if (!this.date) {
     this.date = new Date().toLocaleDateString();
   }
-  next();
 });
 
 module.exports = mongoose.model('Order', orderSchema);
