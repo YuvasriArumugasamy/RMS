@@ -8,41 +8,106 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /* ─── helpers ─── */
 const GST_RATE = 0.05;
+const SERVICE_CHARGE_RATE = 0.02;
 const gst = (n) => Math.round(n * GST_RATE);
-const total = (n) => Math.round(n * (1 + GST_RATE));
+const serviceCharge = (n) => Math.round(n * SERVICE_CHARGE_RATE);
+const totalAmt = (n) => Math.round(n * (1 + GST_RATE + SERVICE_CHARGE_RATE));
 const fmtTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const fmtDate = () => new Date().toLocaleDateString();
 
 const PREP_TIMES = { 'Main Course': 20, Starters: 12, Beverages: 5, Bread: 8, default: 15 };
 const estimatedTime = (items) => {
-  if (!items.length) return 0;
+  if (!items?.length) return 0;
   return Math.max(...items.map(i => PREP_TIMES[i.category] ?? PREP_TIMES.default));
 };
 
 const LANGS = {
-  en: { title: 'Digital Menu', guests: 'Guests', browse: 'Browse Menu', cart: 'Cart', order: 'My Order',
-        status: 'Order Status', callWaiter: 'Call Waiter', requestBill: 'Request Bill', water: 'Water Refill',
-        extras: 'Extra Items', feedback: 'Feedback', placeOrder: 'Place Order', addNote: 'Add special instructions...',
-        guestsQ: 'How many guests?', categories: 'Categories', repeat: 'Repeat Last Order',
-        estimatedTime: 'Est. Prep Time', mins: 'min', welcome: 'Welcome!', tableLabel: 'Table' },
-  ta: { title: 'டிஜிட்டல் மெனு', guests: 'விருந்தினர்கள்', browse: 'மெனு பார்', cart: 'கார்ட்', order: 'என் ஆர்டர்',
-        status: 'ஆர்டர் நிலை', callWaiter: 'வெயிட்டர் அழை', requestBill: 'பில் கேள்', water: 'தண்ணீர் நிரப்பு',
-        extras: 'கூடுதல் பொருட்கள்', feedback: 'கருத்து', placeOrder: 'ஆர்டர் போடு', addNote: 'சிறப்பு குறிப்பு சேர்...',
-        guestsQ: 'எத்தனை பேர்?', categories: 'வகைகள்', repeat: 'கடைசி ஆர்டர் மீண்டும்',
-        estimatedTime: 'தயாரிக்கும் நேரம்', mins: 'நிமிடம்', welcome: 'வரவேற்கிறோம்!', tableLabel: 'மேசை' },
-  hi: { title: 'डिजिटल मेनू', guests: 'मेहमान', browse: 'मेनू देखें', cart: 'कार्ट', order: 'मेरा ऑर्डर',
-        status: 'ऑर्डर स्थिति', callWaiter: 'वेटर बुलाएं', requestBill: 'बिल मांगें', water: 'पानी मंगाएं',
-        extras: 'अतिरिक्त सामान', feedback: 'प्रतिक्रिया', placeOrder: 'ऑर्डर दें', addNote: 'विशेष निर्देश...',
-        guestsQ: 'कितने मेहमान?', categories: 'श्रेणियाँ', repeat: 'पिछला ऑर्डर दोहराएं',
-        estimatedTime: 'तैयारी समय', mins: 'मिनट', welcome: 'स्वागत है!', tableLabel: 'टेबल' },
+  en: { title: 'Our Menu', welcome: 'Welcome!', subtitle: 'Thank you for choosing us',
+        tableLabel: 'Table Number', scanSuccess: 'Scan successful',
+        startOrdering: 'START ORDERING', searchPlaceholder: 'Search for dishes...',
+        all: 'All', addToCart: 'ADD TO CART', myCart: 'My Cart', edit: 'Edit',
+        itemTotal: 'Item Total', total: 'Total', placeOrder: 'PLACE ORDER',
+        confirmOrder: 'Confirm Order', orderType: 'Order Type', dineIn: 'Dine In',
+        takeAway: 'Take Away', specialInstructions: 'Special Instructions (if any)',
+        siPlaceholder: 'Ex: No onion, Less spicy...',
+        billDetails: 'Bill Details', subtotal: 'Subtotal', gstLabel: 'GST (5%)',
+        serviceChargeLabel: 'Service Charge (2%)', confirmOrderBtn: 'CONFIRM ORDER',
+        orderStatus: 'Order Status', orderReceived: 'Order Received', preparing: 'Preparing',
+        preparingNote: 'Your order is being prepared', readyToServe: 'Ready to Serve',
+        readyNote: 'Almost ready!', served: 'Served', servedNote: 'Enjoy your meal',
+        callWaiter: 'CALL WAITER', billSummary: 'Bill Summary', payAtCashier: 'Please pay at the cashier',
+        thankYou: 'Thank you!', offersForYou: 'Offers for You', apply: 'APPLY',
+        todaysSpecial: "Today's Special", freeItem: 'Free Dessert on orders above ₹900',
+        feedback: 'We Value Your Feedback', howWasExp: 'How was your experience?',
+        foodQuality: 'Food Quality', service: 'Service', ambience: 'Ambience',
+        comments: 'Your Comments (Optional)', commentsPlaceholder: 'Write your feedback...',
+        submitFeedback: 'SUBMIT FEEDBACK', backToMenu: 'BACK TO MENU',
+        thankYouTitle: 'Thank You!', thankYouMsg: 'We appreciate your feedback. Visit us again!',
+        needAssistance: 'Need Assistance?', waiterNote: 'Our waiter will be there shortly.',
+        menu: 'Menu', cart: 'Cart', orders: 'Orders', profile: 'Profile',
+        customize: 'Customize (Optional)', extraCheese: 'Extra Cheese',
+        noOnion: 'No Onion', spicy: 'Spicy', addNote: 'Add special note...',
+        qty: 'Quantity', veryGood: 'Very Good' },
+  ta: { title: 'எங்கள் மெனு', welcome: 'வரவேற்கிறோம்!', subtitle: 'எங்களை தேர்ந்தெடுத்தற்கு நன்றி',
+        tableLabel: 'மேசை எண்', scanSuccess: 'ஸ்கேன் வெற்றி',
+        startOrdering: 'ஆர்டர் தொடங்கு', searchPlaceholder: 'உணவு தேடுங்கள்...',
+        all: 'அனைத்தும்', addToCart: 'கார்ட்டில் சேர்', myCart: 'என் கார்ட்', edit: 'திருத்து',
+        itemTotal: 'மொத்தம்', total: 'மொத்தம்', placeOrder: 'ஆர்டர் போடு',
+        confirmOrder: 'ஆர்டர் உறுதி', orderType: 'ஆர்டர் வகை', dineIn: 'உள்ளே சாப்பிட',
+        takeAway: 'வெளியே கொண்டு செல்', specialInstructions: 'சிறப்பு அறிவுறுத்தல்கள்',
+        siPlaceholder: 'எ.கா: வெங்காயம் வேண்டாம், குறைவான காரம்...',
+        billDetails: 'பில் விவரங்கள்', subtotal: 'உப மொத்தம்', gstLabel: 'GST (5%)',
+        serviceChargeLabel: 'சேவை கட்டணம் (2%)', confirmOrderBtn: 'ஆர்டர் உறுதிப்படுத்து',
+        orderStatus: 'ஆர்டர் நிலை', orderReceived: 'ஆர்டர் பெறப்பட்டது', preparing: 'தயாரிக்கிறோம்',
+        preparingNote: 'உங்கள் ஆர்டர் தயாராகிறது', readyToServe: 'பரிமாற தயார்',
+        readyNote: 'கிட்டத்தட்ட தயார்!', served: 'பரிமாறப்பட்டது', servedNote: 'மகிழ்ச்சியாக சாப்பிடுங்கள்',
+        callWaiter: 'வெயிட்டர் அழை', billSummary: 'பில் சுருக்கம்', payAtCashier: 'கேஷியரிடம் பணம் செலுத்துங்கள்',
+        thankYou: 'நன்றி!', offersForYou: 'உங்களுக்கான சலுகைகள்', apply: 'பயன்படுத்து',
+        todaysSpecial: 'இன்றைய சிறப்பு', freeItem: '₹900க்கு மேல் ஆர்டரில் இலவச இனிப்பு',
+        feedback: 'உங்கள் கருத்து', howWasExp: 'உங்கள் அனுபவம் எப்படி?',
+        foodQuality: 'உணவு தரம்', service: 'சேவை', ambience: 'சூழல்',
+        comments: 'கருத்துகள் (விரும்பினால்)', commentsPlaceholder: 'உங்கள் கருத்தை எழுதுங்கள்...',
+        submitFeedback: 'கருத்து சமர்ப்பி', backToMenu: 'மெனுவுக்கு திரும்பு',
+        thankYouTitle: 'நன்றி!', thankYouMsg: 'மீண்டும் வாருங்கள்!',
+        needAssistance: 'உதவி வேண்டுமா?', waiterNote: 'வெயிட்டர் உடனே வருவார்.',
+        menu: 'மெனு', cart: 'கார்ட்', orders: 'ஆர்டர்கள்', profile: 'சுயவிவரம்',
+        customize: 'தனிப்பயனாக்கு', extraCheese: 'கூடுதல் சீஸ்',
+        noOnion: 'வெங்காயம் வேண்டாம்', spicy: 'காரம்', addNote: 'சிறப்பு குறிப்பு...',
+        qty: 'அளவு', veryGood: 'மிகவும் நல்லது' },
+  hi: { title: 'हमारा मेनू', welcome: 'स्वागत है!', subtitle: 'हमें चुनने के लिए धन्यवाद',
+        tableLabel: 'टेबल नंबर', scanSuccess: 'स्कैन सफल',
+        startOrdering: 'ऑर्डर शुरू करें', searchPlaceholder: 'व्यंजन खोजें...',
+        all: 'सभी', addToCart: 'कार्ट में डालें', myCart: 'मेरा कार्ट', edit: 'संपादित',
+        itemTotal: 'कुल', total: 'कुल', placeOrder: 'ऑर्डर दें',
+        confirmOrder: 'ऑर्डर कन्फर्म', orderType: 'ऑर्डर प्रकार', dineIn: 'यहाँ खाएं',
+        takeAway: 'ले जाएं', specialInstructions: 'विशेष निर्देश',
+        siPlaceholder: 'जैसे: प्याज नहीं, कम मसाला...',
+        billDetails: 'बिल विवरण', subtotal: 'उप-कुल', gstLabel: 'GST (5%)',
+        serviceChargeLabel: 'सेवा शुल्क (2%)', confirmOrderBtn: 'ऑर्डर कन्फर्म करें',
+        orderStatus: 'ऑर्डर स्थिति', orderReceived: 'ऑर्डर मिला', preparing: 'तैयार हो रहा है',
+        preparingNote: 'आपका ऑर्डर बन रहा है', readyToServe: 'परोसने के लिए तैयार',
+        readyNote: 'लगभग तैयार!', served: 'परोसा गया', servedNote: 'खाने का आनंद लें',
+        callWaiter: 'वेटर बुलाएं', billSummary: 'बिल सारांश', payAtCashier: 'कैशियर को भुगतान करें',
+        thankYou: 'धन्यवाद!', offersForYou: 'आपके लिए ऑफर', apply: 'लागू करें',
+        todaysSpecial: 'आज का विशेष', freeItem: '₹900 से अधिक के ऑर्डर पर मुफ्त मिठाई',
+        feedback: 'आपकी प्रतिक्रिया', howWasExp: 'आपका अनुभव कैसा था?',
+        foodQuality: 'खाने की गुणवत्ता', service: 'सेवा', ambience: 'माहौल',
+        comments: 'टिप्पणियां (वैकल्पिक)', commentsPlaceholder: 'अपनी प्रतिक्रिया लिखें...',
+        submitFeedback: 'प्रतिक्रिया दें', backToMenu: 'मेनू पर वापस जाएं',
+        thankYouTitle: 'धन्यवाद!', thankYouMsg: 'फिर से आएं!',
+        needAssistance: 'सहायता चाहिए?', waiterNote: 'हमारा वेटर जल्द आएगा।',
+        menu: 'मेनू', cart: 'कार्ट', orders: 'ऑर्डर', profile: 'प्रोफाइल',
+        customize: 'कस्टमाइज़ करें', extraCheese: 'अतिरिक्त पनीर',
+        noOnion: 'प्याज नहीं', spicy: 'मसालेदार', addNote: 'विशेष नोट...',
+        qty: 'मात्रा', veryGood: 'बहुत अच्छा' },
 };
 
 const STATUS_META = {
-  Pending:   { label: 'Order Received',  color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-700',   step: 1 },
-  Preparing: { label: 'Preparing...',    color: 'bg-amber-500',  light: 'bg-amber-50 text-amber-700', step: 2 },
-  Ready:     { label: 'Ready to Serve',  color: 'bg-green-500',  light: 'bg-green-50 text-green-700', step: 3 },
-  Served:    { label: 'Served!',         color: 'bg-slate-400',  light: 'bg-slate-50 text-slate-600', step: 4 },
-  Completed: { label: 'Served!',         color: 'bg-slate-400',  light: 'bg-slate-50 text-slate-600', step: 4 },
+  Pending:   { label: 'Order Received',  color: 'bg-emerald-500',  step: 1, icon: '✅', desc: 'Your order has been received' },
+  Preparing: { label: 'Preparing',       color: 'bg-blue-500',     step: 2, icon: '👨‍🍳', desc: 'Chef is preparing your order' },
+  Ready:     { label: 'Ready to Serve',  color: 'bg-amber-500',    step: 3, icon: '🍽️', desc: 'Your order is ready' },
+  Served:    { label: 'Served',          color: 'bg-slate-400',    step: 4, icon: '✨', desc: 'Enjoy your meal!' },
+  Completed: { label: 'Served',          color: 'bg-slate-400',    step: 4, icon: '✨', desc: 'Enjoy your meal!' },
 };
 
 const CustomerMenu = () => {
@@ -51,30 +116,26 @@ const CustomerMenu = () => {
   const t = LANGS[lang];
 
   // States
-  const [stage, setStage] = useState('guests'); // guests | menu | cart | order | status | feedback
-  const [guestCount, setGuestCount] = useState(null);
+  const [stage, setStage] = useState('welcome'); // welcome | menu | foodDetails | cart | confirm | tracking | bill | callWaiter | offers | feedback | thankYou
   const [menu, setMenu] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState([]);
-  const [specialInstructions, setSpecialInstructions] = useState({});
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [customizations, setCustomizations] = useState({});
+  const [specialInstructions, setSpecialInstructions] = useState('');
+  const [orderType, setOrderType] = useState('Dine In');
   const [placedOrders, setPlacedOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [rating, setRating] = useState(0);
+  const [coupons, setCoupons] = useState([]);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [ratings, setRatings] = useState({ foodQuality: 0, service: 0, ambience: 0 });
   const [feedbackText, setFeedbackText] = useState('');
-  const [waiterCalled, setWaiterCalled] = useState(false);
-  const [billRequested, setBillRequested] = useState(false);
-  const [waterRequested, setWaterRequested] = useState(false);
-  const [showExtrasModal, setShowExtrasModal] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [voiceTranscript, setVoiceTranscript] = useState('');
-  const [showVoiceModal, setShowVoiceModal] = useState(false);
-  const [voiceResult, setVoiceResult] = useState(null);
   const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [orderError, setOrderError] = useState(null);
 
-  // Get table info — try API first, fall back to localStorage
+  // Get table info
   useEffect(() => {
     const fetchTable = async () => {
       try {
@@ -83,9 +144,7 @@ const CustomerMenu = () => {
           setTableInfo({ id: res.data.data._id, name: res.data.data.name });
           return;
         }
-      } catch {
-        // API unavailable — fall back to localStorage
-      }
+      } catch {}
       const tables = JSON.parse(localStorage.getItem('tables') || '[]');
       const found = tables.find(t => String(t.id || t._id) === String(tableId));
       if (found) setTableInfo({ id: found.id || found._id, name: found.name });
@@ -93,35 +152,23 @@ const CustomerMenu = () => {
     fetchTable();
   }, [tableId]);
 
-  // 🔌 Socket.io for this customer — join table room for live status updates
+  // Socket.io for real-time updates
   useEffect(() => {
     if (!tableInfo.name) return;
     const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
 
-    socket.on('connect', () => {
-      socket.emit('join-table', tableInfo.name);
-    });
+    socket.on('connect', () => socket.emit('join-table', tableInfo.name));
 
     socket.on('order-status-update', (update) => {
       setPlacedOrders(prev => prev.map(o =>
         String(o._id || o.id) === String(update.id || update._id) ? { ...o, status: update.status } : o
       ));
-      // Show status notification to customer
-      const msgs = {
-        Preparing: `👨‍🍳 Your order is being prepared!`,
-        Ready:     `✅ Your order is READY! Waiter is on the way 🛎️`,
-        Served:    `🎉 Enjoy your meal!`,
-      };
-      if (msgs[update.status]) {
-        setVoiceResult({ notification: msgs[update.status] });
-        setTimeout(() => setVoiceResult(null), 5000);
-      }
     });
 
     return () => socket.disconnect();
   }, [tableInfo.name]);
 
-  // Load menu — try API first, fall back to localStorage
+  // Load menu
   useEffect(() => {
     const fetchMenu = async () => {
       try {
@@ -129,16 +176,14 @@ const CustomerMenu = () => {
         if (res.data.success && res.data.data.length > 0) {
           const items = res.data.data.map(item => ({
             ...item,
-            id: item._id,          // normalise id for cart logic
-            menuItemId: item._id,  // kept separately for order payload
+            id: item._id,
+            menuItemId: item._id,
           }));
           setMenu(items);
           setCategories(['All', ...new Set(items.map(i => i.category))]);
           return;
         }
-      } catch {
-        // API unavailable — fall back to localStorage
-      }
+      } catch {}
       const items = JSON.parse(localStorage.getItem('menuItems') || '[]').filter(m => m.available);
       setMenu(items);
       setCategories(['All', ...new Set(items.map(i => i.category))]);
@@ -146,14 +191,24 @@ const CustomerMenu = () => {
     fetchMenu();
   }, []);
 
-  // Poll placed orders for live status — try API first, fall back to localStorage
+  // Load coupons
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/coupons`);
+        if (res.data.success) setCoupons(res.data.data.filter(c => c.isActive));
+      } catch {}
+    };
+    fetchCoupons();
+  }, []);
+
+  // Poll placed orders for status
   useEffect(() => {
     if (placedOrders.length === 0 || !tableInfo.name) return;
     const interval = setInterval(async () => {
       try {
         const res = await axios.get(`${API_URL}/orders/qr-status?table=${encodeURIComponent(tableInfo.name)}`);
         if (res.data.success && res.data.data.length > 0) {
-          // Merge: keep any orders already in state, update their status from server
           const serverOrders = res.data.data;
           setPlacedOrders(prev => {
             const merged = prev.map(po => {
@@ -162,85 +217,56 @@ const CustomerMenu = () => {
             });
             return merged;
           });
-          return;
         }
-      } catch {
-        // fall back to localStorage poll
-      }
-      const all = JSON.parse(localStorage.getItem('orders') || '[]');
-      const ids = placedOrders.map(o => o.id);
-      const updated = all.filter(o => ids.includes(o.id));
-      if (updated.length) setPlacedOrders(updated);
+      } catch {}
     }, 3000);
     return () => clearInterval(interval);
   }, [placedOrders.length, tableInfo.name]);
 
   // Cart helpers
   const addToCart = (item) => {
-    setCart(prev => {
-      const ex = prev.find(i => i.id === item.id);
-      return ex ? prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i)
-                : [...prev, { ...item, qty: 1 }];
-    });
+    const cartItem = { ...item, qty: 1, customizations: {}, specialNote: '' };
+    setCart(prev => [...prev, cartItem]);
   };
-  const updateQty = (id, delta) => {
-    setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i).filter(i => i.qty > 0));
+
+  const updateQty = (index, delta) => {
+    setCart(prev => prev.map((item, i) => i === index ? { ...item, qty: Math.max(1, item.qty + delta) } : item));
   };
+
+  const removeFromCart = (index) => {
+    setCart(prev => prev.filter((_, i) => i !== index));
+  };
+
   const cartSubtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-
-  const sendRequest = async (type, setter) => {
-    const requestPayload = {
-      type: 'Request',
-      requestType: type,
-      table: tableInfo.name,
-      items: [{ id: '0', name: type, qty: 1, price: 0 }],
-      subtotal: 0, gst: 0, total: 0,
-      guestCount: guestCount || 1,
-    };
-
-    try {
-      await axios.post(`${API_URL}/orders/qr`, requestPayload);
-    } catch {
-      // API unavailable — write to localStorage so staff page can still see it
-      const localReq = {
-        id: `REQ-${type.toUpperCase()}-${Date.now().toString().slice(-4)}`,
-        ...requestPayload,
-        status: 'Pending',
-        timestamp: fmtTime(), date: fmtDate(),
-      };
-      const all = JSON.parse(localStorage.getItem('orders') || '[]');
-      localStorage.setItem('orders', JSON.stringify([localReq, ...all]));
-    }
-
-    setter(true);
-    setTimeout(() => setter(false), 30000);
-  };
+  const discount = appliedCoupon ? appliedCoupon.discount : 0;
+  const finalSubtotal = Math.max(0, cartSubtotal - discount);
+  const finalGst = gst(finalSubtotal);
+  const finalService = serviceCharge(finalSubtotal);
+  const finalTotal = finalSubtotal + finalGst + finalService;
 
   const placeOrder = async () => {
     if (!cart.length || isPlacingOrder) return;
     setIsPlacingOrder(true);
-    setOrderError(null);
 
-    const sub = cartSubtotal;
     const orderPayload = {
-      type: 'Dine-in (QR)',
-      table: tableInfo.name,
+      type: orderType === 'Dine In' ? 'Dine-in (QR)' : 'Takeaway (QR)',
+      table: orderType === 'Dine In' ? tableInfo.name : 'N/A',
       items: cart.map(i => ({
         id: i.id,
-        menuItemId: i.menuItemId || i._id || i.id,
+        menuItemId: i.menuItemId || i.id,
         name: i.name,
         price: i.price,
         qty: i.qty,
         category: i.category,
         image: i.image,
-        specialNote: specialInstructions[i.id] || '',
+        specialNote: i.specialNote || '',
       })),
-      subtotal: sub,
-      gst: gst(sub),
-      total: total(sub),
-      guestCount,
+      subtotal: finalSubtotal,
+      gst: finalGst,
+      total: finalTotal,
+      guestCount: 1,
       specialInstructions,
+      appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
     };
 
     try {
@@ -250,17 +276,17 @@ const CustomerMenu = () => {
         setPlacedOrders(prev => [newOrder, ...prev]);
         setSelectedOrder(newOrder);
         setCart([]);
-        setSpecialInstructions({});
+        setSpecialInstructions('');
+        setAppliedCoupon(null);
         setIsPlacingOrder(false);
-        setStage('status');
+        setStage('tracking');
         return;
       }
     } catch (err) {
-      console.error('API order failed, falling back to localStorage:', err);
-      setOrderError('Could not reach server. Order saved locally.');
+      console.error('Order failed:', err);
     }
 
-    // Fallback — save to localStorage if API is down
+    // Fallback to localStorage
     const localOrder = {
       id: `ORD-QR-${Date.now().toString().slice(-4)}`,
       ...orderPayload,
@@ -269,142 +295,75 @@ const CustomerMenu = () => {
     };
     const all = JSON.parse(localStorage.getItem('orders') || '[]');
     localStorage.setItem('orders', JSON.stringify([localOrder, ...all]));
-    const tables = JSON.parse(localStorage.getItem('tables') || '[]');
-    localStorage.setItem('tables', JSON.stringify(tables.map(tb =>
-      String(tb.id || tb._id) === String(tableId) && tb.status === 'Available'
-        ? { ...tb, status: 'Occupied' } : tb
-    )));
     setPlacedOrders(prev => [localOrder, ...prev]);
     setSelectedOrder(localOrder);
     setCart([]);
-    setSpecialInstructions({});
-    setStage('status');
+    setSpecialInstructions('');
+    setAppliedCoupon(null);
+    setStage('tracking');
     setIsPlacingOrder(false);
   };
 
-  const repeatLastOrder = () => {
-    const all = JSON.parse(localStorage.getItem('orders') || '[]');
-    const last = all.find(o => o.table === tableInfo.name && o.type === 'Dine-in (QR)');
-    if (last) { last.items.forEach(item => addToCart(item)); setStage('cart'); }
-  };
-
   const submitFeedback = () => {
-    if (!rating) return;
     const feedbacks = JSON.parse(localStorage.getItem('customerFeedbacks') || '[]');
-    feedbacks.unshift({ table: tableInfo.name, rating, comment: feedbackText, date: fmtDate(), time: fmtTime() });
-    localStorage.setItem('customerFeedbacks', JSON.stringify(feedbacks));
-    setRating(0); setFeedbackText('');
-    alert('Thank you for your feedback! 🙏');
-    setStage('status');
-  };
-
-  /* ── VOICE ORDERING ── */
-  const VOICE_LANGS = { en: 'en-IN', ta: 'ta-IN', hi: 'hi-IN' };
-
-  // Parse "add 2 butter chicken" / "2 biryani" / "remove naan" style commands
-  const parseVoiceCommand = useCallback((transcript) => {
-    const text = transcript.toLowerCase().trim();
-
-    // detect quantity
-    const numWords = { one:1, two:2, three:3, four:4, five:5, oru:1, rendu:2, moonu:3, ek:1, do:2, teen:3 };
-    let qty = 1;
-    const numMatch = text.match(/\b(\d+)\b/);
-    if (numMatch) qty = parseInt(numMatch[1]);
-    else { for (const [word, val] of Object.entries(numWords)) { if (text.includes(word)) { qty = val; break; } } }
-
-    // detect action
-    const isRemove = /\b(remove|cancel|delete|drop|hatao|thega|edukama|vendam)\b/.test(text);
-
-    // match menu item by fuzzy name search
-    const matched = menu.find(item => {
-      const itemName = item.name.toLowerCase();
-      const words = itemName.split(' ');
-      return words.some(w => w.length > 3 && text.includes(w)) || text.includes(itemName);
+    feedbacks.unshift({ 
+      table: tableInfo.name, 
+      ratings, 
+      comment: feedbackText, 
+      date: fmtDate(), 
+      time: fmtTime() 
     });
-
-    return { matched, qty, isRemove, text };
-  }, [menu]);
-
-  const startVoiceOrder = useCallback(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Voice ordering not supported in this browser. Please use Chrome.');
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = VOICE_LANGS[lang] || 'en-IN';
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 3;
-
-    setIsListening(true);
-    setVoiceTranscript('');
-    setVoiceResult(null);
-    setShowVoiceModal(true);
-
-    recognition.onresult = (e) => {
-      let interim = '';
-      let final = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t;
-        else interim += t;
-      }
-      setVoiceTranscript(final || interim);
-      if (final) {
-        const parsed = parseVoiceCommand(final);
-        setVoiceResult(parsed);
-      }
-    };
-
-    recognition.onerror = (e) => {
-      setIsListening(false);
-      if (e.error === 'not-allowed') alert('Microphone permission denied. Please allow mic access.');
-    };
-
-    recognition.onend = () => setIsListening(false);
-
-    recognition.start();
-  }, [lang, parseVoiceCommand]);
-
-  const confirmVoiceOrder = () => {
-    if (!voiceResult?.matched) return;
-    const { matched, qty, isRemove } = voiceResult;
-    if (isRemove) {
-      setCart(prev => prev.filter(i => i.id !== matched.id));
-    } else {
-      for (let i = 0; i < qty; i++) addToCart(matched);
-    }
-    setShowVoiceModal(false);
-    setVoiceTranscript('');
-    setVoiceResult(null);
+    localStorage.setItem('customerFeedbacks', JSON.stringify(feedbacks));
+    setRatings({ foodQuality: 0, service: 0, ambience: 0 });
+    setFeedbackText('');
+    setStage('thankYou');
   };
 
-  const filteredMenu = activeCategory === 'All' ? menu : menu.filter(i => i.category === activeCategory);
-  /* ── STAGE: GUESTS ── */
-  const GuestStage = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 to-white px-6 py-10">
-      <div className="w-16 h-16 bg-[#1e3a8a] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-        <span className="text-white font-black text-2xl">R</span>
+  const filteredMenu = menu.filter(item => {
+    const matchCategory = activeCategory === 'All' || item.category === activeCategory;
+    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchSearch;
+  });
+
+  /* ── STAGE: WELCOME ── */
+  const WelcomeStage = () => (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white px-6 py-10 justify-between">
+      <div></div>
+      <div className="text-center">
+        {/* Logo */}
+        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+          <span className="text-5xl">👨‍🍳</span>
+        </div>
+        <h1 className="text-3xl font-black mb-2">{t.welcome}</h1>
+        <p className="text-sm text-slate-300 font-medium mb-8">{t.subtitle}</p>
+        
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 mb-8">
+          <p className="text-xs text-slate-300 font-bold uppercase tracking-wider mb-2">{t.tableLabel}</p>
+          <p className="text-5xl font-black">{'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</p>
+          <div className="mt-4 flex items-center justify-center gap-2 text-emerald-400">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+            </svg>
+            <span className="text-sm font-bold">{t.scanSuccess}</span>
+          </div>
+        </div>
+
+        <button onClick={() => setStage('menu')}
+          className="w-full py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black rounded-2xl text-base shadow-2xl transition-all">
+          {t.startOrdering}
+        </button>
       </div>
-      <h1 className="text-2xl font-black text-slate-800 mb-1">{t.welcome}</h1>
-      <p className="text-sm text-slate-500 font-medium mb-1">{t.tableLabel}: <span className="font-bold text-[#1e3a8a]">{tableInfo.name}</span></p>
-      <p className="text-sm text-slate-500 font-medium mb-8">{t.guestsQ}</p>
-      <div className="grid grid-cols-3 gap-3 w-full max-w-xs mb-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 'More'].map(n => (
-          <button key={n} onClick={() => { setGuestCount(n === 'More' ? 10 : n); setStage('menu'); }}
-            className="py-4 rounded-2xl font-black text-lg bg-white border-2 border-slate-200 hover:border-[#f97316] hover:bg-orange-50 text-slate-700 transition-all shadow-sm">
-            {n}
-          </button>
-        ))}
-      </div>
+
       {/* Language selector */}
-      <div className="flex gap-2 mt-4">
+      <div className="flex justify-center gap-3 mt-8">
         {Object.keys(LANGS).map(l => (
           <button key={l} onClick={() => setLang(l)}
-            className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${lang === l ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}>
-            {l === 'en' ? 'EN' : l === 'ta' ? 'தமிழ்' : 'हिंदी'}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              lang === l 
+                ? 'bg-white text-slate-900' 
+                : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+            }`}>
+            {l === 'en' ? 'English' : l === 'ta' ? 'தமிழ்' : 'हिंदी'}
           </button>
         ))}
       </div>
@@ -413,21 +372,24 @@ const CustomerMenu = () => {
 
   /* ── BOTTOM NAV ── */
   const BottomNav = () => (
-    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 flex z-40 safe-bottom">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex shadow-lg z-40">
       {[
-        { id: 'menu', icon: '🍽️', label: t.browse },
-        { id: 'cart', icon: '🛒', label: t.cart, badge: cartCount },
-        { id: 'order', icon: '📋', label: t.order, badge: placedOrders.length },
-        { id: 'status', icon: '📍', label: t.status },
-        { id: 'feedback', icon: '⭐', label: t.feedback },
+        { id: 'menu', icon: '🏠', label: t.menu },
+        { id: 'cart', icon: '🛒', label: t.cart, badge: cart.length },
+        { id: 'tracking', icon: '📦', label: t.orders, badge: placedOrders.length },
+        { id: 'profile', icon: '👤', label: t.profile },
       ].map(item => (
-        <button key={item.id} onClick={() => setStage(item.id)}
-          className={`flex-1 flex flex-col items-center py-2 text-[10px] font-bold relative transition-colors ${stage === item.id ? 'text-[#f97316]' : 'text-slate-400'}`}>
-          <span className="text-lg leading-tight">{item.icon}</span>
+        <button key={item.id} onClick={() => item.id === 'tracking' && placedOrders.length > 0 ? setStage('tracking') : item.id === 'profile' ? setStage('feedback') : setStage(item.id)}
+          className={`flex-1 flex flex-col items-center py-3 text-[10px] font-bold relative transition-colors ${
+            stage === item.id ? 'text-orange-500' : 'text-slate-400'
+          }`}>
+          <span className="text-xl leading-none mb-1">{item.icon}</span>
           {item.badge > 0 && (
-            <span className="absolute top-1 right-3 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">{item.badge}</span>
+            <span className="absolute top-1.5 right-1/4 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+              {item.badge}
+            </span>
           )}
-          <span className="leading-tight mt-0.5">{item.label}</span>
+          <span className="leading-none">{item.label}</span>
         </button>
       ))}
     </div>
@@ -435,177 +397,244 @@ const CustomerMenu = () => {
 
   /* ── STAGE: MENU ── */
   const MenuStage = () => (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fb]">
+    <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-[#1e3a8a] text-white px-4 pt-10 pb-4 sticky top-0 z-30 shadow-md">
-        <div className="flex justify-between items-center mb-3">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+        <div className="flex justify-between items-center mb-4">
           <div>
-            <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider">{tableInfo.name}</p>
-            <h1 className="text-lg font-black">{t.title}</h1>
+            <p className="text-xs text-slate-400 font-bold">{tableInfo.name}</p>
+            <h1 className="text-2xl font-black">{t.title}</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <select value={lang} onChange={e => setLang(e.target.value)}
-              className="bg-white/20 text-white text-xs font-bold rounded-lg px-2 py-1 border-none outline-none">
-              <option value="en">EN</option><option value="ta">தமிழ்</option><option value="hi">हिंदी</option>
-            </select>
-            <button onClick={startVoiceOrder}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-black shadow-md transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-white/20 hover:bg-white/30'}`}>
-              🎤 {isListening
-                ? (lang === 'ta' ? 'கேட்கிறேன்' : lang === 'hi' ? 'सुन...' : 'Listening')
-                : (lang === 'ta' ? 'பேசு' : lang === 'hi' ? 'बोलें' : 'Voice')}
-            </button>
-            <button onClick={() => setStage('cart')}
-              className="relative bg-[#f97316] text-white px-3 py-1.5 rounded-full text-xs font-black shadow-md">
-              🛒 {cartCount > 0 && <span className="ml-1">({cartCount})</span>}
-            </button>
-          </div>
+          <button onClick={() => setStage('offers')} className="text-2xl">🎁</button>
         </div>
-        {/* Category tabs */}
+        
+        {/* Search */}
+        <div className="relative mb-4">
+          <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            placeholder={t.searchPlaceholder}
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 text-sm font-medium focus:outline-none focus:bg-white/20"/>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">🔍</span>
+        </div>
+
+        {/* Categories */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
-          {categories.map(c => (
-            <button key={c} onClick={() => setActiveCategory(c)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${activeCategory === c ? 'bg-[#f97316] text-white' : 'bg-white/20 text-white/80 hover:bg-white/30'}`}>
-              {c}
-            </button>
-          ))}
+          {categories.map(c => {
+            const icons = { All: '🍽️', Starters: '🥗', 'Main Course': '🍛', Beverages: '🥤', Bread: '🍞', Desserts: '🍰' };
+            return (
+              <button key={c} onClick={() => setActiveCategory(c)}
+                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeCategory === c 
+                    ? 'bg-orange-500 text-white shadow-lg' 
+                    : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                }`}>
+                <span>{icons[c] || '🍴'}</span>
+                <span>{c}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Repeat last order banner */}
-      {(() => {
-        const all = JSON.parse(localStorage.getItem('orders') || '[]');
-        const last = all.find(o => o.table === tableInfo.name && o.type === 'Dine-in (QR)');
-        if (!last) return null;
-        return (
-          <div className="mx-4 mt-4 p-3 bg-orange-50 border border-orange-200 rounded-2xl flex items-center justify-between">
-            <span className="text-xs font-bold text-orange-700">🔁 {t.repeat}</span>
-            <button onClick={repeatLastOrder} className="text-xs font-black text-white bg-[#f97316] px-3 py-1 rounded-full">Add</button>
-          </div>
-        );
-      })()}
-
-      {/* Menu grid */}
-      <div className="p-4 pb-24 grid grid-cols-2 gap-3">
-        {filteredMenu.map(item => {
-          const inCart = cart.find(i => i.id === item.id);
-          return (
-            <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-              <div className="bg-slate-50 flex items-center justify-center py-5 text-5xl">{item.image}</div>
-              <div className="p-3 flex flex-col flex-1">
-                <p className="text-xs font-black text-slate-800 leading-tight">{item.name}</p>
-                <p className="text-[10px] text-slate-400 font-bold mt-0.5">{item.category}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm font-black text-[#1e3a8a]">₹{item.price}</span>
-                  {inCart ? (
-                    <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 rounded-full px-1">
-                      <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 font-black text-orange-600 text-sm flex items-center justify-center">−</button>
-                      <span className="text-xs font-black text-orange-700 w-4 text-center">{inCart.qty}</span>
-                      <button onClick={() => addToCart(item)} className="w-6 h-6 font-black text-orange-600 text-sm flex items-center justify-center">+</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => addToCart(item)}
-                      className="w-8 h-8 rounded-full bg-[#f97316] text-white font-black text-lg flex items-center justify-center shadow-md hover:bg-orange-600 transition-colors">+</button>
-                  )}
+      {/* Menu Items */}
+      <div className="flex-1 p-4 pb-24">
+        <div className="grid grid-cols-1 gap-4">
+          {filteredMenu.map(item => (
+            <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
+              className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex gap-4 p-4 cursor-pointer hover:shadow-md transition-shadow">
+              <div className="w-24 h-24 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="text-5xl">{item.image}</span>
+              </div>
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-800 mb-1">{item.name}</h3>
+                  <p className="text-xs text-slate-500 line-clamp-2">{item.description || 'Delicious dish with special spices.'}</p>
                 </div>
-                {inCart && (
-                  <input value={specialInstructions[item.id] || ''} onChange={e => setSpecialInstructions(p => ({ ...p, [item.id]: e.target.value }))}
-                    placeholder={t.addNote} className="mt-2 w-full text-[10px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-orange-400"/>
-                )}
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-lg font-black text-orange-600">₹{item.price}</span>
+                  <button onClick={(e) => { e.stopPropagation(); addToCart(item); }}
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-colors">
+                    {t.addToCart}
+                  </button>
+                </div>
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Floating service buttons */}
-      <div className="fixed top-1/2 right-0 -translate-y-1/2 flex flex-col gap-2 pr-2 z-30">
-        {[
-          { icon: '🙋', label: 'Waiter', fn: () => sendRequest('Call Waiter', setWaiterCalled), active: waiterCalled, color: 'bg-blue-600' },
-          { icon: '💧', label: 'Water', fn: () => sendRequest('Water Refill', setWaterRequested), active: waterRequested, color: 'bg-cyan-500' },
-          { icon: '🍴', label: 'Extras', fn: () => setShowExtrasModal(true), active: false, color: 'bg-purple-600' },
-          { icon: '🧾', label: 'Bill', fn: () => sendRequest('Request Bill', setBillRequested), active: billRequested, color: 'bg-green-600' },
-        ].map(btn => (
-          <button key={btn.label} onClick={btn.fn}
-            className={`w-11 h-11 rounded-xl ${btn.active ? 'bg-slate-400' : btn.color} text-white shadow-lg flex flex-col items-center justify-center transition-all`}>
-            <span className="text-base leading-none">{btn.icon}</span>
-            <span className="text-[8px] font-black leading-none mt-0.5">{btn.label}</span>
-          </button>
-        ))}
+          ))}
+        </div>
       </div>
 
       <BottomNav />
     </div>
   );
 
-  /* ── STAGE: CART ── */
-  const CartStage = () => (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fb]">
-      <div className="bg-[#1e3a8a] text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider">{tableInfo.name}</p>
-            <h1 className="text-xl font-black">{t.cart}</h1>
+  /* ── STAGE: FOOD DETAILS ── */
+  const FoodDetailsStage = () => {
+    const [localQty, setLocalQty] = useState(1);
+    const [localCustom, setLocalCustom] = useState({ extraCheese: false, noOnion: false, spicy: false });
+    const item = selectedFood;
+    if (!item) return null;
+
+    const handleAddToCart = () => {
+      for (let i = 0; i < localQty; i++) {
+        setCart(prev => {
+          const existing = prev.find(ci => ci.id === item.id);
+          if (existing) {
+            return prev.map(ci => ci.id === item.id ? { ...ci, qty: ci.qty + 1, customizations: localCustom } : ci);
+          }
+          return [...prev, { ...item, qty: 1, customizations: localCustom, specialNote: '' }];
+        });
+      }
+      setStage('menu');
+    };
+
+    return (
+      <div className="flex flex-col min-h-screen bg-white">
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStage('menu')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              ←
+            </button>
+            <h1 className="text-lg font-black">Food Details</h1>
           </div>
-          <button onClick={startVoiceOrder}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black shadow-md transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-white/20 hover:bg-white/30'}`}>
-            🎤 {lang === 'ta' ? 'பேசி சேர்' : lang === 'hi' ? 'बोलकर जोड़ें' : 'Voice Add'}
+        </div>
+
+        <div className="flex-1 pb-24 overflow-auto">
+          {/* Food Image */}
+          <div className="w-full h-52 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+            <span className="text-8xl">{item.image}</span>
+          </div>
+
+          <div className="p-5">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">{item.name}</h2>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-yellow-500 text-sm">⭐</span>
+                  <span className="text-xs font-bold text-slate-500">4.5</span>
+                </div>
+              </div>
+              <p className="text-2xl font-black text-orange-600">₹{item.price}</p>
+            </div>
+
+            <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+              {item.description || 'Delicious dish prepared with fresh ingredients and special spices. A must-try!'}
+            </p>
+
+            {/* Customize Section */}
+            <div className="mb-5">
+              <h3 className="text-sm font-black text-slate-800 mb-3">{t.customize}</h3>
+              <div className="space-y-3">
+                {[
+                  { key: 'extraCheese', label: t.extraCheese, price: '₹50' },
+                  { key: 'noOnion', label: t.noOnion, price: '₹0' },
+                  { key: 'spicy', label: t.spicy, price: '₹0' },
+                ].map(opt => (
+                  <div key={opt.key} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" checked={localCustom[opt.key]} onChange={e => setLocalCustom(p => ({ ...p, [opt.key]: e.target.checked }))}
+                        className="w-5 h-5 rounded accent-orange-500"/>
+                      <span className="text-sm font-bold text-slate-700">{opt.label}</span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-500">{opt.price}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity */}
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-sm font-black text-slate-800">{t.qty}</span>
+              <div className="flex items-center gap-4 bg-slate-100 rounded-xl px-4 py-2">
+                <button onClick={() => setLocalQty(p => Math.max(1, p - 1))}
+                  className="w-8 h-8 rounded-full bg-white shadow text-orange-600 font-black text-xl flex items-center justify-center">−</button>
+                <span className="text-lg font-black text-slate-800 w-6 text-center">{localQty}</span>
+                <button onClick={() => setLocalQty(p => p + 1)}
+                  className="w-8 h-8 rounded-full bg-orange-500 shadow text-white font-black text-xl flex items-center justify-center">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Add to Cart Button */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4">
+          <button onClick={handleAddToCart}
+            className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black rounded-2xl text-sm shadow-lg">
+            {t.addToCart} | ₹{item.price * localQty}
           </button>
         </div>
       </div>
-      <div className="flex-1 p-4 pb-36 space-y-3">
+    );
+  };
+
+  /* ── STAGE: CART ── */
+  const CartStage = () => (
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-black">{t.myCart}</h1>
+          <button onClick={() => setStage('menu')} className="text-orange-400 text-sm font-bold">{t.edit}</button>
+        </div>
+      </div>
+
+      <div className="flex-1 p-4 pb-44">
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <span className="text-5xl mb-3">🛒</span>
-            <p className="font-bold text-sm">Cart is empty</p>
-            <button onClick={() => setStage('menu')} className="mt-4 px-6 py-2.5 bg-[#f97316] text-white font-black rounded-full text-sm shadow-md">Browse Menu</button>
+            <span className="text-6xl mb-4">🛒</span>
+            <p className="font-bold text-base">Cart is empty</p>
+            <button onClick={() => setStage('menu')} className="mt-4 px-8 py-3 bg-orange-500 text-white font-black rounded-2xl">
+              Browse Menu
+            </button>
           </div>
-        ) : cart.map(item => (
-          <div key={item.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{item.image}</span>
-              <div className="flex-1">
-                <p className="text-sm font-black text-slate-800">{item.name}</p>
-                <p className="text-xs text-slate-400 font-bold">₹{item.price} each</p>
+        ) : (
+          <div className="space-y-3">
+            {cart.map((item, index) => (
+              <div key={index} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-slate-100 rounded-xl flex items-center justify-center">
+                    <span className="text-3xl">{item.image}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-black text-slate-800">{item.name}</h3>
+                    <p className="text-xs text-slate-400 font-bold">₹{item.price}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => index > -1 && cart[index].qty === 1 ? removeFromCart(index) : updateQty(index, -1)}
+                      className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-black flex items-center justify-center">−</button>
+                    <span className="text-sm font-black text-slate-800 w-5 text-center">{item.qty}</span>
+                    <button onClick={() => updateQty(index, 1)}
+                      className="w-8 h-8 rounded-full bg-orange-500 text-white font-black flex items-center justify-center">+</button>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-full px-2 py-1">
-                <button onClick={() => updateQty(item.id, -1)} className="text-orange-600 font-black text-base w-5 text-center">−</button>
-                <span className="text-sm font-black text-orange-700 w-5 text-center">{item.qty}</span>
-                <button onClick={() => updateQty(item.id, 1)} className="text-orange-600 font-black text-base w-5 text-center">+</button>
-              </div>
-              <span className="text-sm font-black text-[#1e3a8a] w-14 text-right">₹{item.price * item.qty}</span>
-            </div>
-            <input value={specialInstructions[item.id] || ''} onChange={e => setSpecialInstructions(p => ({ ...p, [item.id]: e.target.value }))}
-              placeholder={t.addNote} className="mt-2 w-full text-[10px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-orange-400"/>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {cart.length > 0 && (
-        <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-100 p-4 z-40">
-          <div className="flex justify-between text-xs font-bold text-slate-500 mb-1">
-            <span>Subtotal</span><span>₹{cartSubtotal}</span>
-          </div>
-          <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
-            <span>GST (5%)</span><span>₹{gst(cartSubtotal)}</span>
-          </div>
-          <div className="flex justify-between text-sm font-black text-slate-800 mb-3 border-t border-slate-100 pt-2">
-            <span>Total</span><span>₹{total(cartSubtotal)}</span>
-          </div>
-          <div className="flex items-center gap-2 mb-3 text-xs text-slate-500 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
-            <span>⏱</span><span className="font-bold">{t.estimatedTime}: ~{estimatedTime(cart)} {t.mins}</span>
-          </div>
-          {orderError && (
-            <div className="mb-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-700">
-              ⚠️ {orderError}
+        <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-slate-100 p-4 z-40">
+          <div className="space-y-1 mb-3">
+            <div className="flex justify-between text-sm text-slate-600">
+              <span className="font-bold">{t.itemTotal}</span>
+              <span className="font-bold">₹{cartSubtotal}</span>
             </div>
-          )}
-          <button onClick={placeOrder} disabled={isPlacingOrder}
-            className="w-full py-4 bg-[#f97316] hover:bg-orange-600 disabled:bg-orange-300 text-white font-black rounded-2xl text-sm shadow-lg transition-all flex items-center justify-center gap-2">
-            {isPlacingOrder ? (
-              <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Placing...</span></>
-            ) : (
-              <span>{t.placeOrder} · ₹{total(cartSubtotal)}</span>
+            <div className="flex justify-between text-sm text-slate-600">
+              <span className="font-bold">{t.gstLabel}</span>
+              <span className="font-bold">₹{gst(finalSubtotal)}</span>
+            </div>
+            {appliedCoupon && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span className="font-bold">Discount ({appliedCoupon.code})</span>
+                <span className="font-bold">-₹{discount}</span>
+              </div>
             )}
+            <div className="flex justify-between text-base font-black text-slate-800 border-t border-slate-200 pt-2 mt-1">
+              <span>{t.total}</span>
+              <span className="text-orange-600">₹{finalTotal}</span>
+            </div>
+          </div>
+          <button onClick={() => setStage('confirm')}
+            className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black rounded-2xl text-sm shadow-lg">
+            {t.placeOrder}
           </button>
         </div>
       )}
@@ -614,272 +643,484 @@ const CustomerMenu = () => {
     </div>
   );
 
-  /* ── STAGE: ORDER HISTORY ── */
-  const OrderStage = () => (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fb]">
-      <div className="bg-[#1e3a8a] text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
-        <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider">{tableInfo.name}</p>
-        <h1 className="text-xl font-black">{t.order}</h1>
+  /* ── STAGE: CONFIRM ORDER ── */
+  const ConfirmStage = () => (
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setStage('cart')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
+          <h1 className="text-xl font-black">{t.confirmOrder}</h1>
+        </div>
       </div>
-      <div className="flex-1 p-4 pb-24 space-y-3">
-        {placedOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <span className="text-5xl mb-3">📋</span>
-            <p className="font-bold text-sm">No orders yet</p>
+
+      <div className="flex-1 p-5 pb-44 space-y-4">
+        {/* Table Number */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t.tableLabel}</p>
+          <p className="text-2xl font-black text-slate-800">{'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</p>
+        </div>
+
+        {/* Order Type */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{t.orderType}</p>
+          <div className="flex gap-3">
+            {['Dine In', 'Take Away'].map(type => (
+              <button key={type} onClick={() => setOrderType(type)}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
+                  orderType === type 
+                    ? 'bg-orange-500 text-white shadow-md' 
+                    : 'bg-slate-100 text-slate-600 border border-slate-200'
+                }`}>
+                {type === 'Dine In' ? t.dineIn : t.takeAway}
+              </button>
+            ))}
           </div>
-        ) : placedOrders.map(order => {
-          const sm = STATUS_META[order.status] || STATUS_META.Pending;
-          const orderId = order._id || order.id;
-          return (
-            <div key={orderId} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="text-sm font-black text-slate-800">{order.orderId || order.id}</p>
-                  <p className="text-[10px] text-slate-400 font-bold">{order.date} · {order.timestamp}</p>
-                </div>
-                <span className={`text-[10px] font-black px-2 py-1 rounded-full ${sm.light}`}>{sm.label}</span>
-              </div>
-              <div className="space-y-1 mb-2">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-xs">
-                    <span className="font-bold text-slate-700">{item.qty}x {item.name}</span>
-                    <span className="font-bold text-slate-500">₹{item.price * item.qty}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-slate-100 pt-2 flex justify-between">
-                <span className="text-xs font-bold text-slate-500">Total</span>
-                <span className="text-sm font-black text-[#1e3a8a]">₹{order.total}</span>
-              </div>
-              {/* Status progress */}
-              <div className="mt-3 flex items-center gap-1">
-                {['Pending','Preparing','Ready','Served'].map((s, i) => {
-                  const cur = (STATUS_META[order.status]?.step ?? 1);
-                  const step = i + 1;
-                  return (
-                    <React.Fragment key={s}>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black ${step <= cur ? 'bg-[#f97316] text-white' : 'bg-slate-200 text-slate-400'}`}>{step}</div>
-                      {i < 3 && <div className={`flex-1 h-1 rounded-full ${step < cur ? 'bg-[#f97316]' : 'bg-slate-200'}`}/>}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between mt-1">
-                {['Received','Preparing','Ready','Served'].map(s => (
-                  <span key={s} className="text-[8px] text-slate-400 font-bold">{s}</span>
-                ))}
-              </div>
+        </div>
+
+        {/* Special Instructions */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{t.specialInstructions}</p>
+          <textarea value={specialInstructions} onChange={e => setSpecialInstructions(e.target.value)}
+            placeholder={t.siPlaceholder}
+            className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 resize-none"
+            rows="3"/>
+        </div>
+
+        {/* Bill Details */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{t.billDetails}</p>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-slate-600">
+              <span className="font-bold">{t.subtotal}</span>
+              <span className="font-bold">₹{cartSubtotal}</span>
             </div>
-          );
-        })}
+            {appliedCoupon && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span className="font-bold">Discount</span>
+                <span className="font-bold">-₹{discount}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm text-slate-600">
+              <span className="font-bold">{t.gstLabel}</span>
+              <span className="font-bold">₹{finalGst}</span>
+            </div>
+            <div className="flex justify-between text-sm text-slate-600">
+              <span className="font-bold">{t.serviceChargeLabel}</span>
+              <span className="font-bold">₹{finalService}</span>
+            </div>
+            <div className="flex justify-between text-lg font-black text-slate-800 border-t border-slate-200 pt-2 mt-2">
+              <span>{t.total}</span>
+              <span className="text-orange-600">₹{finalTotal}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <BottomNav />
+
+      {/* Confirm Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 z-40">
+        <button onClick={placeOrder} disabled={isPlacingOrder}
+          className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 text-white font-black rounded-2xl text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+          {isPlacingOrder ? (
+            <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Placing...</span></>
+          ) : (
+            <span>{t.confirmOrderBtn}</span>
+          )}
+        </button>
+      </div>
     </div>
   );
 
-  /* ── STAGE: STATUS (post-order) ── */
-  const StatusStage = () => {
+  /* ── STAGE: ORDER TRACKING ── */
+  const TrackingStage = () => {
     const order = selectedOrder || placedOrders[0];
-    // Use placedOrders state directly (kept fresh by socket + polling)
-    const latest = order
+    const latest = order 
       ? (placedOrders.find(o => String(o._id || o.id) === String(order._id || order.id)) || order)
       : null;
     const sm = latest ? (STATUS_META[latest.status] || STATUS_META.Pending) : null;
+
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
-        <div className="bg-[#1e3a8a] text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
-          <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider">{tableInfo.name}</p>
-          <h1 className="text-xl font-black">{t.status}</h1>
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+          <h1 className="text-2xl font-black">{t.orderStatus}</h1>
+          <p className="text-xs text-slate-300 font-medium mt-1">Order ID: {latest?.orderId || latest?.id}</p>
         </div>
-        <div className="flex-1 p-4 pb-24">
+
+        <div className="flex-1 p-5 pb-24">
           {!latest ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <span className="text-5xl mb-3">📍</span>
-              <p className="font-bold text-sm">No active order</p>
-              <button onClick={() => setStage('menu')} className="mt-4 px-6 py-2.5 bg-[#f97316] text-white font-black rounded-full text-sm shadow-md">Start Ordering</button>
+              <span className="text-6xl mb-4">📍</span>
+              <p className="font-bold text-base">No active order</p>
+              <button onClick={() => setStage('menu')} className="mt-4 px-8 py-3 bg-orange-500 text-white font-black rounded-2xl">
+                Start Ordering
+              </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Status card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 text-center">
-                <div className={`w-16 h-16 rounded-full ${sm.color} mx-auto flex items-center justify-center mb-3 shadow-lg`}>
-                  <span className="text-2xl">{latest.status === 'Ready' ? '✅' : latest.status === 'Preparing' ? '👨‍🍳' : latest.status === 'Served' || latest.status === 'Completed' ? '🎉' : '📥'}</span>
-                </div>
-                <h2 className="text-xl font-black text-slate-800">{sm.label}</h2>
-                <p className="text-xs text-slate-400 font-bold mt-1">{latest.orderId || latest.id}</p>
-                <div className="flex items-center justify-center gap-2 mt-3 text-xs text-orange-700 bg-orange-50 border border-orange-100 rounded-xl px-4 py-2">
-                  <span>⏱</span><span className="font-bold">~{estimatedTime(latest.items)} {t.mins} {t.estimatedTime.toLowerCase()}</span>
+            <div className="space-y-5">
+              {/* Status Timeline */}
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div className="space-y-4">
+                  {['Pending', 'Preparing', 'Ready', 'Served'].map((status, i) => {
+                    const meta = STATUS_META[status];
+                    const isCurrent = latest.status === status;
+                    const isPast = meta.step < (STATUS_META[latest.status]?.step || 1);
+                    const isActive = isCurrent || isPast;
+
+                    return (
+                      <div key={status} className="flex items-start gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all ${
+                            isActive ? meta.color + ' shadow-lg' : 'bg-slate-200'
+                          }`}>
+                            {isActive ? meta.icon : '⏱️'}
+                          </div>
+                          {i < 3 && (
+                            <div className={`w-1 h-8 rounded ${isActive ? 'bg-orange-500' : 'bg-slate-200'}`}/>
+                          )}
+                        </div>
+                        <div className="flex-1 pt-2">
+                          <h3 className={`text-sm font-black ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>
+                            {meta.label}
+                          </h3>
+                          <p className={`text-xs mt-1 ${isActive ? 'text-slate-500' : 'text-slate-400'}`}>
+                            {isCurrent ? meta.desc : isActive ? '✓ Completed' : 'Pending'}
+                          </p>
+                          {isCurrent && (
+                            <div className="mt-2 text-xs font-bold text-orange-600 flex items-center gap-1">
+                              <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"/>
+                              <span>{meta.desc}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              {/* Items summary */}
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Order Summary</p>
-                {latest.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm py-1 border-b border-slate-50 last:border-0">
-                    <span className="font-bold text-slate-700">{item.qty}x {item.name}</span>
-                    <span className="font-bold text-slate-500">₹{item.price * item.qty}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between mt-2 pt-2 border-t border-slate-100">
-                  <span className="text-sm font-black text-slate-700">Total</span>
-                  <span className="text-sm font-black text-[#1e3a8a]">₹{latest.total}</span>
+
+              {/* Order Summary */}
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Order Summary</h3>
+                <div className="space-y-2 mb-3">
+                  {latest.items.map((item, i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="font-bold text-slate-700">{item.qty}x {item.name}</span>
+                      <span className="font-bold text-slate-500">₹{item.price * item.qty}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-slate-200 pt-3 flex justify-between">
+                  <span className="text-sm font-black text-slate-800">Total</span>
+                  <span className="text-lg font-black text-orange-600">₹{latest.total}</span>
                 </div>
               </div>
-              {/* Quick actions */}
+
+              {/* Quick Actions */}
               <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => setStage('menu')} className="py-3 bg-[#1e3a8a] text-white font-black rounded-2xl text-xs shadow-md">+ Add More</button>
-                <button onClick={() => sendRequest('Request Bill', setBillRequested)} className="py-3 bg-green-500 text-white font-black rounded-2xl text-xs shadow-md">🧾 Request Bill</button>
-                <button onClick={() => sendRequest('Call Waiter', setWaiterCalled)} className="py-3 bg-blue-500 text-white font-black rounded-2xl text-xs shadow-md">🙋 Call Waiter</button>
-                <button onClick={() => setStage('feedback')} className="py-3 bg-orange-400 text-white font-black rounded-2xl text-xs shadow-md">⭐ Feedback</button>
+                <button onClick={() => setStage('callWaiter')}
+                  className="py-4 bg-blue-500 hover:bg-blue-600 text-white font-black rounded-2xl text-sm shadow-md">
+                  🙋 {t.callWaiter}
+                </button>
+                <button onClick={() => setStage('bill')}
+                  className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl text-sm shadow-md">
+                  🧾 View Bill
+                </button>
               </div>
             </div>
           )}
         </div>
+
         <BottomNav />
       </div>
     );
   };
 
-  /* ── STAGE: FEEDBACK ── */
-  const FeedbackStage = () => (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
-      <div className="bg-[#1e3a8a] text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
-        <p className="text-[10px] font-bold opacity-60 uppercase tracking-wider">{tableInfo.name}</p>
-        <h1 className="text-xl font-black">{t.feedback}</h1>
-      </div>
-      <div className="flex-1 p-4 pb-24">
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 text-center">
-          <p className="text-sm font-bold text-slate-700 mb-4">How was your experience?</p>
-          <div className="flex justify-center gap-2 mb-6">
-            {[1,2,3,4,5].map(n => (
-              <button key={n} onClick={() => setRating(n)}
-                className={`text-3xl transition-transform ${rating >= n ? 'scale-110' : 'opacity-40'}`}>⭐</button>
-            ))}
+  /* ── STAGE: BILL ── */
+  const BillStage = () => {
+    const order = selectedOrder || placedOrders[0];
+    return (
+      <div className="flex flex-col min-h-screen bg-slate-50">
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStage('tracking')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
+            <h1 className="text-xl font-black">{t.billSummary}</h1>
           </div>
-          <textarea value={feedbackText} onChange={e => setFeedbackText(e.target.value)}
-            placeholder="Tell us more about your experience..."
-            className="w-full p-3 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-orange-400 resize-none" rows="4"/>
-          <button onClick={submitFeedback} disabled={!rating}
-            className="w-full mt-4 py-4 bg-[#f97316] disabled:bg-slate-300 text-white font-black rounded-2xl text-sm shadow-lg transition-all">Submit Feedback 🙏</button>
+        </div>
+
+        <div className="flex-1 p-5 pb-24">
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-slate-200">
+            {/* Header */}
+            <div className="text-center mb-6 pb-5 border-b border-slate-200">
+              <div className="w-16 h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <span className="text-3xl">🧾</span>
+              </div>
+              <h2 className="text-xl font-black text-slate-800">Bill Details</h2>
+              <p className="text-xs text-slate-400 font-medium mt-1">Order ID: {order?.orderId || order?.id}</p>
+              <p className="text-xs text-slate-400 font-medium">{order?.date} · {order?.timestamp}</p>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-2 mb-4">
+              {order?.items.map((item, i) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span className="font-bold text-slate-700">{item.qty}x {item.name}</span>
+                  <span className="font-bold text-slate-600">₹{item.price * item.qty}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Subtotals */}
+            <div className="space-y-1 mb-3 pb-3 border-t border-slate-200 pt-3">
+              <div className="flex justify-between text-sm text-slate-600">
+                <span className="font-bold">{t.subtotal}</span>
+                <span className="font-bold">₹{order?.subtotal || cartSubtotal}</span>
+              </div>
+              <div className="flex justify-between text-sm text-slate-600">
+                <span className="font-bold">{t.gstLabel}</span>
+                <span className="font-bold">₹{order?.gst || finalGst}</span>
+              </div>
+              <div className="flex justify-between text-sm text-slate-600">
+                <span className="font-bold">{t.serviceChargeLabel}</span>
+                <span className="font-bold">₹{serviceCharge(order?.subtotal || finalSubtotal)}</span>
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="flex justify-between text-xl font-black text-slate-800 bg-orange-50 rounded-xl p-4 mb-5">
+              <span>{t.total}</span>
+              <span className="text-orange-600">₹{order?.total || finalTotal}</span>
+            </div>
+
+            {/* Payment Note */}
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-2xl p-4 text-center">
+              <span className="text-3xl mb-2 block">💳</span>
+              <p className="text-sm font-bold">{t.payAtCashier}</p>
+              <p className="text-xs text-slate-300 mt-1 font-medium">{t.thankYou}</p>
+            </div>
+          </div>
+
+          {/* Feedback Button */}
+          <button onClick={() => setStage('feedback')}
+            className="w-full mt-5 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black rounded-2xl text-sm shadow-lg">
+            ⭐ {t.submitFeedback}
+          </button>
+        </div>
+
+        <BottomNav />
+      </div>
+    );
+  };
+
+  /* ── STAGE: CALL WAITER ── */
+  const CallWaiterStage = () => {
+    const [requested, setRequested] = useState(false);
+
+    const callWaiter = async () => {
+      const requestPayload = {
+        type: 'Request',
+        requestType: 'Call Waiter',
+        table: tableInfo.name,
+        items: [{ id: '0', name: 'Call Waiter', qty: 1, price: 0 }],
+        subtotal: 0, gst: 0, total: 0,
+        guestCount: 1,
+      };
+
+      try {
+        await axios.post(`${API_URL}/orders/qr`, requestPayload);
+      } catch {}
+
+      setRequested(true);
+      setTimeout(() => setStage('tracking'), 3000);
+    };
+
+    return (
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-white">
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStage('tracking')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
+            <h1 className="text-xl font-black">{t.callWaiter}</h1>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          {!requested ? (
+            <div className="text-center">
+              <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <span className="text-6xl">🙋</span>
+              </div>
+              <h2 className="text-2xl font-black text-slate-800 mb-2">{t.needAssistance}</h2>
+              <p className="text-sm text-slate-500 mb-8 max-w-xs mx-auto">{t.waiterNote}</p>
+              <button onClick={callWaiter}
+                className="px-12 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-black rounded-2xl text-base shadow-lg">
+                {t.callWaiter}
+              </button>
+            </div>
+          ) : (
+            <div className="text-center">
+              <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-black text-emerald-600 mb-2">Waiter Called!</h2>
+              <p className="text-sm text-slate-600">Our staff will assist you shortly</p>
+            </div>
+          )}
         </div>
       </div>
+    );
+  };
+
+  /* ── STAGE: OFFERS & COUPONS ── */
+  const OffersStage = () => (
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setStage('menu')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
+          <h1 className="text-xl font-black">{t.offersForYou}</h1>
+        </div>
+      </div>
+
+      <div className="flex-1 p-5 pb-24 space-y-4">
+        {/* Coupon 1 */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl p-5 shadow-lg border-2 border-dashed border-white/30">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-full">FLAT10</span>
+              <h3 className="text-xl font-black mt-2">Get ₹100 OFF</h3>
+              <p className="text-xs text-white/80 font-medium mt-1">On orders above ₹500</p>
+            </div>
+            <span className="text-4xl">🎉</span>
+          </div>
+          <button onClick={() => { setAppliedCoupon({ code: 'FLAT10', discount: 100 }); setStage('cart'); }}
+            className="w-full py-3 bg-white text-orange-600 font-black rounded-xl text-sm shadow-md hover:bg-white/90">
+            {t.apply}
+          </button>
+        </div>
+
+        {/* Coupon 2 */}
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-5 shadow-lg border-2 border-dashed border-white/30">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-full">WELCOME20</span>
+              <h3 className="text-xl font-black mt-2">Get 20% OFF</h3>
+              <p className="text-xs text-white/80 font-medium mt-1">Valid on first order</p>
+            </div>
+            <span className="text-4xl">🎁</span>
+          </div>
+          <button onClick={() => { setAppliedCoupon({ code: 'WELCOME20', discount: Math.round(cartSubtotal * 0.2) }); setStage('cart'); }}
+            className="w-full py-3 bg-white text-emerald-600 font-black rounded-xl text-sm shadow-md hover:bg-white/90">
+            {t.apply}
+          </button>
+        </div>
+
+        {/* Today's Special */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-4xl">🧁</span>
+            <div>
+              <h3 className="text-base font-black text-slate-800">{t.todaysSpecial}</h3>
+              <p className="text-xs text-slate-500 font-medium">{t.freeItem}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <BottomNav />
     </div>
   );
 
-  /* ── EXTRAS MODAL ── */
-  const ExtrasModal = () => (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 relative animate-[fadeIn_0.2s_ease-out]">
-        <button onClick={() => setShowExtrasModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
-        <h3 className="text-lg font-black text-slate-800 mb-1">{t.extras}</h3>
-        <p className="text-xs text-slate-500 font-medium mb-4">Request additional items</p>
-        <div className="space-y-2">
-          {[
-            { icon: '🍽️', label: 'Extra Plate' },
-            { icon: '🥄', label: 'Extra Spoon' },
-            { icon: '🍴', label: 'Fork' },
-            { icon: '🧻', label: 'Tissues' },
-            { icon: '🧂', label: 'Salt & Pepper' },
-          ].map(item => (
-            <button key={item.label} onClick={() => { sendRequest(item.label, () => {}); setShowExtrasModal(false); }}
-              className="w-full flex items-center gap-3 p-3 bg-slate-50 hover:bg-orange-50 border border-slate-100 hover:border-orange-200 rounded-2xl text-left transition-all">
-              <span className="text-2xl">{item.icon}</span>
-              <span className="text-sm font-bold text-slate-700">{item.label}</span>
-            </button>
-          ))}
+  /* ── STAGE: FEEDBACK ── */
+  const FeedbackStage = () => (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
+        <h1 className="text-xl font-black">{t.feedback}</h1>
+      </div>
+
+      <div className="flex-1 p-5 pb-24">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+          <div className="text-center mb-6">
+            <span className="text-5xl block mb-3">⭐</span>
+            <h2 className="text-xl font-black text-slate-800 mb-1">{t.howWasExp}</h2>
+            <p className="text-xs text-slate-500 font-medium">{t.veryGood}</p>
+          </div>
+
+          {/* Rating Categories */}
+          <div className="space-y-4 mb-6">
+            {[
+              { key: 'foodQuality', label: t.foodQuality, icon: '🍽️' },
+              { key: 'service', label: t.service, icon: '🙋' },
+              { key: 'ambience', label: t.ambience, icon: '✨' },
+            ].map(cat => (
+              <div key={cat.key} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{cat.icon}</span>
+                  <p className="text-sm font-bold text-slate-700">{cat.label}</p>
+                </div>
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n} onClick={() => setRatings(p => ({ ...p, [cat.key]: n }))}
+                      className={`w-10 h-10 rounded-xl transition-all ${
+                        ratings[cat.key] >= n 
+                          ? 'bg-emerald-500 text-white scale-110' 
+                          : 'bg-slate-100 text-slate-400'
+                      } flex items-center justify-center font-black text-sm shadow-sm`}>
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Comments */}
+          <div className="mb-5">
+            <p className="text-sm font-bold text-slate-700 mb-2">{t.comments}</p>
+            <textarea value={feedbackText} onChange={e => setFeedbackText(e.target.value)}
+              placeholder={t.commentsPlaceholder}
+              className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 resize-none"
+              rows="4"/>
+          </div>
+
+          {/* Submit Button */}
+          <button onClick={submitFeedback}
+            disabled={!ratings.foodQuality || !ratings.service || !ratings.ambience}
+            className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl text-sm shadow-lg transition-all">
+            {t.submitFeedback}
+          </button>
         </div>
       </div>
+
+      <BottomNav />
     </div>
   );
 
-  /* ── VOICE MODAL ── */
-  const VoiceModal = () => (    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-[fadeIn_0.2s_ease-out]">
-        <button onClick={() => { setShowVoiceModal(false); setIsListening(false); }} 
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
-        
-        <div className="text-center mb-6">
-          <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${isListening ? 'bg-red-500 animate-pulse' : 'bg-slate-200'}`}>
-            <span className="text-3xl">{isListening ? '🎤' : '🔇'}</span>
-          </div>
-          <h3 className="text-xl font-black text-slate-800 mb-1">
-            {isListening ? (lang === 'ta' ? 'கேட்கிறேன்...' : lang === 'hi' ? 'सुन रहा हूँ...' : 'Listening...') : 'Voice Order'}
-          </h3>
-          <p className="text-xs text-slate-500 font-medium">
-            {lang === 'ta' ? 'உங்கள் ஆர்டரை சொல்லுங்கள்' : lang === 'hi' ? 'अपना ऑर्डर बोलें' : 'Say your order'}
-          </p>
+  /* ── STAGE: THANK YOU ── */
+  const ThankYouStage = () => (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-emerald-50 to-white justify-center items-center p-8">
+      <div className="text-center">
+        <div className="w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl animate-bounce">
+          <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+          </svg>
         </div>
 
-        {/* Transcript display */}
-        {voiceTranscript && (
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">You said:</p>
-            <p className="text-sm font-bold text-blue-900">{voiceTranscript}</p>
-          </div>
-        )}
+        <h1 className="text-4xl font-black text-slate-800 mb-3">{t.thankYouTitle}</h1>
+        <p className="text-base text-slate-600 font-medium mb-8 max-w-sm mx-auto">{t.thankYouMsg}</p>
 
-        {/* Parsed result */}
-        {voiceResult && (
-          <div className={`mb-4 p-4 rounded-2xl border ${voiceResult.matched ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-            {voiceResult.matched ? (
-              <>
-                <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-2">Detected:</p>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-3xl">{voiceResult.matched.image}</span>
-                  <div>
-                    <p className="text-sm font-black text-slate-800">{voiceResult.qty}x {voiceResult.matched.name}</p>
-                    <p className="text-xs font-bold text-slate-500">₹{voiceResult.matched.price * voiceResult.qty}</p>
-                  </div>
-                </div>
-                {voiceResult.isRemove && (
-                  <p className="text-xs font-bold text-red-600 flex items-center gap-1">
-                    <span>🚫</span> Will remove from cart
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">❌ Not Found</p>
-                <p className="text-xs text-red-700 font-medium">Try saying the dish name clearly</p>
-              </>
-            )}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <span className="text-3xl">👥</span>
+          <div className="flex -space-x-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 border-2 border-white"/>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 border-2 border-white"/>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 border-2 border-white"/>
           </div>
-        )}
-
-        {/* Examples */}
-        {!voiceTranscript && (
-          <div className="mb-6 p-4 bg-slate-50 rounded-2xl">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Examples:</p>
-            <div className="space-y-1 text-xs text-slate-600 font-medium">
-              <p>• {lang === 'ta' ? '"ரெண்டு பிரியாணி போடு"' : lang === 'hi' ? '"दो बिरयानी डालो"' : '"Add 2 Biryani"'}</p>
-              <p>• {lang === 'ta' ? '"பட்டர் சிக்கன்"' : lang === 'hi' ? '"बटर चिकन"' : '"Butter Chicken"'}</p>
-              <p>• {lang === 'ta' ? '"நான் தேவை இல்லை"' : lang === 'hi' ? '"नान हटाओ"' : '"Remove Naan"'}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-3">
-          {!isListening && !voiceResult && (
-            <button onClick={startVoiceOrder}
-              className="flex-1 py-3.5 bg-red-500 hover:bg-red-600 text-white font-black rounded-2xl text-sm shadow-lg transition-all flex items-center justify-center gap-2">
-              🎤 Start Speaking
-            </button>
-          )}
-          {voiceResult?.matched && (
-            <>
-              <button onClick={() => { setVoiceTranscript(''); setVoiceResult(null); }}
-                className="flex-1 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl text-sm transition-all">
-                Try Again
-              </button>
-              <button onClick={confirmVoiceOrder}
-                className="flex-1 py-3 bg-[#f97316] hover:bg-orange-600 text-white font-black rounded-2xl text-sm shadow-lg transition-all">
-                Confirm ✓
-              </button>
-            </>
-          )}
+          <span className="text-3xl">😊</span>
         </div>
+
+        <button onClick={() => setStage('menu')}
+          className="px-12 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black rounded-2xl text-base shadow-lg">
+          {t.backToMenu}
+        </button>
       </div>
     </div>
   );
@@ -887,22 +1128,17 @@ const CustomerMenu = () => {
   // Main render
   return (
     <>
-      {/* 🔔 Live order status notification banner */}
-      {voiceResult?.notification && (
-        <div className="fixed top-4 left-4 right-4 z-[100] bg-[#1e3a8a] text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-[fadeIn_0.3s_ease-out]">
-          <span className="text-xl">🔔</span>
-          <p className="text-sm font-black flex-1">{voiceResult.notification}</p>
-          <button onClick={() => setVoiceResult(null)} className="text-white/60 hover:text-white font-black text-lg">✕</button>
-        </div>
-      )}
-      {stage === 'guests' && <GuestStage />}
+      {stage === 'welcome' && <WelcomeStage />}
       {stage === 'menu' && <MenuStage />}
+      {stage === 'foodDetails' && <FoodDetailsStage />}
       {stage === 'cart' && <CartStage />}
-      {stage === 'order' && <OrderStage />}
-      {stage === 'status' && <StatusStage />}
+      {stage === 'confirm' && <ConfirmStage />}
+      {stage === 'tracking' && <TrackingStage />}
+      {stage === 'bill' && <BillStage />}
+      {stage === 'callWaiter' && <CallWaiterStage />}
+      {stage === 'offers' && <OffersStage />}
       {stage === 'feedback' && <FeedbackStage />}
-      {showExtrasModal && <ExtrasModal />}
-      {showVoiceModal && <VoiceModal />}
+      {stage === 'thankYou' && <ThankYouStage />}
     </>
   );
 };
