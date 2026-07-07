@@ -164,6 +164,11 @@ const KitchenDisplay = () => {
                     <div>
                       <h4 className="font-extrabold text-slate-800 text-sm">{o.orderId || id}</h4>
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{o.type} {o.table !== 'N/A' && `(${o.table})`}</span>
+                      {o.waiterName && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-lg">
+                          👤 {o.waiterName}
+                        </span>
+                      )}
                     </div>
                     <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
                       {o.timestamp || new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -214,6 +219,11 @@ const KitchenDisplay = () => {
                     <div>
                       <h4 className="font-extrabold text-slate-800 text-sm">{o.orderId || id}</h4>
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{o.type} {o.table !== 'N/A' && `(${o.table})`}</span>
+                      {o.waiterName && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-lg">
+                          👤 {o.waiterName}
+                        </span>
+                      )}
                     </div>
                     <span className="block text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-100">
                       ⏱ {getPrepTime(o.prepStartTime)}
@@ -263,6 +273,11 @@ const KitchenDisplay = () => {
                     <div>
                       <h4 className="font-extrabold text-slate-800 text-sm">{o.orderId || id}</h4>
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{o.type} {o.table !== 'N/A' && `(${o.table})`}</span>
+                      {o.waiterName && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-lg">
+                          👤 {o.waiterName}
+                        </span>
+                      )}
                     </div>
                     <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
                       {o.timestamp || new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

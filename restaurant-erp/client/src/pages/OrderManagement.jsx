@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { PageLoader, SkeletonTableRow, LoadingButton } from '../components/LoadingSkeleton';
+import { useVoiceOrder } from '../hooks/useVoiceOrder';
 
 const OrderManagement = () => {
   const { on, connected } = useSocket();
@@ -15,8 +16,10 @@ const OrderManagement = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [orderType, setOrderType] = useState('Dine-in');
   const [selectedTable, setSelectedTable] = useState('Table 01');
+  const [waiterName, setWaiterName] = useState('');
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [showVoicePanel, setShowVoicePanel] = useState(false);
 
   useEffect(() => {
     const savedOrders = localStorage.getItem('orders');
@@ -46,17 +49,40 @@ const OrderManagement = () => {
     return () => cleanup?.();
   }, [on]);
 
-  const addToCart = (item) => {    const existing = cart.find(i => i.id === item.id);
-    if (existing) {
-      setCart(cart.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i));
-    } else {
-      setCart([...cart, { ...item, qty: 1 }]);
-    }
-  };
+  const addToCart = useCallback((item, qty = 1) => {
+    setCart(prev => {
+      const existing = prev.find(i => (i._id || i.id) === (item._id || item.id));
+      if (existing) {
+        return prev.map(i => (i._id || i.id) === (item._id || item.id) ? { ...i, qty: i.qty + qty } : i);
+      }
+      return [...prev, { ...item, id: item._id || item.id, qty }];
+    });
+  }, []);
+
+  const removeFromCartByItem = useCallback((item) => {
+    setCart(prev => prev.filter(i => (i._id || i.id) !== (item._id || item.id)));
+    toast.info(`🗑️ ${item.name} removed from cart`);
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
+  // ── Voice Order Hook ──────────────────────────────────────────
+  const voice = useVoiceOrder({
+    menuItems,
+    onAddItem: (item, qty) => {
+      addToCart(item, qty);
+      toast.success(`🎤 Added ${qty}x ${item.name} via voice!`, { autoClose: 2500 });
+    },
+    onRemoveItem: removeFromCartByItem,
+    onClearCart: clearCart,
+    onPlaceOrder: placeOrder,
+  });
 
   const updateQty = (id, change) => {
     setCart(cart.map(i => {
-      if (i.id === id) {
+      if ((i._id || i.id) === id) {
         const newQty = i.qty + change;
         return newQty > 0 ? { ...i, qty: newQty } : null;
       }
@@ -77,6 +103,7 @@ const OrderManagement = () => {
       subtotal: sub,
       gst: Math.round(sub * 0.05),
       total: Math.round(sub * 1.05),
+      waiterName,
     };
     try {
       const { data } = await api.post('/orders', newOrder);
@@ -143,8 +170,115 @@ const OrderManagement = () => {
             📋 Order History
           </button>
         </div>
+        {/* Voice Order Button */}
+        {voice.supported && (
+          <button
+            onClick={() => setShowVoicePanel(v => !v)}
+            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 border shadow-sm ${
+              showVoicePanel
+                ? 'bg-rose-500 text-white border-rose-500 shadow-rose-500/20'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-rose-300 hover:text-rose-500'
+            }`}
+          >
+            🎤 Voice Order
+          </button>
+        )}
         </div>
       </div>
+
+      {/* ── Voice Order Panel ── */}
+      {showVoicePanel && (
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 border border-slate-700 shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                🎤 Voice Order Assistant
+                <span className="text-[9px] font-bold text-slate-400 bg-slate-700 px-2 py-0.5 rounded-full">Web Speech API</span>
+              </h3>
+              <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                Say: <span className="text-slate-200">"2 biryani and 1 mango lassi"</span> or <span className="text-slate-200">"clear cart"</span>
+              </p>
+            </div>
+            <button onClick={() => setShowVoicePanel(false)} className="text-slate-500 hover:text-slate-300 text-lg font-bold transition-colors">✕</button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Mic button */}
+            <div className="flex flex-col items-center justify-center gap-3">
+              <button
+                onClick={voice.isListening ? voice.stopListening : voice.startListening}
+                className={`relative w-20 h-20 rounded-full font-bold text-3xl transition-all shadow-2xl ${
+                  voice.isListening
+                    ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/40 animate-pulse'
+                    : 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/30'
+                }`}
+              >
+                {voice.isListening ? '⏹' : '🎤'}
+                {voice.isListening && (
+                  <span className="absolute inset-0 rounded-full border-4 border-rose-400 animate-ping opacity-60"/>
+                )}
+              </button>
+              <p className="text-[10px] font-bold text-slate-400 text-center">
+                {voice.isListening ? 'Tap to stop' : 'Tap to speak'}
+              </p>
+            </div>
+
+            {/* Live transcript */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Live Transcript</p>
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-3 min-h-[64px] flex items-center">
+                <p className={`text-sm font-medium ${voice.transcript ? 'text-white' : 'text-slate-600 italic'}`}>
+                  {voice.transcript || 'Waiting for speech...'}
+                </p>
+              </div>
+              <p className={`text-xs font-semibold ${voice.statusMsg.startsWith('✅') ? 'text-emerald-400' : voice.statusMsg.startsWith('❌') || voice.statusMsg.startsWith('❓') ? 'text-rose-400' : 'text-slate-400'}`}>
+                {voice.statusMsg || 'Ready to listen'}
+              </p>
+            </div>
+
+            {/* Quick commands reference */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Example Commands</p>
+              <div className="space-y-1.5">
+                {[
+                  ['Add items',    '"2 biryani and 1 lassi"'],
+                  ['Single item',  '"one masala dosa"'],
+                  ['Remove item',  '"remove biryani"'],
+                  ['Clear cart',   '"clear cart"'],
+                  ['Place order',  '"place order"'],
+                ].map(([label, cmd]) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <span className="text-[9px] text-slate-500 font-bold w-20 flex-shrink-0">{label}</span>
+                    <span className="text-[10px] text-indigo-300 font-mono bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-lg truncate">{cmd}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Last parsed actions */}
+          {voice.lastActions.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Last Parsed Actions</p>
+              <div className="flex flex-wrap gap-2">
+                {voice.lastActions.map((a, i) => (
+                  <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${
+                    a.type === 'ADD_ITEM'    ? 'bg-emerald-900/40 text-emerald-400 border-emerald-700' :
+                    a.type === 'REMOVE_ITEM' ? 'bg-red-900/40     text-red-400     border-red-700'     :
+                    a.type === 'CLEAR_CART'  ? 'bg-amber-900/40   text-amber-400   border-amber-700'   :
+                    'bg-blue-900/40 text-blue-400 border-blue-700'
+                  }`}>
+                    {a.type === 'ADD_ITEM'    && `+${a.qty}x ${a.item?.name}`}
+                    {a.type === 'REMOVE_ITEM' && `Remove: ${a.item?.name}`}
+                    {a.type === 'CLEAR_CART'  && 'Clear Cart'}
+                    {a.type === 'PLACE_ORDER' && 'Place Order'}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {activeTab === 'pos' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -194,6 +328,26 @@ const OrderManagement = () => {
               </div>
             </div>
 
+            {/* Waiter Assignment */}
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                Assigned Waiter <span className="text-slate-300">(optional)</span>
+              </label>
+              <select
+                value={waiterName}
+                onChange={e => setWaiterName(e.target.value)}
+                className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 text-sm font-semibold"
+              >
+                <option value="">— No waiter assigned —</option>
+                {JSON.parse(localStorage.getItem('staff') || '[]')
+                  .filter(s => ['Waiter', 'Manager', 'Admin'].includes(s.role))
+                  .map(s => (
+                    <option key={s._id || s.id} value={s.name}>{s.name} ({s.role})</option>
+                  ))
+                }
+              </select>
+            </div>
+
             {/* Cart Table list */}
             <div className="space-y-4">
               <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">
@@ -209,7 +363,7 @@ const OrderManagement = () => {
               ) : (
                 <div className="space-y-4 max-h-64 overflow-y-auto pr-1">
                   {cart.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center text-sm border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                    <div key={item._id || item.id} className="flex justify-between items-center text-sm border-b border-slate-50 pb-3 last:border-0 last:pb-0">
                       <div className="w-1/2 flex items-center space-x-2">
                         <span className="text-xl">{item.image}</span>
                         <div>
@@ -219,7 +373,7 @@ const OrderManagement = () => {
                       </div>
                       
                       <div className="w-1/4 flex items-center justify-center space-x-2 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                        <button onClick={() => updateQty(item.id, -1)} className="text-slate-400 hover:text-indigo-600 font-bold text-sm px-1">-</button>
+                        <button onClick={() => updateQty(item._id || item.id, -1)} className="text-slate-400 hover:text-indigo-600 font-bold text-sm px-1">-</button>
                         <span className="font-bold text-slate-800 text-xs w-4 text-center">{item.qty}</span>
                         <button onClick={() => addToCart(item)} className="text-slate-400 hover:text-indigo-600 font-bold text-sm px-1">+</button>
                       </div>
@@ -251,7 +405,7 @@ const OrderManagement = () => {
 
                 <div className="flex space-x-3 pt-3">
                   <button
-                    onClick={() => setCart([])}
+                    onClick={() => clearCart()}
                     className="flex-1 py-3.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-2xl text-xs transition-all"
                   >
                     Cancel
@@ -328,6 +482,7 @@ const OrderManagement = () => {
                   <th className="pb-3">Date & Time</th>
                   <th className="pb-3">Type</th>
                   <th className="pb-3">Items</th>
+                  <th className="pb-3">Waiter</th>
                   <th className="pb-3">Total</th>
                   <th className="pb-3">Status</th>
                 </tr>
@@ -346,11 +501,16 @@ const OrderManagement = () => {
                 ) : (
                   orders.map(o => (
                     <tr key={o.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/30">
-                      <td className="py-4 font-bold text-slate-800">{o.id}</td>
+                      <td className="py-4 font-bold text-slate-800">{o.orderId || o.id}</td>
                       <td className="py-4 font-semibold text-slate-500 text-xs">{o.date} {o.timestamp}</td>
                       <td className="py-4 font-semibold text-slate-500 text-xs">{o.type} {o.table !== 'N/A' && `(${o.table})`}</td>
                       <td className="py-4 font-medium text-slate-500 text-xs max-w-xs truncate">
                         {o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
+                      </td>
+                      <td className="py-4 text-xs">
+                        {o.waiterName
+                          ? <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg">👤 {o.waiterName}</span>
+                          : <span className="text-slate-300 font-medium">—</span>}
                       </td>
                       <td className="py-4 font-bold text-slate-800 text-xs">₹{o.total}</td>
                       <td className="py-4">

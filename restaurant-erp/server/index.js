@@ -39,7 +39,9 @@ const inventoryRoutes = require('./routes/inventory');
 const staffRoutes     = require('./routes/staff');
 const supplierRoutes  = require('./routes/suppliers');
 const customerRoutes  = require('./routes/customers');
-const settingsRoutes  = require('./routes/settings');
+const settingsRoutes      = require('./routes/settings');
+const reservationRoutes   = require('./routes/reservations');
+const couponRoutes        = require('./routes/coupons');
 
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:5173',
@@ -81,7 +83,9 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/staff',     staffRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/customers', customerRoutes);
-app.use('/api/settings',  settingsRoutes);
+app.use('/api/settings',      settingsRoutes);
+app.use('/api/reservations',  reservationRoutes);
+app.use('/api/coupons',       couponRoutes);
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));

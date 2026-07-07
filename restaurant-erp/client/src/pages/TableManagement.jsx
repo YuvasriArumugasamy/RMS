@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 
 const STATUS_COLORS = {
@@ -9,34 +10,49 @@ const STATUS_COLORS = {
   Occupied:    { dot:'bg-red-500',     badge:'bg-red-50    text-red-700     border-red-200',      card:'border-red-200    bg-red-50/40',      icon:'text-red-500'     },
 };
 
+const RESERVATION_STATUS_STYLES = {
+  Pending:   'bg-blue-50   text-blue-700   border-blue-200',
+  Confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Seated:    'bg-indigo-50  text-indigo-700  border-indigo-200',
+  Cancelled: 'bg-slate-50   text-slate-500   border-slate-200',
+  'No-show': 'bg-red-50     text-red-600     border-red-200',
+};
+
 const TableIcon = ({ color = 'currentColor' }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="9" width="18" height="2" rx="1"/>
-    <line x1="8" y1="11" x2="8" y2="20"/>
-    <line x1="16" y1="11" x2="16" y2="20"/>
-    <line x1="5" y1="20" x2="19" y2="20"/>
+    <rect x="3" y="9" width="18" height="2" rx="1"/><line x1="8" y1="11" x2="8" y2="20"/>
+    <line x1="16" y1="11" x2="16" y2="20"/><line x1="5" y1="20" x2="19" y2="20"/>
     <line x1="12" y1="3" x2="12" y2="9"/>
-  </svg>
-);
-
-const QRIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
   </svg>
 );
 
 const TableManagement = () => {
   const { on, connected } = useSocket();
-  const [tables, setTables]               = useState([]);
-  const [reserveName, setReserveName]     = useState('');
-  const [reserveTime, setReserveTime]     = useState('');
-  const [selectedTable, setSelectedTable] = useState(null);
-  const [guestCount, setGuestCount]       = useState('6');
-  const [autoMessage, setAutoMessage]     = useState('');
-  const [editTable, setEditTable]         = useState(null);
-  const [activeQRTable, setActiveQRTable] = useState(null);
+  const [activeTab, setActiveTab] = useState('map'); // 'map' | 'reservations'
+  const [tables, setTables] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [loadingRes, setLoadingRes] = useState(false);
 
+  // Table map state
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [guestCount, setGuestCount] = useState('4');
+  const [autoMessage, setAutoMessage] = useState('');
+  const [activeQRTable, setActiveQRTable] = useState(null);
+  const [editTable, setEditTable] = useState(null);
+
+  // Reservation form state
+  const [showResModal, setShowResModal] = useState(false);
+  const [resForm, setResForm] = useState({
+    customerName: '', customerPhone: '', partySize: '2',
+    date: new Date().toISOString().split('T')[0],
+    time: '19:00', specialRequest: '', tableId: '', tableName: '',
+  });
+  const [savingRes, setSavingRes] = useState(false);
+
+  // Calendar filter
+  const [calendarDate, setCalendarDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // ── Fetch tables ────────────────────────────────────────────
   useEffect(() => {
     const saved = localStorage.getItem('tables');
     if (saved) {
@@ -54,7 +70,23 @@ const TableManagement = () => {
     }
   }, []);
 
-  // 🔌 Socket — live table status updates from other staff
+  // ── Fetch reservations ──────────────────────────────────────
+  const fetchReservations = useCallback(async (date) => {
+    setLoadingRes(true);
+    try {
+      const { data } = await api.get(`/reservations${date ? `?date=${date}` : ''}`);
+      if (data.success) setReservations(data.data);
+    } catch {
+      const saved = localStorage.getItem('reservations');
+      if (saved) setReservations(JSON.parse(saved));
+    } finally {
+      setLoadingRes(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchReservations(''); }, [fetchReservations]);
+
+  // ── Socket listeners ───────────────────────────────────────
   useEffect(() => {
     const handleTableUpdate = (update) => {
       setTables(prev => prev.map(t =>
@@ -62,11 +94,23 @@ const TableManagement = () => {
           ? { ...t, status: update.status }
           : t
       ));
-      const emoji = update.status === 'Occupied' ? '🔴' : update.status === 'Available' ? '🟢' : '🟡';
-      toast.info(`${emoji} ${update.name || update.table} — ${update.status}`, { autoClose: 3000 });
     };
-    const cleanup = on?.('table-update', handleTableUpdate);
-    return () => cleanup?.();
+    const handleNewReservation = (res) => {
+      setReservations(prev => {
+        if (prev.find(r => (r._id || r.id) === (res._id || res.id))) return prev;
+        toast.info(`📅 New Reservation: ${res.customerName} — ${res.tableName} at ${res.time}`);
+        return [res, ...prev];
+      });
+    };
+    const handleResUpdate = (update) => {
+      setReservations(prev => prev.map(r =>
+        (r._id || r.id) === update.id ? { ...r, status: update.status } : r
+      ));
+    };
+    const c1 = on?.('table-update', handleTableUpdate);
+    const c2 = on?.('new-reservation', handleNewReservation);
+    const c3 = on?.('reservation-update', handleResUpdate);
+    return () => { c1?.(); c2?.(); c3?.(); };
   }, [on]);
 
   const saveTables = (updated) => {
@@ -74,23 +118,94 @@ const TableManagement = () => {
     localStorage.setItem('tables', JSON.stringify(updated));
   };
 
-  const handleReserve = (e) => {
-    e.preventDefault();
-    if (!selectedTable) return;
-    saveTables(tables.map(t => t.id === selectedTable.id
-      ? { ...t, status:'Reserved', reservation:{ name:reserveName, time:reserveTime } }
-      : t
-    ));
-    toast.success(`📅 ${selectedTable.name} reserved for ${reserveName} at ${reserveTime}`);
-    setSelectedTable(null); setReserveName(''); setReserveTime('');
+  // ── Open reservation modal for a table ─────────────────────
+  const openResModal = (table) => {
+    setResForm(f => ({ ...f, tableId: table._id || table.id, tableName: table.name, partySize: String(table.capacity) }));
+    setShowResModal(true);
   };
 
+  // ── Submit new reservation ──────────────────────────────────
+  const submitReservation = async (e) => {
+    e.preventDefault();
+    setSavingRes(true);
+    const payload = {
+      table: resForm.tableId,
+      tableName: resForm.tableName,
+      customerName: resForm.customerName,
+      customerPhone: resForm.customerPhone,
+      partySize: parseInt(resForm.partySize),
+      date: resForm.date,
+      time: resForm.time,
+      specialRequest: resForm.specialRequest,
+    };
+    try {
+      const { data } = await api.post('/reservations', payload);
+      if (data.success) {
+        setReservations(prev => [data.data, ...prev]);
+        saveTables(tables.map(t => (t._id || t.id) === resForm.tableId || t.name === resForm.tableName
+          ? { ...t, status: 'Reserved', reservation: { name: resForm.customerName, time: resForm.time } }
+          : t
+        ));
+        toast.success(`📅 Reserved ${resForm.tableName} for ${resForm.customerName} at ${resForm.time}`);
+        setShowResModal(false);
+        setResForm(f => ({ ...f, customerName:'', customerPhone:'', specialRequest:'' }));
+      }
+    } catch (err) {
+      // Offline fallback
+      const fallback = { id: `RES-${Date.now()}`, ...payload, status: 'Pending', reservationId: `RES-${Date.now().toString().slice(-6)}` };
+      const updated = [fallback, ...reservations];
+      setReservations(updated);
+      localStorage.setItem('reservations', JSON.stringify(updated));
+      saveTables(tables.map(t => (t._id || t.id) === resForm.tableId || t.name === resForm.tableName
+        ? { ...t, status: 'Reserved', reservation: { name: resForm.customerName, time: resForm.time } }
+        : t
+      ));
+      toast.warning(err?.response?.data?.message || '⚠️ Offline — reservation saved locally');
+      setShowResModal(false);
+    } finally {
+      setSavingRes(false);
+    }
+  };
+
+  // ── Update reservation status ───────────────────────────────
+  const updateResStatus = async (res, newStatus) => {
+    const id = res._id || res.id;
+    try {
+      await api.put(`/reservations/${id}`, { status: newStatus });
+      setReservations(prev => prev.map(r => (r._id || r.id) === id ? { ...r, status: newStatus } : r));
+      if (newStatus === 'Seated') {
+        saveTables(tables.map(t => t.name === res.tableName ? { ...t, status: 'Occupied', reservation: null } : t));
+        toast.success(`🪑 ${res.customerName} seated at ${res.tableName}`);
+      } else if (newStatus === 'Cancelled' || newStatus === 'No-show') {
+        saveTables(tables.map(t => t.name === res.tableName ? { ...t, status: 'Available', reservation: null } : t));
+        toast.info(`${newStatus === 'Cancelled' ? '❌' : '👻'} Reservation ${newStatus.toLowerCase()}: ${res.customerName}`);
+      } else {
+        toast.success(`✅ Reservation confirmed: ${res.customerName}`);
+      }
+    } catch {
+      setReservations(prev => prev.map(r => (r._id || r.id) === id ? { ...r, status: newStatus } : r));
+      toast.warning('⚠️ Offline — status updated locally');
+    }
+  };
+
+  const deleteReservation = async (res) => {
+    if (!window.confirm(`Delete reservation for ${res.customerName}?`)) return;
+    const id = res._id || res.id;
+    try {
+      await api.delete(`/reservations/${id}`);
+    } catch { /* silent offline */ }
+    setReservations(prev => prev.filter(r => (r._id || r.id) !== id));
+    saveTables(tables.map(t => t.name === res.tableName ? { ...t, status: 'Available', reservation: null } : t));
+    toast.success('🗑️ Reservation deleted');
+  };
+
+  // ── Auto table assignment ───────────────────────────────────
   const handleAutoAssign = () => {
     const guests = parseInt(guestCount);
     if (isNaN(guests) || guests <= 0) { setAutoMessage('Please enter a valid guest count.'); return; }
-    const best = tables.filter(t => t.status === 'Available' && t.capacity >= guests).sort((a,b) => a.capacity - b.capacity)[0];
+    const best = tables.filter(t => t.status === 'Available' && t.capacity >= guests).sort((a, b) => a.capacity - b.capacity)[0];
     if (best) {
-      saveTables(tables.map(t => t.id === best.id ? { ...t, status:'Occupied' } : t));
+      saveTables(tables.map(t => t.id === best.id ? { ...t, status: 'Occupied' } : t));
       setAutoMessage(`Assigned to ${best.name} (Capacity: ${best.capacity})`);
       toast.success(`✅ Auto-assigned ${guests} guests → ${best.name}`);
     } else {
@@ -99,266 +214,403 @@ const TableManagement = () => {
     }
   };
 
-  const cancelReservation = (id) => {
-    saveTables(tables.map(t => t.id === id ? { ...t, status:'Available', reservation:null } : t));
-    toast.info('🗑️ Reservation cancelled');
-  };
-
   const freeTable = (id) => {
     const t = tables.find(tb => tb.id === id);
-    saveTables(tables.map(tb => tb.id === id ? { ...tb, status:'Available', reservation:null } : tb));
+    saveTables(tables.map(tb => tb.id === id ? { ...tb, status: 'Available', reservation: null } : tb));
     toast.success(`🟢 ${t?.name || 'Table'} is now Available`);
   };
 
   const resetAllTables = () => {
-    saveTables(tables.map(t => ({ ...t, status:'Available', reservation:null })));
+    saveTables(tables.map(t => ({ ...t, status: 'Available', reservation: null })));
     setAutoMessage('');
     toast.info('🔄 All tables reset to Available');
   };
 
-  const counts = { total:tables.length, available:tables.filter(t=>t.status==='Available').length, reserved:tables.filter(t=>t.status==='Reserved').length, maintenance:tables.filter(t=>t.status==='Maintenance').length };
+  // ── Derived data ────────────────────────────────────────────
+  const counts = {
+    total:       tables.length,
+    available:   tables.filter(t => t.status === 'Available').length,
+    reserved:    tables.filter(t => t.status === 'Reserved').length,
+    occupied:    tables.filter(t => t.status === 'Occupied').length,
+    maintenance: tables.filter(t => t.status === 'Maintenance').length,
+  };
+
+  const dateReservations = reservations.filter(r => !calendarDate || r.date === calendarDate);
+  const pendingCount     = reservations.filter(r => r.status === 'Pending').length;
+  const todayCount       = reservations.filter(r => r.date === new Date().toISOString().split('T')[0]).length;
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-5">
+    <div className="max-w-[1600px] mx-auto space-y-5 animate-[fadeIn_0.3s_ease-out]">
 
-      {/* Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-        {/* ── LEFT ── */}
-        <div className="space-y-4">
-
-          {/* Edit table status card */}
-          {editTable && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-bold text-slate-800">Edit {editTable.name}</h3>
-                <button onClick={()=>setEditTable(null)} className="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-400 rounded-full text-xs font-bold transition">✕</button>
-              </div>
-              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">Change Status</p>
-              <div className="space-y-2">
-                {['Available','Reserved','Occupied','Maintenance'].map(s => {
-                  const sc = STATUS_COLORS[s] || STATUS_COLORS.Available;
-                  return (
-                    <button key={s} type="button"
-                      onClick={() => {
-                        saveTables(tables.map(t => t.id === editTable.id ? { ...t, status: s, reservation: s !== 'Reserved' ? null : t.reservation } : t));
-                        setEditTable(null);
-                      }}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 text-left transition-all ${editTable.status === s ? `${sc.card} border-current font-bold` : 'border-slate-100 hover:border-slate-200 bg-white'}`}>
-                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${sc.dot}`}/>
-                      <span className={`text-sm font-semibold ${editTable.status === s ? '' : 'text-slate-600'}`}>{s}</span>
-                      {editTable.status === s && <span className="ml-auto text-[10px] font-bold text-slate-400">Current</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Reserve card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-            <h3 className="text-base font-bold text-slate-800 mb-1">
-              {selectedTable ? `Reserve ${selectedTable.name}` : 'Select a table to reserve'}
-            </h3>
-            {!selectedTable ? (
-              <>
-                <p className="text-xs text-slate-400 font-medium mb-4">Click on any 'Available' table on the map to reserve it.</p>
-                {/* Legend */}
-                <div className="flex flex-wrap gap-3">
-                  {['Available','Reserved','Maintenance'].map(s => (
-                    <div key={s} className="flex items-center gap-1.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[s].dot}`}/>
-                      <span className="text-xs text-slate-500 font-medium">{s}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <form onSubmit={handleReserve} className="space-y-3 mt-3">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Customer Name</label>
-                  <input type="text" required value={reserveName} onChange={e=>setReserveName(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-orange-400/20"/>
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Time</label>
-                  <input type="time" required value={reserveTime} onChange={e=>setReserveTime(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-orange-400/20"/>
-                </div>
-                <div className="flex gap-2">
-                  <button type="submit" className="flex-1 py-2.5 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-orange-400/20">
-                    Confirm
-                  </button>
-                  <button type="button" onClick={()=>setSelectedTable(null)} className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition-all">
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Auto assign */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-            <h3 className="text-base font-bold text-slate-800 mb-3">Auto Table Assignment</h3>
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Number of Guests</label>
-              <div className="relative mb-3">
-                <input type="number" min="1" value={guestCount} onChange={e=>setGuestCount(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#1e3a8a] focus:ring-2 focus:ring-blue-400/20 pr-10"/>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                </span>
-              </div>
-              <button onClick={handleAutoAssign}
-                className="w-full py-2.5 bg-[#1e3a8a] hover:bg-blue-900 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-blue-900/20 flex items-center justify-center gap-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="9" width="18" height="2" rx="1"/><line x1="8" y1="11" x2="8" y2="20"/><line x1="16" y1="11" x2="16" y2="20"/><line x1="5" y1="20" x2="19" y2="20"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
-                Find & Occupy Table
-              </button>
-              {autoMessage && (
-                <div className="mt-3 flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <p className="text-[11px] font-semibold text-blue-700">{autoMessage}</p>
-                </div>
-              )}
-            </div>
-          </div>
+      {/* ── Page Header ── */}
+      <div className="flex justify-between items-center flex-wrap gap-3">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Table Management</h2>
+          <p className="text-xs text-slate-400 font-semibold mt-0.5">Manage tables, reservations, and walk-in assignments.</p>
         </div>
-
-        {/* ── RIGHT ── */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-bold text-slate-800">Interactive Table Map</h3>
-            <div className="flex items-center gap-2">
-              {/* Live connection badge */}
-              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border ${
-                connected ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-400 bg-slate-50 border-slate-200'
-              }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}/>
-                {connected ? 'Live Sync' : 'Offline'}
-              </span>
-              <button onClick={resetAllTables}
-                className="text-[10px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1 rounded-full transition-all">
-                Reset All
-              </button>
-              <span className="text-[10px] text-slate-400 font-bold bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 flex items-center gap-1">
-                Click <QRIcon/> to view QR
-              </span>
-            </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border ${connected ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-400 bg-slate-50 border-slate-200'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}/>
+            {connected ? 'Live Sync' : 'Offline'}
+          </span>
+          {/* Tabs */}
+          <div className="flex bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
+            <button onClick={() => setActiveTab('map')} className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === 'map' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}>
+              🗺️ Table Map
+            </button>
+            <button onClick={() => { setActiveTab('reservations'); fetchReservations(''); }} className={`px-4 py-2 text-xs font-bold rounded-xl transition-all relative ${activeTab === 'reservations' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}>
+              📅 Reservations
+              {pendingCount > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">{pendingCount}</span>}
+            </button>
           </div>
-
-          {/* Stats row */}
-          <div className="grid grid-cols-4 gap-3 mb-5">
-            {[
-              { label:'Total Tables',  val:counts.total,       icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="9" width="18" height="2" rx="1"/><line x1="8" y1="11" x2="8" y2="20"/><line x1="16" y1="11" x2="16" y2="20"/><line x1="5" y1="20" x2="19" y2="20"/><line x1="12" y1="3" x2="12" y2="9"/></svg>, bg:'bg-indigo-50', text:'text-indigo-700' },
-              { label:'Available',     val:counts.available,   icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>, bg:'bg-emerald-50', text:'text-emerald-700' },
-              { label:'Reserved',      val:counts.reserved,    icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, bg:'bg-amber-50', text:'text-amber-700' },
-              { label:'Maintenance',   val:counts.maintenance, icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, bg:'bg-slate-50', text:'text-slate-600' },
-            ].map(({label,val,icon,bg,text}) => (
-              <div key={label} className={`${bg} rounded-xl p-3 flex items-center gap-2`}>
-                <div>{icon}</div>
-                <div>
-                  <p className={`text-xl font-extrabold ${text} leading-none`}>{val}</p>
-                  <p className="text-[9px] text-slate-400 font-semibold mt-0.5">{label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Table grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-            {tables.map(table => {
-              const sc = STATUS_COLORS[table.status] || STATUS_COLORS.Available;
-              return (
-                <div key={table.id}
-                  onClick={() => table.status === 'Available' && setSelectedTable(table)}
-                  className={`relative p-4 rounded-2xl border-2 transition-all ${sc.card} ${table.status === 'Available' ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : 'cursor-default'}`}>
-                  {/* QR button */}
-                  <button onClick={e => { e.stopPropagation(); setActiveQRTable(table); }}
-                    className="absolute top-3 right-3 text-slate-400 hover:text-[#1e3a8a] transition-colors">
-                    <QRIcon/>
-                  </button>
-                  {/* Table icon */}
-                  <div className={`mb-2 ${sc.icon}`}>
-                    <TableIcon color="currentColor"/>
-                  </div>
-                  <h4 className="text-sm font-extrabold text-slate-800">{table.name}</h4>
-                  <p className="text-[10px] text-slate-400 font-medium mb-2">Capacity: {table.capacity}</p>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${sc.badge}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}/>
-                    {table.status}
-                  </span>
-                  {table.reservation && (
-                    <div className="mt-2 pt-2 border-t border-dashed border-amber-300 text-[10px] text-amber-800">
-                      <p><span className="font-bold">By:</span> {table.reservation.name}</p>
-                      <p><span className="font-bold">At:</span> {table.reservation.time}</p>
-                      <button onClick={e => { e.stopPropagation(); cancelReservation(table.id); }}
-                        className="mt-1 text-red-600 font-bold hover:underline text-[9px] uppercase tracking-wider">
-                        Cancel
-                      </button>
-                    </div>
-                  )}
-                  {(table.status === 'Occupied' || table.status === 'Maintenance') && (
-                    <button onClick={e => { e.stopPropagation(); freeTable(table.id); }}
-                      className="mt-2 w-full py-1 text-[9px] font-bold bg-white/70 hover:bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-700 hover:border-emerald-300 transition-all">
-                      Free Table
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Feature icons */}
-          <div className="grid grid-cols-4 gap-2 pt-4 border-t border-slate-100">
-            {[
-              { icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label:'Easy Reservation', sub:'Quick and simple table booking' },
-              { icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, label:'Group Friendly', sub:'Perfect for small and large groups' },
-              { icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, label:'Real-time Status', sub:'Live table availability updates' },
-              { icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>, label:'Digital Experience', sub:'QR enabled for modern dining' },
-            ].map(({icon,label,sub}) => (
-              <div key={label} className="flex items-start gap-2">
-                <div className="mt-0.5 flex-shrink-0">{icon}</div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-700">{label}</p>
-                  <p className="text-[9px] text-slate-400 font-medium leading-tight">{sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <button onClick={() => setShowResModal(true)} className="px-4 py-2 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+            + New Reservation
+          </button>
         </div>
       </div>
 
-      {/* QR Modal */}
-      {activeQRTable && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center text-center relative">
-            <button onClick={()=>setActiveQRTable(null)}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full font-bold transition-colors text-sm">✕</button>
-            <h3 className="text-lg font-extrabold text-slate-800 mb-1">{activeQRTable.name}</h3>
-            <p className="text-xs text-slate-500 font-medium mb-5">Scan to view menu & order instantly</p>
-            <div className="w-44 h-44 border-4 border-slate-900 rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden p-3">
-              <div className="w-full h-full border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center flex-col gap-1">
-                <span className="text-3xl opacity-60">🍽️</span>
-                <span className="text-[9px] font-bold text-slate-400 text-center px-2">Scan to order</span>
+      {/* ── KPI Strip ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          { label:'Total',       val:counts.total,       color:'bg-indigo-50  text-indigo-700',  dot:'bg-indigo-400'  },
+          { label:'Available',   val:counts.available,   color:'bg-emerald-50 text-emerald-700', dot:'bg-emerald-500' },
+          { label:'Occupied',    val:counts.occupied,    color:'bg-red-50     text-red-700',     dot:'bg-red-500'     },
+          { label:'Reserved',    val:counts.reserved,    color:'bg-amber-50   text-amber-700',   dot:'bg-amber-400'   },
+          { label:'Maintenance', val:counts.maintenance, color:'bg-slate-50   text-slate-600',   dot:'bg-slate-400'   },
+        ].map(({ label, val, color, dot }) => (
+          <div key={label} className={`${color} rounded-2xl p-4 flex items-center gap-3 border border-white`}>
+            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${dot}`}/>
+            <div>
+              <p className="text-xl font-extrabold leading-none">{val}</p>
+              <p className="text-[10px] font-semibold opacity-70 mt-0.5">{label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── TAB: TABLE MAP ── */}
+      {activeTab === 'map' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Left panel */}
+          <div className="space-y-4">
+            {/* Auto-assign */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3">
+              <h3 className="text-sm font-bold text-slate-800">Auto Table Assignment</h3>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">No. of Guests</label>
+                <input type="number" min="1" value={guestCount} onChange={e => setGuestCount(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500"/>
               </div>
-              <div className="absolute top-0 left-0 w-7 h-7 border-t-4 border-l-4 border-[#1e3a8a] rounded-tl-xl m-2"/>
-              <div className="absolute top-0 right-0 w-7 h-7 border-t-4 border-r-4 border-[#1e3a8a] rounded-tr-xl m-2"/>
-              <div className="absolute bottom-0 left-0 w-7 h-7 border-b-4 border-l-4 border-[#1e3a8a] rounded-bl-xl m-2"/>
-              <div className="absolute bottom-0 right-0 w-7 h-7 border-b-4 border-r-4 border-[#1e3a8a] rounded-br-xl m-2"/>
-            </div>
-            <p className="text-[10px] text-slate-400 font-mono mb-4 bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 break-all text-center">
-              {window.location.origin}/qr-order/{activeQRTable.id}
-            </p>
-            <div className="flex w-full gap-3">
-              <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/qr-order/${activeQRTable.id}`)}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition-colors">
-                Copy URL
+              <button onClick={handleAutoAssign} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-all shadow-md">
+                Find & Occupy Best Table
               </button>
-              <a href={`/qr-order/${activeQRTable.id}`} target="_blank" rel="noreferrer"
-                className="flex-1 py-2.5 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl text-xs transition-all shadow-md text-center">
-                Open Menu
-              </a>
+              {autoMessage && (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-[11px] font-semibold text-blue-700">{autoMessage}</div>
+              )}
             </div>
+
+            {/* Edit table panel */}
+            {editTable && (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-800">Edit {editTable.name}</h3>
+                  <button onClick={() => setEditTable(null)} className="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-400 rounded-full text-xs font-bold transition flex items-center justify-center">✕</button>
+                </div>
+                <div className="space-y-2">
+                  {['Available','Reserved','Occupied','Maintenance'].map(s => {
+                    const sc = STATUS_COLORS[s];
+                    return (
+                      <button key={s} onClick={() => {
+                        saveTables(tables.map(t => (t._id||t.id) === (editTable._id||editTable.id) ? { ...t, status: s } : t));
+                        setEditTable(null);
+                      }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 text-left transition-all ${editTable.status === s ? `${sc.card} border-current font-bold` : 'border-slate-100 hover:border-slate-200 bg-white'}`}>
+                        <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${sc.dot}`}/>
+                        <span className={`text-sm font-semibold ${editTable.status === s ? '' : 'text-slate-600'}`}>{s}</span>
+                        {editTable.status === s && <span className="ml-auto text-[10px] font-bold text-slate-400">Current</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Legend */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Legend</p>
+              <div className="space-y-2">
+                {Object.entries(STATUS_COLORS).map(([status, sc]) => (
+                  <div key={status} className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${sc.dot}`}/>
+                    <span className="text-xs text-slate-600 font-medium">{status}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={resetAllTables} className="mt-4 w-full py-2 text-[10px] font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all">
+                Reset All Tables
+              </button>
+            </div>
+          </div>
+
+          {/* Table grid */}
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <h3 className="text-base font-bold text-slate-800 mb-4">Interactive Floor Map</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {tables.map(table => {
+                const sc = STATUS_COLORS[table.status] || STATUS_COLORS.Available;
+                return (
+                  <div key={table.id} className={`relative p-4 rounded-2xl border-2 transition-all ${sc.card} ${table.status === 'Available' ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : 'cursor-default'}`}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className={`${sc.icon}`}><TableIcon color="currentColor"/></div>
+                      <div className="flex gap-1">
+                        <button onClick={() => setEditTable(table)} className="w-6 h-6 bg-white/70 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg text-[10px] font-bold transition flex items-center justify-center border border-slate-100" title="Edit status">
+                          ✏
+                        </button>
+                        {table.status === 'Available' && (
+                          <button onClick={() => openResModal(table)} className="w-6 h-6 bg-white/70 hover:bg-amber-50 text-slate-400 hover:text-amber-600 rounded-lg text-[10px] font-bold transition flex items-center justify-center border border-slate-100" title="Reserve">
+                            📅
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <h4 className="text-sm font-extrabold text-slate-800">{table.name}</h4>
+                    <p className="text-[10px] text-slate-400 font-medium mb-2">👥 Capacity: {table.capacity}</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${sc.badge}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}/>{table.status}
+                    </span>
+                    {table.reservation && (
+                      <div className="mt-2 pt-2 border-t border-dashed border-amber-300 text-[10px] text-amber-800 space-y-0.5">
+                        <p>👤 {table.reservation.name}</p>
+                        <p>🕐 {table.reservation.time}</p>
+                      </div>
+                    )}
+                    {(table.status === 'Occupied' || table.status === 'Maintenance') && (
+                      <button onClick={() => freeTable(table._id || table.id)}
+                        className="mt-2 w-full py-1 text-[9px] font-bold bg-white/70 hover:bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-700 hover:border-emerald-300 transition-all">
+                        Free Table
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB: RESERVATIONS ── */}
+      {activeTab === 'reservations' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Left: date picker + stats */}
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+              <h3 className="text-sm font-bold text-slate-800">Filter by Date</h3>
+              <input type="date" value={calendarDate} onChange={e => setCalendarDate(e.target.value)}
+                className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500"/>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setCalendarDate(new Date().toISOString().split('T')[0])}
+                  className="py-2 text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-100">
+                  Today
+                </button>
+                <button onClick={() => setCalendarDate('')}
+                  className="py-2 text-xs font-bold bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl transition-all border border-slate-200">
+                  All Dates
+                </button>
+              </div>
+            </div>
+
+            {/* Reservation summary */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3">
+              <h3 className="text-sm font-bold text-slate-800">Summary</h3>
+              {[
+                { label:'Today\'s Bookings', val: todayCount,                                              color:'text-indigo-600  bg-indigo-50'  },
+                { label:'Pending Confirm',   val: reservations.filter(r=>r.status==='Pending').length,    color:'text-amber-600   bg-amber-50'   },
+                { label:'Confirmed',         val: reservations.filter(r=>r.status==='Confirmed').length,  color:'text-emerald-600 bg-emerald-50' },
+                { label:'Seated Today',      val: reservations.filter(r=>r.status==='Seated' && r.date===new Date().toISOString().split('T')[0]).length, color:'text-blue-600 bg-blue-50' },
+              ].map(({ label, val, color }) => (
+                <div key={label} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+                  <span className="text-xs text-slate-600 font-medium">{label}</span>
+                  <span className={`text-sm font-extrabold px-2.5 py-0.5 rounded-lg ${color}`}>{val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: reservation list */}
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-800">
+                  {calendarDate ? `Reservations — ${new Date(calendarDate + 'T00:00:00').toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' })}` : 'All Reservations'}
+                </h3>
+                <p className="text-xs text-slate-400 font-medium">{dateReservations.length} booking{dateReservations.length !== 1 ? 's' : ''}</p>
+              </div>
+              <button onClick={() => fetchReservations('')} className="text-xs font-bold text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all">
+                🔄 Refresh
+              </button>
+            </div>
+
+            {loadingRes ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="w-8 h-8 border-4 border-[#f97316] border-t-transparent rounded-full animate-spin"/>
+              </div>
+            ) : dateReservations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <span className="text-4xl mb-3">📅</span>
+                <p className="text-sm font-bold text-slate-500">No reservations found</p>
+                <p className="text-xs text-slate-400 font-medium mt-1">Click "+ New Reservation" to add one</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                {dateReservations.map(res => (
+                  <div key={res._id || res.id} className={`p-4 rounded-2xl border transition-all ${res.status === 'Cancelled' || res.status === 'No-show' ? 'opacity-50 bg-slate-50' : 'bg-white hover:shadow-sm'} border-slate-100`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-extrabold text-sm flex-shrink-0">
+                          {res.customerName?.slice(0,2).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-extrabold text-slate-800">{res.customerName}</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">📞 {res.customerPhone}</p>
+                        </div>
+                      </div>
+                      <span className={`text-[9px] font-bold px-2 py-1 rounded-lg border flex-shrink-0 ${RESERVATION_STATUS_STYLES[res.status] || RESERVATION_STATUS_STYLES.Pending}`}>
+                        {res.status}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 mt-3">
+                      <div className="bg-slate-50 rounded-xl p-2 text-center">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Table</p>
+                        <p className="text-xs font-extrabold text-slate-700">{res.tableName}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-2 text-center">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Time</p>
+                        <p className="text-xs font-extrabold text-slate-700">{res.time}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-2 text-center">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Guests</p>
+                        <p className="text-xs font-extrabold text-slate-700">👥 {res.partySize}</p>
+                      </div>
+                    </div>
+
+                    {res.specialRequest && (
+                      <p className="mt-2 text-[10px] text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-1.5 font-medium">
+                        📝 {res.specialRequest}
+                      </p>
+                    )}
+
+                    {/* Action buttons */}
+                    {!['Cancelled','No-show','Seated'].includes(res.status) && (
+                      <div className="flex gap-2 mt-3">
+                        {res.status === 'Pending' && (
+                          <button onClick={() => updateResStatus(res, 'Confirmed')}
+                            className="flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold rounded-xl transition-all">
+                            ✅ Confirm
+                          </button>
+                        )}
+                        {(res.status === 'Pending' || res.status === 'Confirmed') && (
+                          <button onClick={() => updateResStatus(res, 'Seated')}
+                            className="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold rounded-xl transition-all">
+                            🪑 Seat Now
+                          </button>
+                        )}
+                        <button onClick={() => updateResStatus(res, 'No-show')}
+                          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold rounded-xl transition-all">
+                          No-show
+                        </button>
+                        <button onClick={() => updateResStatus(res, 'Cancelled')}
+                          className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-[10px] font-bold rounded-xl transition-all">
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                    {['Cancelled','No-show'].includes(res.status) && (
+                      <button onClick={() => deleteReservation(res)}
+                        className="mt-2 w-full py-1.5 text-[10px] font-bold text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all">
+                        🗑️ Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── New Reservation Modal ── */}
+      {showResModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative space-y-5">
+            <button onClick={() => setShowResModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
+            <div>
+              <h3 className="text-lg font-extrabold text-slate-800">New Reservation</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Book a table in advance for a guest</p>
+            </div>
+
+            <form onSubmit={submitReservation} className="space-y-4">
+              {/* Table selector */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Table</label>
+                <select required value={resForm.tableId} onChange={e => {
+                  const t = tables.find(tb => String(tb._id || tb.id) === e.target.value);
+                  setResForm(f => ({ ...f, tableId: e.target.value, tableName: t?.name || '' }));
+                }} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500">
+                  <option value="">-- Choose Table --</option>
+                  {tables.filter(t => t.status === 'Available').map(t => (
+                    <option key={t._id || t.id} value={t._id || t.id}>{t.name} (Capacity: {t.capacity})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Customer Name</label>
+                  <input required type="text" placeholder="e.g. Rahul Sharma" value={resForm.customerName} onChange={e => setResForm(f => ({...f, customerName: e.target.value}))}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"/>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Phone</label>
+                  <input required type="tel" placeholder="+91 9999999999" value={resForm.customerPhone} onChange={e => setResForm(f => ({...f, customerPhone: e.target.value}))}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"/>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Date</label>
+                  <input required type="date" value={resForm.date} min={new Date().toISOString().split('T')[0]} onChange={e => setResForm(f => ({...f, date: e.target.value}))}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"/>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Time</label>
+                  <input required type="time" value={resForm.time} onChange={e => setResForm(f => ({...f, time: e.target.value}))}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"/>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Guests</label>
+                  <input required type="number" min="1" value={resForm.partySize} onChange={e => setResForm(f => ({...f, partySize: e.target.value}))}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"/>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Special Request (optional)</label>
+                <textarea rows="2" placeholder="e.g. Birthday celebration, window seat..." value={resForm.specialRequest} onChange={e => setResForm(f => ({...f, specialRequest: e.target.value}))}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-indigo-500"/>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowResModal(false)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl text-xs transition-all">
+                  Cancel
+                </button>
+                <button type="submit" disabled={savingRes}
+                  className="flex-1 py-3 bg-[#f97316] hover:bg-orange-600 disabled:opacity-60 text-white font-bold rounded-2xl text-xs transition-all shadow-md shadow-orange-400/20">
+                  {savingRes ? 'Booking...' : '📅 Confirm Reservation'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -367,4 +619,3 @@ const TableManagement = () => {
 };
 
 export default TableManagement;
-

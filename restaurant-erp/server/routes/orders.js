@@ -3,11 +3,103 @@ const Order = require('../models/Order');
 const Table = require('../models/Table');
 const Ingredient = require('../models/Ingredient');
 const MenuItem = require('../models/MenuItem');
+const Customer = require('../models/Customer');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes require authentication
+// ─────────────────────────────────────────────────────────────
+// @route   POST /api/orders/qr
+// @desc    Place a QR (customer-facing) order — NO auth required
+// @access  Public (customer scans QR code, no login)
+// ─────────────────────────────────────────────────────────────
+router.post('/qr', async (req, res) => {
+  try {
+    const { table, items, subtotal, gst, total, guestCount, specialInstructions } = req.body;
+
+    if (!table || !items || !items.length) {
+      return res.status(400).json({ success: false, message: 'Table and items are required.' });
+    }
+
+    // Map cart items — attach specialNote from the instructions map
+    const orderItems = items.map(i => ({
+      ...i,
+      menuItemId: i.menuItemId || i._id || i.id,   // tolerate both id shapes
+      specialNote: (specialInstructions && specialInstructions[i.id]) || i.specialNote || '',
+    }));
+
+    const order = await Order.create({
+      type: 'Dine-in (QR)',
+      table,
+      items: orderItems,
+      subtotal: subtotal || 0,
+      gst: gst || 0,
+      total: total || 0,
+      guestCount: guestCount || 1,
+      requestType: '',
+      // No createdBy — QR orders are anonymous
+    });
+
+    // Mark table occupied
+    await Table.findOneAndUpdate(
+      { name: table, status: 'Available' },
+      { status: 'Occupied' }
+    );
+
+    // Deduct inventory stock based on recipe
+    for (const cartItem of orderItems) {
+      if (!cartItem.menuItemId) continue;
+      const menuItem = await MenuItem.findById(cartItem.menuItemId).populate('recipe.ingredientId');
+      if (menuItem && menuItem.recipe.length > 0) {
+        for (const r of menuItem.recipe) {
+          await Ingredient.findByIdAndUpdate(r.ingredientId, {
+            $inc: { stock: -(r.qty * (cartItem.qty || 1)) }
+          });
+        }
+      }
+    }
+
+    // Trigger ingredient status re-evaluation
+    const allIngredients = await Ingredient.find();
+    for (const ing of allIngredients) {
+      await ing.save();
+    }
+
+    // 🔌 Emit to kitchen & staff in real-time
+    const io = req.app.get('io');
+    if (io) {
+      io.to('kitchen').emit('new-order', order);
+      io.to('staff').emit('table-update', { table, status: 'Occupied' });
+    }
+
+    res.status(201).json({ success: true, data: order });
+  } catch (err) {
+    console.error('QR Order error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   GET /api/orders/qr-status?table=Table1
+// @desc    Get active orders for a table (customer polling) — NO auth required
+// @access  Public
+router.get('/qr-status', async (req, res) => {
+  try {
+    const { table } = req.query;
+    if (!table) return res.status(400).json({ success: false, message: 'Table name is required.' });
+
+    const orders = await Order.find({
+      table,
+      type: 'Dine-in (QR)',
+      status: { $nin: ['Completed', 'Cancelled'] },
+    }).sort({ createdAt: -1 }).limit(20);
+
+    res.json({ success: true, data: orders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// All routes below require authentication
 router.use(protect);
 
 // @route   GET /api/orders
@@ -30,13 +122,14 @@ router.get('/', async (req, res) => {
 // @access  Private (Waiter, Admin, Manager + QR public handled separately)
 router.post('/', async (req, res) => {
   try {
-    const { type, table, items, subtotal, gst, total, guestCount, requestType } = req.body;
+    const { type, table, items, subtotal, gst, total, guestCount, requestType, waiterName } = req.body;
 
     // Create order
     const order = await Order.create({
       type, table, items, subtotal, gst, total,
       guestCount: guestCount || 1,
       requestType: requestType || '',
+      waiterName: waiterName || '',
       createdBy: req.user._id,
     });
 
@@ -112,13 +205,20 @@ router.put('/:id/status', authorize('Admin', 'Manager', 'Chef', 'Waiter'), async
 });
 
 // @route   PUT /api/orders/:id/billing
-// @desc    Mark order as paid
+// @desc    Mark order as paid with payment method
 // @access  Private (Cashier, Admin, Manager)
 router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req, res) => {
   try {
+    const { paymentMethod } = req.body;
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
-      { billingStatus: 'Paid', status: 'Completed' },
+      {
+        billingStatus: 'Paid',
+        status: 'Completed',
+        paymentMethod: paymentMethod || 'Cash',
+        paidAt: new Date(),
+      },
       { new: true }
     );
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
@@ -138,9 +238,30 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
       }
     }
 
+    // 🏆 Auto-update customer loyalty points if customerPhone is set
+    if (order.customerPhone) {
+      try {
+        const customer = await Customer.findOne({ phone: order.customerPhone });
+        if (customer) {
+          customer.totalSpend   = (customer.totalSpend   || 0) + (order.total || 0);
+          customer.totalOrders  = (customer.totalOrders  || 0) + 1;
+          customer.loyaltyPoints = Math.floor(customer.totalSpend / 10); // ₹10 = 1 point
+          await customer.save();
+        }
+      } catch (loyaltyErr) {
+        console.error('Loyalty update error (non-critical):', loyaltyErr.message);
+      }
+    }
+
     // 🔌 Emit billing update
     const io = req.app.get('io');
-    if (io) io.to('staff').emit('billing-update', { id: order._id, orderId: order.orderId, billingStatus: 'Paid' });
+    if (io) io.to('staff').emit('billing-update', {
+      id: order._id,
+      orderId: order.orderId,
+      billingStatus: 'Paid',
+      paymentMethod: order.paymentMethod,
+      paidAt: order.paidAt,
+    });
 
     res.json({ success: true, data: order });
   } catch (err) {

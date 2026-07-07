@@ -49,6 +49,38 @@ export const SocketProvider = ({ children }) => {
       setConnected(false);
     });
 
+    // ── Push Notifications via socket events ─────────────────
+    const sendPush = (title, body, icon = '/favicon.png') => {
+      if (Notification.permission === 'granted') {
+        try {
+          new Notification(title, { body, icon, badge: '/favicon.png' });
+        } catch (e) {
+          console.warn('Push notification failed:', e.message);
+        }
+      }
+    };
+
+    socket.on('new-order', (order) => {
+      sendPush(
+        '🆕 New Order!',
+        `${order.orderId || order.id} — ${order.table || 'Takeaway'} · ₹${order.total}`
+      );
+    });
+
+    socket.on('order-status-update', (update) => {
+      if (update.status === 'Ready') {
+        sendPush('✅ Order Ready!', `${update.orderId} is ready for pickup — ${update.table}`);
+      }
+    });
+
+    socket.on('new-reservation', (res) => {
+      sendPush('📅 New Reservation!', `${res.customerName} — ${res.tableName} at ${res.time}`);
+    });
+
+    socket.on('low-stock-alert', (item) => {
+      sendPush('⚠️ Low Stock Alert!', `${item.name} is running low: ${item.stock} ${item.unit} remaining`);
+    });
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
@@ -77,8 +109,16 @@ export const SocketProvider = ({ children }) => {
     socketRef.current?.off(event, callback);
   };
 
+  // Helper: request browser push permission
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) return 'unsupported';
+    if (Notification.permission === 'granted') return 'granted';
+    const result = await Notification.requestPermission();
+    return result;
+  };
+
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, connected, emit, on, off }}>
+    <SocketContext.Provider value={{ socket: socketRef.current, connected, emit, on, off, requestNotificationPermission }}>
       {children}
     </SocketContext.Provider>
   );

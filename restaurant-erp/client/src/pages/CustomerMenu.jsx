@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import axios from 'axios';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /* ─── helpers ─── */
 const GST_RATE = 0.05;
@@ -68,15 +70,32 @@ const CustomerMenu = () => {
   const [voiceTranscript, setVoiceTranscript] = useState('');
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [voiceResult, setVoiceResult] = useState(null);
+  const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderError, setOrderError] = useState(null);
 
-  // Get table info
-  const tableInfo = (() => {
-    const tables = JSON.parse(localStorage.getItem('tables') || '[]');
-    return tables.find(t => String(t.id) === String(tableId)) || { id: tableId, name: `Table ${tableId}` };
-  })();
+  // Get table info — try API first, fall back to localStorage
+  useEffect(() => {
+    const fetchTable = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/tables/${tableId}`);
+        if (res.data.success) {
+          setTableInfo({ id: res.data.data._id, name: res.data.data.name });
+          return;
+        }
+      } catch {
+        // API unavailable — fall back to localStorage
+      }
+      const tables = JSON.parse(localStorage.getItem('tables') || '[]');
+      const found = tables.find(t => String(t.id || t._id) === String(tableId));
+      if (found) setTableInfo({ id: found.id || found._id, name: found.name });
+    };
+    fetchTable();
+  }, [tableId]);
 
   // 🔌 Socket.io for this customer — join table room for live status updates
   useEffect(() => {
+    if (!tableInfo.name) return;
     const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
 
     socket.on('connect', () => {
@@ -85,7 +104,7 @@ const CustomerMenu = () => {
 
     socket.on('order-status-update', (update) => {
       setPlacedOrders(prev => prev.map(o =>
-        (o._id || o.id) === (update.id || update._id) ? { ...o, status: update.status } : o
+        String(o._id || o.id) === String(update.id || update._id) ? { ...o, status: update.status } : o
       ));
       // Show status notification to customer
       const msgs = {
@@ -94,7 +113,6 @@ const CustomerMenu = () => {
         Served:    `🎉 Enjoy your meal!`,
       };
       if (msgs[update.status]) {
-        // Simple in-app notification — no toast library needed in customer page
         setVoiceResult({ notification: msgs[update.status] });
         setTimeout(() => setVoiceResult(null), 5000);
       }
@@ -103,25 +121,59 @@ const CustomerMenu = () => {
     return () => socket.disconnect();
   }, [tableInfo.name]);
 
-  // Load menu
+  // Load menu — try API first, fall back to localStorage
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('menuItems') || '[]').filter(m => m.available);
-    setMenu(items);
-    const cats = ['All', ...new Set(items.map(i => i.category))];
-    setCategories(cats);
+    const fetchMenu = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/menu?available=true`);
+        if (res.data.success && res.data.data.length > 0) {
+          const items = res.data.data.map(item => ({
+            ...item,
+            id: item._id,          // normalise id for cart logic
+            menuItemId: item._id,  // kept separately for order payload
+          }));
+          setMenu(items);
+          setCategories(['All', ...new Set(items.map(i => i.category))]);
+          return;
+        }
+      } catch {
+        // API unavailable — fall back to localStorage
+      }
+      const items = JSON.parse(localStorage.getItem('menuItems') || '[]').filter(m => m.available);
+      setMenu(items);
+      setCategories(['All', ...new Set(items.map(i => i.category))]);
+    };
+    fetchMenu();
   }, []);
 
-  // Poll placed orders for live status
+  // Poll placed orders for live status — try API first, fall back to localStorage
   useEffect(() => {
-    if (placedOrders.length === 0) return;
-    const interval = setInterval(() => {
+    if (placedOrders.length === 0 || !tableInfo.name) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await axios.get(`${API_URL}/orders/qr-status?table=${encodeURIComponent(tableInfo.name)}`);
+        if (res.data.success && res.data.data.length > 0) {
+          // Merge: keep any orders already in state, update their status from server
+          const serverOrders = res.data.data;
+          setPlacedOrders(prev => {
+            const merged = prev.map(po => {
+              const fresh = serverOrders.find(so => String(so._id) === String(po._id || po.id));
+              return fresh ? { ...po, status: fresh.status } : po;
+            });
+            return merged;
+          });
+          return;
+        }
+      } catch {
+        // fall back to localStorage poll
+      }
       const all = JSON.parse(localStorage.getItem('orders') || '[]');
       const ids = placedOrders.map(o => o.id);
       const updated = all.filter(o => ids.includes(o.id));
       if (updated.length) setPlacedOrders(updated);
     }, 3000);
     return () => clearInterval(interval);
-  }, [placedOrders]);
+  }, [placedOrders.length, tableInfo.name]);
 
   // Cart helpers
   const addToCart = (item) => {
@@ -137,48 +189,97 @@ const CustomerMenu = () => {
   const cartSubtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
-  const sendRequest = (type, setter) => {
-    const requestOrder = {
-      id: `REQ-${type.toUpperCase()}-${Date.now().toString().slice(-4)}`,
+  const sendRequest = async (type, setter) => {
+    const requestPayload = {
       type: 'Request',
       requestType: type,
       table: tableInfo.name,
-      items: [{ id: 0, name: type, qty: 1, price: 0 }],
+      items: [{ id: '0', name: type, qty: 1, price: 0 }],
       subtotal: 0, gst: 0, total: 0,
-      status: 'Pending',
-      timestamp: fmtTime(), date: fmtDate(),
+      guestCount: guestCount || 1,
     };
-    const all = JSON.parse(localStorage.getItem('orders') || '[]');
-    localStorage.setItem('orders', JSON.stringify([requestOrder, ...all]));
+
+    try {
+      await axios.post(`${API_URL}/orders/qr`, requestPayload);
+    } catch {
+      // API unavailable — write to localStorage so staff page can still see it
+      const localReq = {
+        id: `REQ-${type.toUpperCase()}-${Date.now().toString().slice(-4)}`,
+        ...requestPayload,
+        status: 'Pending',
+        timestamp: fmtTime(), date: fmtDate(),
+      };
+      const all = JSON.parse(localStorage.getItem('orders') || '[]');
+      localStorage.setItem('orders', JSON.stringify([localReq, ...all]));
+    }
+
     setter(true);
     setTimeout(() => setter(false), 30000);
   };
 
-  const placeOrder = () => {
-    if (!cart.length) return;
+  const placeOrder = async () => {
+    if (!cart.length || isPlacingOrder) return;
+    setIsPlacingOrder(true);
+    setOrderError(null);
+
     const sub = cartSubtotal;
-    const newOrder = {
-      id: `ORD-QR-${Date.now().toString().slice(-4)}`,
+    const orderPayload = {
       type: 'Dine-in (QR)',
       table: tableInfo.name,
-      items: cart.map(i => ({ ...i, specialNote: specialInstructions[i.id] || '' })),
-      subtotal: sub, gst: gst(sub), total: total(sub),
+      items: cart.map(i => ({
+        id: i.id,
+        menuItemId: i.menuItemId || i._id || i.id,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        category: i.category,
+        image: i.image,
+        specialNote: specialInstructions[i.id] || '',
+      })),
+      subtotal: sub,
+      gst: gst(sub),
+      total: total(sub),
+      guestCount,
+      specialInstructions,
+    };
+
+    try {
+      const res = await axios.post(`${API_URL}/orders/qr`, orderPayload);
+      if (res.data.success) {
+        const newOrder = { ...res.data.data, id: res.data.data._id };
+        setPlacedOrders(prev => [newOrder, ...prev]);
+        setSelectedOrder(newOrder);
+        setCart([]);
+        setSpecialInstructions({});
+        setIsPlacingOrder(false);
+        setStage('status');
+        return;
+      }
+    } catch (err) {
+      console.error('API order failed, falling back to localStorage:', err);
+      setOrderError('Could not reach server. Order saved locally.');
+    }
+
+    // Fallback — save to localStorage if API is down
+    const localOrder = {
+      id: `ORD-QR-${Date.now().toString().slice(-4)}`,
+      ...orderPayload,
       status: 'Pending',
       timestamp: fmtTime(), date: fmtDate(),
-      guestCount,
     };
     const all = JSON.parse(localStorage.getItem('orders') || '[]');
-    localStorage.setItem('orders', JSON.stringify([newOrder, ...all]));
-    // Mark table occupied
+    localStorage.setItem('orders', JSON.stringify([localOrder, ...all]));
     const tables = JSON.parse(localStorage.getItem('tables') || '[]');
     localStorage.setItem('tables', JSON.stringify(tables.map(tb =>
-      String(tb.id) === String(tableId) && tb.status === 'Available' ? { ...tb, status: 'Occupied' } : tb
+      String(tb.id || tb._id) === String(tableId) && tb.status === 'Available'
+        ? { ...tb, status: 'Occupied' } : tb
     )));
-    setPlacedOrders(prev => [newOrder, ...prev]);
-    setSelectedOrder(newOrder);
+    setPlacedOrders(prev => [localOrder, ...prev]);
+    setSelectedOrder(localOrder);
     setCart([]);
     setSpecialInstructions({});
     setStage('status');
+    setIsPlacingOrder(false);
   };
 
   const repeatLastOrder = () => {
@@ -493,8 +594,18 @@ const CustomerMenu = () => {
           <div className="flex items-center gap-2 mb-3 text-xs text-slate-500 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
             <span>⏱</span><span className="font-bold">{t.estimatedTime}: ~{estimatedTime(cart)} {t.mins}</span>
           </div>
-          <button onClick={placeOrder} className="w-full py-4 bg-[#f97316] hover:bg-orange-600 text-white font-black rounded-2xl text-sm shadow-lg transition-all">
-            {t.placeOrder} · ₹{total(cartSubtotal)}
+          {orderError && (
+            <div className="mb-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-700">
+              ⚠️ {orderError}
+            </div>
+          )}
+          <button onClick={placeOrder} disabled={isPlacingOrder}
+            className="w-full py-4 bg-[#f97316] hover:bg-orange-600 disabled:bg-orange-300 text-white font-black rounded-2xl text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+            {isPlacingOrder ? (
+              <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Placing...</span></>
+            ) : (
+              <span>{t.placeOrder} · ₹{total(cartSubtotal)}</span>
+            )}
           </button>
         </div>
       )}
@@ -518,11 +629,12 @@ const CustomerMenu = () => {
           </div>
         ) : placedOrders.map(order => {
           const sm = STATUS_META[order.status] || STATUS_META.Pending;
+          const orderId = order._id || order.id;
           return (
-            <div key={order.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+            <div key={orderId} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="text-sm font-black text-slate-800">{order.id}</p>
+                  <p className="text-sm font-black text-slate-800">{order.orderId || order.id}</p>
                   <p className="text-[10px] text-slate-400 font-bold">{order.date} · {order.timestamp}</p>
                 </div>
                 <span className={`text-[10px] font-black px-2 py-1 rounded-full ${sm.light}`}>{sm.label}</span>
@@ -568,10 +680,10 @@ const CustomerMenu = () => {
   /* ── STAGE: STATUS (post-order) ── */
   const StatusStage = () => {
     const order = selectedOrder || placedOrders[0];
-    const latest = order ? (() => {
-      const all = JSON.parse(localStorage.getItem('orders') || '[]');
-      return all.find(o => o.id === order.id) || order;
-    })() : null;
+    // Use placedOrders state directly (kept fresh by socket + polling)
+    const latest = order
+      ? (placedOrders.find(o => String(o._id || o.id) === String(order._id || order.id)) || order)
+      : null;
     const sm = latest ? (STATUS_META[latest.status] || STATUS_META.Pending) : null;
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
@@ -594,7 +706,7 @@ const CustomerMenu = () => {
                   <span className="text-2xl">{latest.status === 'Ready' ? '✅' : latest.status === 'Preparing' ? '👨‍🍳' : latest.status === 'Served' || latest.status === 'Completed' ? '🎉' : '📥'}</span>
                 </div>
                 <h2 className="text-xl font-black text-slate-800">{sm.label}</h2>
-                <p className="text-xs text-slate-400 font-bold mt-1">{latest.id}</p>
+                <p className="text-xs text-slate-400 font-bold mt-1">{latest.orderId || latest.id}</p>
                 <div className="flex items-center justify-center gap-2 mt-3 text-xs text-orange-700 bg-orange-50 border border-orange-100 rounded-xl px-4 py-2">
                   <span>⏱</span><span className="font-bold">~{estimatedTime(latest.items)} {t.mins} {t.estimatedTime.toLowerCase()}</span>
                 </div>

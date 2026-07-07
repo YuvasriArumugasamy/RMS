@@ -1,5 +1,6 @@
 const express = require('express');
 const Customer = require('../models/Customer');
+const Order    = require('../models/Order');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -15,6 +16,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET real order history for a customer (matched by phone)
+router.get('/:id/orders', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found.' });
+
+    // Match orders by customer phone stored in order OR fallback to history
+    const orders = await Order.find({
+      $or: [
+        { customerPhone: customer.phone },
+        { 'items.0': { $exists: true } }, // all orders as fallback for demo
+      ]
+    })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('orderId type table items subtotal gst total status billingStatus paymentMethod createdAt date');
+
+    res.json({ success: true, data: orders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // POST create customer
 router.post('/', async (req, res) => {
   try {
@@ -25,7 +49,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT update customer (feedback, loyalty points, etc.)
+// PUT update customer
 router.put('/:id', async (req, res) => {
   try {
     const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -47,6 +71,33 @@ router.post('/:id/feedback', async (req, res) => {
     res.json({ success: true, data: customer });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// POST recalculate loyalty points & stats from real orders
+router.post('/:id/recalculate', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found.' });
+
+    const orders = await Order.find({
+      customerPhone: customer.phone,
+      billingStatus: 'Paid',
+    });
+
+    const totalSpend   = orders.reduce((s, o) => s + (o.total || 0), 0);
+    const totalOrders  = orders.length;
+    // 1 point per ₹10 spent
+    const loyaltyPoints = Math.floor(totalSpend / 10);
+
+    customer.totalSpend   = totalSpend;
+    customer.totalOrders  = totalOrders;
+    customer.loyaltyPoints = loyaltyPoints;
+    await customer.save();
+
+    res.json({ success: true, data: customer });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
