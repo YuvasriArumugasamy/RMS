@@ -1,53 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
-// Generates a simple real QR-like SVG using a basic URL matrix pattern
-// (Since we can't install qrcode.react without running npm install, we embed a working approach using URL-based QR)
-const QR_BASE = `${window.location.origin}/qr-order/`;
-
-const QRCodeSVG = ({ value, size = 160 }) => {
-  // Create deterministic pattern from value string
-  const hash = value.split('').reduce((a, c, i) => a ^ (c.charCodeAt(0) * (i + 7)), 0);
-  const seed = Math.abs(hash);
-  const cell = size / 21;
-  const pseudo = (n) => ((seed * (n + 1) * 6364136223846793005 + 1442695040888963407) & 0x7FFFFFFF) % 2;
-  const fixedModules = new Set();
-
-  // Finder patterns
-  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) fixedModules.add(`${r}-${c}`);
-  for (let r = 0; r < 7; r++) for (let c = 14; c < 21; c++) fixedModules.add(`${r}-${c}`);
-  for (let r = 14; r < 21; r++) for (let c = 0; c < 7; c++) fixedModules.add(`${r}-${c}`);
-
-  const modules = [];
-  for (let r = 0; r < 21; r++) {
-    for (let c = 0; c < 21; c++) {
-      const key = `${r}-${c}`;
-      let dark = false;
-      // Finder pattern outer
-      if ((r < 7 && c < 7) || (r < 7 && c >= 14) || (r >= 14 && c < 7)) {
-        const lr = r < 7 ? r : r - 14;
-        const lc = c < 7 ? c : c - 14;
-        dark = (lr === 0 || lr === 6 || lc === 0 || lc === 6) || (lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4);
-      } else if ((r >= 8 && r <= 12 && c >= 8 && c <= 12)) {
-        dark = (r + c) % 2 === 0;
-      } else {
-        const idx = r * 21 + c;
-        dark = pseudo(idx + seed % 13) === 1;
-        // timing strips
-        if ((r === 6 || c === 6) && !fixedModules.has(key)) dark = (r + c) % 2 === 0;
-      }
-      modules.push({ r, c, dark });
-    }
-  }
-
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} xmlns="http://www.w3.org/2000/svg">
-      <rect width={size} height={size} fill="white"/>
-      {modules.map(({ r, c, dark }) => dark ? (
-        <rect key={`${r}-${c}`} x={c * cell} y={r * cell} width={cell} height={cell} fill="#111"/>
-      ) : null)}
-    </svg>
-  );
-};
+import QRCode from 'react-qr-code';
 
 const QRManagement = () => {
   const [tables, setTables] = useState([]);
@@ -127,7 +79,13 @@ const QRManagement = () => {
         {tables.map(table => (
           <div key={table.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-col items-center text-center hover:shadow-md transition-all">
             <div className="mb-3 p-2 bg-slate-50 rounded-xl border border-slate-100">
-              <QRCodeSVG value={getURL(table)} size={120} />
+              <QRCode
+                value={getURL(table)}
+                size={120}
+                level="H"
+                fgColor="#111827"
+                bgColor="#ffffff"
+              />
             </div>
             <h3 className="text-sm font-black text-slate-800">{table.name}</h3>
             <p className="text-[10px] text-slate-400 font-bold mb-1">Capacity: {table.capacity}</p>
