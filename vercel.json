@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "cd restaurant-erp/client && npm install && npm run build",
+  "outputDirectory": "restaurant-erp/client/dist",
+  "installCommand": "cd restaurant-erp/client && npm install",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
