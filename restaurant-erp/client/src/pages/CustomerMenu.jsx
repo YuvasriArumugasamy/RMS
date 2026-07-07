@@ -327,7 +327,7 @@ const CustomerMenu = () => {
 
   /* ── STAGE: WELCOME ── */
   const WelcomeStage = () => (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white px-6 py-10 justify-between">
+    <div className="flex flex-col h-screen overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 text-white px-6 py-10 justify-between">
       <div></div>
       <div className="text-center">
         {/* Logo */}
@@ -397,7 +397,7 @@ const CustomerMenu = () => {
 
   /* ── STAGE: MENU ── */
   const MenuStage = () => (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
         <div className="flex justify-between items-center mb-4">
@@ -436,7 +436,7 @@ const CustomerMenu = () => {
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 p-4 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 pb-24">
         <div className="grid grid-cols-1 gap-4">
           {filteredMenu.map(item => (
             <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
@@ -487,7 +487,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col h-screen overflow-hidden bg-white">
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
           <div className="flex items-center gap-3">
             <button onClick={() => setStage('menu')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
@@ -497,7 +497,7 @@ const CustomerMenu = () => {
           </div>
         </div>
 
-        <div className="flex-1 pb-24 overflow-auto">
+        <div className="flex-1 overflow-y-auto pb-24">
           {/* Food Image */}
           <div className="w-full h-52 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
             <span className="text-8xl">{item.image}</span>
@@ -567,7 +567,7 @@ const CustomerMenu = () => {
 
   /* ── STAGE: CART ── */
   const CartStage = () => (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-black">{t.myCart}</h1>
@@ -575,7 +575,7 @@ const CustomerMenu = () => {
         </div>
       </div>
 
-      <div className="flex-1 p-4 pb-44">
+      <div className="flex-1 overflow-y-auto p-4 pb-44">
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-400">
             <span className="text-6xl mb-4">🛒</span>
@@ -645,7 +645,7 @@ const CustomerMenu = () => {
 
   /* ── STAGE: CONFIRM ORDER ── */
   const ConfirmStage = () => (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
           <button onClick={() => setStage('cart')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
@@ -653,7 +653,7 @@ const CustomerMenu = () => {
         </div>
       </div>
 
-      <div className="flex-1 p-5 pb-44 space-y-4">
+      <div className="flex-1 overflow-y-auto p-5 pb-44 space-y-4">
         {/* Table Number */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t.tableLabel}</p>
@@ -739,13 +739,13 @@ const CustomerMenu = () => {
     const sm = latest ? (STATUS_META[latest.status] || STATUS_META.Pending) : null;
 
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
+      <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-slate-50 to-orange-50">
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
           <h1 className="text-2xl font-black">{t.orderStatus}</h1>
           <p className="text-xs text-slate-300 font-medium mt-1">Order ID: {latest?.orderId || latest?.id}</p>
         </div>
 
-        <div className="flex-1 p-5 pb-24">
+        <div className="flex-1 overflow-y-auto p-5 pb-24">
           {!latest ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
               <span className="text-6xl mb-4">📍</span>
@@ -838,7 +838,7 @@ const CustomerMenu = () => {
   const BillStage = () => {
     const order = selectedOrder || placedOrders[0];
     return (
-      <div className="flex flex-col min-h-screen bg-slate-50">
+      <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
           <div className="flex items-center gap-3">
             <button onClick={() => setStage('tracking')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
@@ -846,7 +846,7 @@ const CustomerMenu = () => {
           </div>
         </div>
 
-        <div className="flex-1 p-5 pb-24">
+        <div className="flex-1 overflow-y-auto p-5 pb-24">
           <div className="bg-white rounded-3xl p-6 shadow-lg border border-slate-200">
             {/* Header */}
             <div className="text-center mb-6 pb-5 border-b border-slate-200">
@@ -933,7 +933,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-white">
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
           <div className="flex items-center gap-3">
             <button onClick={() => setStage('tracking')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
@@ -972,7 +972,7 @@ const CustomerMenu = () => {
 
   /* ── STAGE: OFFERS & COUPONS ── */
   const OffersStage = () => (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
           <button onClick={() => setStage('menu')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">←</button>
@@ -980,7 +980,7 @@ const CustomerMenu = () => {
         </div>
       </div>
 
-      <div className="flex-1 p-5 pb-24 space-y-4">
+      <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-4">
         {/* Coupon 1 */}
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl p-5 shadow-lg border-2 border-dashed border-white/30">
           <div className="flex items-start justify-between mb-3">
@@ -1031,12 +1031,12 @@ const CustomerMenu = () => {
 
   /* ── STAGE: FEEDBACK ── */
   const FeedbackStage = () => (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-slate-50 to-orange-50">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 pt-10 pb-5 sticky top-0 z-30 shadow-md">
         <h1 className="text-xl font-black">{t.feedback}</h1>
       </div>
 
-      <div className="flex-1 p-5 pb-24">
+      <div className="flex-1 overflow-y-auto p-5 pb-24">
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
           <div className="text-center mb-6">
             <span className="text-5xl block mb-3">⭐</span>
@@ -1096,7 +1096,7 @@ const CustomerMenu = () => {
 
   /* ── STAGE: THANK YOU ── */
   const ThankYouStage = () => (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-emerald-50 to-white justify-center items-center p-8">
+    <div className="flex flex-col h-screen overflow-y-auto bg-gradient-to-br from-emerald-50 to-white justify-center items-center p-8">
       <div className="text-center">
         <div className="w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl animate-bounce">
           <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
