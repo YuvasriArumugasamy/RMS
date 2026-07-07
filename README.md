@@ -261,3 +261,18 @@ Pull requests welcome! For major changes, please open an issue first.
 ---
 
 **Built with ❤️ for restaurants worldwide** 🍕🍔🍜
+
+---
+
+## 📱 Customer QR Ordering Features
+
+✅ **11 Complete Screens** - Welcome, Menu, Food Details, Cart, Confirm, Tracking, Bill, Call Waiter, Offers, Feedback, Thank You  
+✅ **No Login Required** - Scan QR → Order directly  
+✅ **Multi-language** - English, Tamil, Hindi  
+✅ **Real-time Order Tracking** - Live status updates via Socket.io  
+✅ **Food Customization** - Extra cheese, No onion, Spicy options  
+✅ **Service Charge (2%)** - Professional billing with GST  
+✅ **Offers & Coupons** - Apply discounts at checkout  
+✅ **Multi-category Feedback** - Rate Food Quality, Service, Ambience separately  
+✅ **Call Waiter Button** - Request assistance anytime  
+✅ **Beautiful UI/UX** - Modern gradient design with smooth animations
