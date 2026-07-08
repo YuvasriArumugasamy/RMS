@@ -4,7 +4,8 @@ import QRCode from 'react-qr-code';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
+// Use VITE_APP_URL if set, otherwise auto-detect from browser (works on any deployment)
+const APP_URL = import.meta.env.VITE_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173');
 
 const QRLogin = () => {
   const navigate = useNavigate();

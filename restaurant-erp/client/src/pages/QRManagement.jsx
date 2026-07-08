@@ -3,7 +3,7 @@ import QRCode from 'react-qr-code';
 import { api } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
-const APP_URL = import.meta.env.VITE_APP_URL || window.location.origin;
+const APP_URL = import.meta.env.VITE_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173');
 
 const QRManagement = () => {
   const [tables, setTables] = useState([]);
