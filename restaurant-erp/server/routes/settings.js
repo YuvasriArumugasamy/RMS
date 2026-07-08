@@ -1,37 +1,66 @@
 const express = require('express');
 const { protect, authorize } = require('../middleware/auth');
+const Settings = require('../models/Settings');
 
 const router = express.Router();
 router.use(protect);
 
-// In-memory role permissions (can be moved to DB later)
-// Default permissions matching the client-side structure
-let rolePermissions = {
-  Admin:    ['Dashboard', 'Menu Management', 'Table Management', 'Order Management',
-             'Kitchen Management', 'Inventory Management', 'Billing', 'Staff Management',
-             'Customer Management', 'Reports & Analytics', 'Settings', 'AI Operational Hub', 'Digital Twin'],
-  Manager:  ['Dashboard', 'Menu Management', 'Table Management', 'Order Management',
-             'Kitchen Management', 'Inventory Management', 'Billing', 'Customer Management',
-             'Reports & Analytics', 'AI Operational Hub', 'Digital Twin'],
-  Chef:     ['Kitchen Management', 'AI Operational Hub'],
-  Waiter:   ['Table Management', 'Order Management'],
-  Cashier:  ['Billing'],
+// Helper — get or create the single settings doc
+const getSettings = async () => {
+  let doc = await Settings.findOne({ key: 'main' });
+  if (!doc) doc = await Settings.create({ key: 'main' });
+  return doc;
 };
 
-// GET role permissions
-router.get('/permissions', async (req, res) => {
-  res.json({ success: true, data: rolePermissions });
+// ── GET general settings ─────────────────────────────────────
+// @access Admin, Manager
+router.get('/', authorize('Admin', 'Manager'), async (req, res) => {
+  try {
+    const doc = await getSettings();
+    res.json({ success: true, data: doc });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
-// PUT update role permissions (Admin only)
+// ── PUT update general settings ──────────────────────────────
+// @access Admin only
+router.put('/', authorize('Admin'), async (req, res) => {
+  try {
+    const { name, email, phone, address, currency } = req.body;
+    const doc = await Settings.findOneAndUpdate(
+      { key: 'main' },
+      { name, email, phone, address, currency },
+      { new: true, upsert: true, runValidators: true }
+    );
+    res.json({ success: true, data: doc });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── GET role permissions ─────────────────────────────────────
+router.get('/permissions', async (req, res) => {
+  try {
+    const doc = await getSettings();
+    res.json({ success: true, data: doc.rolePermissions });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── PUT update role permissions (Admin only) ─────────────────
 router.put('/permissions', authorize('Admin'), async (req, res) => {
   try {
     const { role, permissions } = req.body;
     if (!role || !Array.isArray(permissions)) {
       return res.status(400).json({ success: false, message: 'role and permissions array required.' });
     }
-    rolePermissions[role] = permissions;
-    res.json({ success: true, data: rolePermissions });
+    const doc = await getSettings();
+    doc.rolePermissions = { ...doc.rolePermissions, [role]: permissions };
+    doc.markModified('rolePermissions'); // needed for Mixed type
+    await doc.save();
+    res.json({ success: true, data: doc.rolePermissions });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

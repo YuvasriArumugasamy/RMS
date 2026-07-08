@@ -59,12 +59,6 @@ router.post('/qr', async (req, res) => {
       }
     }
 
-    // Trigger ingredient status re-evaluation
-    const allIngredients = await Ingredient.find();
-    for (const ing of allIngredients) {
-      await ing.save();
-    }
-
     // 🔌 Emit to kitchen & staff in real-time
     const io = req.app.get('io');
     if (io) {
@@ -155,12 +149,6 @@ router.post('/', async (req, res) => {
           });
         }
       }
-    }
-
-    // Re-run status update on affected ingredients
-    const allIngredients = await Ingredient.find();
-    for (const ing of allIngredients) {
-      await ing.save(); // triggers pre-save hook to update status
     }
 
     // 🔌 Emit to kitchen & staff in real-time

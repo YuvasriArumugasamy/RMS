@@ -1,31 +1,54 @@
 import { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
+import { api } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+
+const APP_URL = import.meta.env.VITE_APP_URL || window.location.origin;
 
 const QRManagement = () => {
   const [tables, setTables] = useState([]);
   const [selected, setSelected] = useState(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const printRef = useRef(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('tables');
-    if (saved) setTables(JSON.parse(saved));
-    else {
-      const defaults = [
-        { id:1, name:'Table 01', capacity:2, status:'Available' },
-        { id:2, name:'Table 02', capacity:4, status:'Available' },
-        { id:3, name:'Table 03', capacity:6, status:'Available' },
-        { id:4, name:'Table 04', capacity:8, status:'Available' },
-        { id:5, name:'Table 05', capacity:4, status:'Available' },
-      ];
-      setTables(defaults);
-    }
+    const fetchTables = async () => {
+      try {
+        const { data } = await api.get('/tables');
+        if (data.success && data.data.length > 0) {
+          setTables(data.data);
+          localStorage.setItem('tables', JSON.stringify(data.data));
+          return;
+        }
+      } catch {}
+      // Fallback localStorage
+      const saved = localStorage.getItem('tables');
+      if (saved) {
+        setTables(JSON.parse(saved));
+      } else {
+        const defaults = [
+          { id:1, name:'Table 01', capacity:2, status:'Available' },
+          { id:2, name:'Table 02', capacity:4, status:'Available' },
+          { id:3, name:'Table 03', capacity:6, status:'Available' },
+          { id:4, name:'Table 04', capacity:8, status:'Available' },
+          { id:5, name:'Table 05', capacity:4, status:'Available' },
+        ];
+        setTables(defaults);
+      }
+      setLoading(false);
+    };
+    fetchTables().finally(() => setLoading(false));
   }, []);
 
-  const getURL = (table) => `${window.location.origin}/qr-order/${table.id}`;
+  // Use MongoDB _id if available, fallback to id (for localStorage defaults)
+  const getTableId = (table) => table._id || table.id;
+  const getURL = (table) => `${APP_URL}/qr-order/${getTableId(table)}`;
 
   const copyURL = (table) => {
-    navigator.clipboard.writeText(getURL(table)).then(() => alert(`Copied: ${getURL(table)}`));
+    navigator.clipboard.writeText(getURL(table)).then(() => 
+      toast.success(`📋 Copied: ${getURL(table)}`)
+    );
   };
 
   const handlePrint = () => {
@@ -75,9 +98,14 @@ const QRManagement = () => {
       </div>
 
       {/* QR Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"/>
+        </div>
+      ) : (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {tables.map(table => (
-          <div key={table.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-col items-center text-center hover:shadow-md transition-all">
+          <div key={getTableId(table)} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-col items-center text-center hover:shadow-md transition-all">
             <div className="mb-3 p-2 bg-slate-50 rounded-xl border border-slate-100">
               <QRCode
                 value={getURL(table)}
@@ -93,7 +121,7 @@ const QRManagement = () => {
               {table.status}
             </span>
             <p className="text-[9px] text-slate-400 font-mono break-all mb-3 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100 w-full">
-              /qr-order/{table.id}
+              /qr-order/{getTableId(table)}
             </p>
             <div className="flex gap-1.5 w-full">
               <button onClick={() => copyURL(table)}
@@ -108,6 +136,7 @@ const QRManagement = () => {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 };

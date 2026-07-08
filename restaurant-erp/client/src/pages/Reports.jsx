@@ -84,7 +84,12 @@ const Reports = () => {
   // ── Date filter ──────────────────────────────────────────────────────────
   const applyDateFilter = (list, filter) => list.filter(o => {
     if (filter === 'all') return true;
-    const d = new Date(o.createdAt || o.date);
+    // Prefer createdAt (ISO string from DB), fallback to date field
+    const raw = o.createdAt || o.date;
+    if (!raw) return filter === 'all';
+    // Parse safely — handle both ISO strings and locale strings
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return false;
     const now = new Date();
     if (filter === 'today') return d.toDateString() === now.toDateString();
     if (filter === 'week')  return d >= new Date(now - 7 * 86400000);

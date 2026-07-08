@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useSocket } from '../context/SocketContext';
+import { api } from '../context/AuthContext';
 
 const Settings = () => {
   const { requestNotificationPermission } = useSocket();
   const [activeTab, setActiveTab] = useState('General Settings');
+  const [saving, setSaving] = useState(false);
   const [notifPermission, setNotifPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
   );
@@ -19,6 +21,29 @@ const Settings = () => {
     };
   });
 
+  // Load settings from API on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data.success && data.data) {
+          const s = {
+            name:     data.data.name,
+            email:    data.data.email,
+            phone:    data.data.phone,
+            address:  data.data.address,
+            currency: data.data.currency,
+          };
+          setSettings(s);
+          localStorage.setItem('settings', JSON.stringify(s));
+        }
+      } catch {
+        // offline — keep localStorage values
+      }
+    };
+    loadSettings();
+  }, []);
+
   const tabs = [
     'General Settings',
     'Notifications',
@@ -29,10 +54,19 @@ const Settings = () => {
     'Backup & Restore',
   ];
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
+    setSaving(true);
+    // Always save to localStorage for offline/invoice use
     localStorage.setItem('settings', JSON.stringify(settings));
-    toast.success('✅ Settings saved!');
+    try {
+      await api.put('/settings', settings);
+      toast.success('✅ Settings saved!');
+    } catch {
+      toast.warning('⚠️ Saved locally (server offline)');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEnableNotifications = async () => {
@@ -143,9 +177,12 @@ const Settings = () => {
 
               <button
                 type="submit"
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-sm"
+                disabled={saving}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-sm flex items-center gap-2"
               >
-                Save Changes
+                {saving ? (
+                  <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Saving...</span></>
+                ) : 'Save Changes'}
               </button>
             </form>
           ) : activeTab === 'Notifications' ? (
