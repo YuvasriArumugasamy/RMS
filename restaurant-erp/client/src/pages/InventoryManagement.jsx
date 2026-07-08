@@ -62,6 +62,8 @@ const InventoryManagement = () => {
       }
     } catch (err) {
       toast.error(`❌ ${err.response?.data?.message || 'Failed to add ingredient'}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -231,14 +233,14 @@ const InventoryManagement = () => {
                 </thead>
                 <tbody className="text-sm">
                   {ingredients.map((item) => (
-                    <tr key={item.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/30 transition-colors group">
+                    <tr key={item._id || item.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/30 transition-colors group">
                       <td className="py-4 font-bold text-slate-800">{item.name}</td>
                       <td className="py-4 font-black text-slate-800">
                          <div className="flex items-center space-x-2">
                            <span>{Number(item.stock).toFixed(2)} {item.unit}</span>
                            <div className="flex bg-slate-100 rounded-lg p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button onClick={() => updateStock(item.id, -1)} className="px-2 text-slate-500 hover:text-red-500 font-bold">-</button>
-                             <button onClick={() => updateStock(item.id, 1)} className="px-2 text-slate-500 hover:text-green-500 font-bold">+</button>
+                             <button onClick={() => updateStock(item._id || item.id, -1)} className="px-2 text-slate-500 hover:text-red-500 font-bold">-</button>
+                             <button onClick={() => updateStock(item._id || item.id, 1)} className="px-2 text-slate-500 hover:text-green-500 font-bold">+</button>
                            </div>
                          </div>
                       </td>
@@ -255,7 +257,7 @@ const InventoryManagement = () => {
                         </span>
                       </td>
                       <td className="py-4 text-right space-x-3 font-semibold text-xs">
-                        <button onClick={() => deleteIngredient(item.id)} className="text-red-500 hover:underline">Delete</button>
+                        <button onClick={() => deleteIngredient(item._id || item.id)} className="text-red-500 hover:underline">Delete</button>
                       </td>
                     </tr>
                   ))}
@@ -325,8 +327,8 @@ const InventoryManagement = () => {
                  <p className="col-span-2 text-center text-slate-400 text-sm py-10 font-medium">No suppliers registered.</p>
                )}
                {suppliers.map(s => (
-                  <div key={s.id} className="p-5 border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:border-indigo-100 transition-all group relative">
-                     <button onClick={() => deleteSupplier(s.id)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                  <div key={s._id || s.id} className="p-5 border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:border-indigo-100 transition-all group relative">
+                     <button onClick={() => deleteSupplier(s._id || s.id)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
                      <h4 className="font-extrabold text-slate-800 text-sm mb-1">{s.name}</h4>
                      <p className="text-xs font-semibold text-slate-500 mb-3">{s.items}</p>
                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">

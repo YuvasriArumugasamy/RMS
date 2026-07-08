@@ -83,9 +83,12 @@ router.get('/qr-status', async (req, res) => {
 
     const orders = await Order.find({
       table,
-      type: 'Dine-in (QR)',
+      type: { $in: ['Dine-in (QR)', 'Takeaway (QR)'] },
       status: { $nin: ['Completed', 'Cancelled'] },
-    }).sort({ createdAt: -1 }).limit(20);
+    })
+    .select('orderId status items total createdAt table type') // only expose what customer needs
+    .sort({ createdAt: -1 })
+    .limit(10);
 
     res.json({ success: true, data: orders });
   } catch (err) {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -89,25 +89,25 @@ export const SocketProvider = ({ children }) => {
   }, [user]);
 
   // Helper: emit an event
-  const emit = (event, data) => {
+  const emit = useCallback((event, data) => {
     if (socketRef.current?.connected) {
       socketRef.current.emit(event, data);
     }
-  };
+  }, []);
 
   // Helper: listen to an event (returns cleanup fn)
-  const on = (event, callback) => {
-    if (socketRef.current) {
-      socketRef.current.on(event, callback);
-      return () => socketRef.current?.off(event, callback);
-    }
-    return () => {};
-  };
+  // Uses socketRef so it always attaches to the current socket, not a stale one
+  const on = useCallback((event, callback) => {
+    const socket = socketRef.current;
+    if (!socket) return () => {};
+    socket.on(event, callback);
+    return () => socket.off(event, callback);
+  }, [connected]); // re-memoize when connection changes so consumers get fresh handlers
 
   // Helper: remove listener
-  const off = (event, callback) => {
+  const off = useCallback((event, callback) => {
     socketRef.current?.off(event, callback);
-  };
+  }, []);
 
   // Helper: request browser push permission
   const requestNotificationPermission = async () => {
