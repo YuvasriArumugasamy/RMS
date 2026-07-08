@@ -1,23 +1,54 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const sendEmail = require('../utils/mailer');
 
 const router = express.Router();
 
-// Generate JWT
+// ── Rate limiters ─────────────────────────────────────────────
+// Login: max 10 attempts per 15 minutes per IP
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Register: max 5 attempts per hour per IP
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many registration attempts. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Forgot password: max 5 per hour
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many password reset requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Generate JWT with fallback expiry
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 };
 
 // @route   POST /api/auth/register
-// @desc    Register new user (Admin only in production)
-// @access  Public (for demo; lock in production)
-router.post('/register', async (req, res) => {
+// @desc    Register new user
+//          - If NO users exist in DB → allow freely (initial setup)
+//          - Otherwise → requires existing Admin JWT token
+// @access  Public (first user) / Admin only (subsequent users)
+router.post('/register', registerLimiter, async (req, res) => {
   try {
     const { username, password, role, phone } = req.body;
 
@@ -25,12 +56,35 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Username and password required.' });
     }
 
+    // Check if any users exist
+    const userCount = await User.countDocuments();
+
+    if (userCount > 0) {
+      // Subsequent registrations require Admin auth
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, message: 'Admin authentication required to register new users.' });
+      }
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const adminUser = await User.findById(decoded.id);
+        if (!adminUser || adminUser.role !== 'Admin') {
+          return res.status(403).json({ success: false, message: 'Only Admins can register new users.' });
+        }
+      } catch {
+        return res.status(401).json({ success: false, message: 'Invalid or expired admin token.' });
+      }
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Username already exists.' });
     }
 
-    const user = await User.create({ username, password, role, phone });
+    // For first user, force Admin role
+    const assignedRole = userCount === 0 ? 'Admin' : (role || 'Waiter');
+    const user = await User.create({ username, password, role: assignedRole, phone });
     const token = signToken(user._id);
 
     res.status(201).json({
@@ -52,7 +106,7 @@ router.post('/register', async (req, res) => {
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -103,7 +157,7 @@ router.get('/me', protect, async (req, res) => {
 // @desc    Send password reset link to user's registered email
 // @access  Public
 // ─────────────────────────────────────────────────────────────
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', forgotLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
