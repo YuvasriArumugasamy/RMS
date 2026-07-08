@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, api } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 
 const pageMeta = {
   '/':          { title: 'Operational Dashboard',       sub: 'Real-time restaurant overview' },
@@ -27,6 +28,7 @@ const roleColors = {
 
 const Header = () => {
   const { user } = useAuth();
+  const { on } = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
   const [pendingCount, setPendingCount] = useState(0);
@@ -37,18 +39,43 @@ const Header = () => {
     return () => clearInterval(t);
   }, []);
 
-  useEffect(() => {
-    const check = () => {
+  // Fetch active order count from API
+  const fetchActiveCount = async () => {
+    try {
+      const { data } = await api.get('/orders');
+      if (data.success) {
+        const active = data.data.filter(o => !['Completed', 'Cancelled'].includes(o.status));
+        setPendingCount(active.length);
+        return;
+      }
+    } catch {
+      // fallback localStorage
       const saved = localStorage.getItem('orders');
       if (saved) {
         const orders = JSON.parse(saved);
-        setPendingCount(orders.filter((o) => o.status !== 'Completed').length);
+        setPendingCount(orders.filter(o => !['Completed', 'Cancelled'].includes(o.status)).length);
       }
-    };
-    check();
-    const interval = setInterval(check, 3000);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveCount();
+    const interval = setInterval(fetchActiveCount, 15000); // refresh every 15s
     return () => clearInterval(interval);
   }, []);
+
+  // Real-time count update via socket
+  useEffect(() => {
+    const handleNewOrder = () => setPendingCount(prev => prev + 1);
+    const handleStatusUpdate = (update) => {
+      if (update.status === 'Completed' || update.status === 'Cancelled') {
+        setPendingCount(prev => Math.max(0, prev - 1));
+      }
+    };
+    const cleanupNew    = on?.('new-order', handleNewOrder);
+    const cleanupStatus = on?.('order-status-update', handleStatusUpdate);
+    return () => { cleanupNew?.(); cleanupStatus?.(); };
+  }, [on]);
 
   const meta = pageMeta[location.pathname] || { title: 'Smart Restaurant ERP', sub: '' };
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });

@@ -22,17 +22,49 @@ const OrderManagement = () => {
   const [showVoicePanel, setShowVoicePanel] = useState(false);
 
   useEffect(() => {
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
+    // Load menu from localStorage and API
+    const loadMenu = async () => {
+      // First try localStorage for instant display
+      const savedMenu = localStorage.getItem('menuItems');
+      if (savedMenu) {
+        const parsedMenu = JSON.parse(savedMenu).filter(m => m.available);
+        setMenuItems(parsedMenu);
+        const cats = new Set(parsedMenu.map(m => m.category));
+        setCategories(['All', ...Array.from(cats)]);
+      }
+      // Then fetch from API (always up-to-date)
+      try {
+        const { data } = await api.get('/menu?available=true');
+        if (data.success && data.data.length > 0) {
+          const items = data.data.map(i => ({ ...i, id: i._id }));
+          setMenuItems(items);
+          const cats = new Set(items.map(m => m.category));
+          setCategories(['All', ...Array.from(cats)]);
+          localStorage.setItem('menuItems', JSON.stringify(items));
+        }
+      } catch {
+        // already loaded from localStorage above
+      }
+    };
+    loadMenu();
 
-    const savedMenu = localStorage.getItem('menuItems');
-    if (savedMenu) {
-      const parsedMenu = JSON.parse(savedMenu).filter(m => m.available);
-      setMenuItems(parsedMenu);
-      
-      const cats = new Set(parsedMenu.map(m => m.category));
-      setCategories(['All', ...Array.from(cats)]);
-    }
+    // Load orders from API first, fallback to localStorage
+    const loadOrders = async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get('/orders');
+        if (data.success) {
+          setOrders(data.data);
+        }
+      } catch {
+        // API unavailable — use localStorage
+        const savedOrders = localStorage.getItem('orders');
+        if (savedOrders) setOrders(JSON.parse(savedOrders));
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadOrders();
   }, []);
 
   // 🔌 Live order status updates via socket
@@ -67,28 +99,6 @@ const OrderManagement = () => {
   const clearCart = useCallback(() => {
     setCart([]);
   }, []);
-
-  // ── Voice Order Hook ──────────────────────────────────────────
-  const voice = useVoiceOrder({
-    menuItems,
-    onAddItem: (item, qty) => {
-      addToCart(item, qty);
-      toast.success(`🎤 Added ${qty}x ${item.name} via voice!`, { autoClose: 2500 });
-    },
-    onRemoveItem: removeFromCartByItem,
-    onClearCart: clearCart,
-    onPlaceOrder: placeOrder,
-  });
-
-  const updateQty = (id, change) => {
-    setCart(cart.map(i => {
-      if ((i._id || i.id) === id) {
-        const newQty = i.qty + change;
-        return newQty > 0 ? { ...i, qty: newQty } : null;
-      }
-      return i;
-    }).filter(Boolean));
-  };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
@@ -129,6 +139,28 @@ const OrderManagement = () => {
     } finally {
       setPlacingOrder(false);
     }
+  };
+
+  // ── Voice Order Hook ──────────────────────────────────────────
+  const voice = useVoiceOrder({
+    menuItems,
+    onAddItem: (item, qty) => {
+      addToCart(item, qty);
+      toast.success(`🎤 Added ${qty}x ${item.name} via voice!`, { autoClose: 2500 });
+    },
+    onRemoveItem: removeFromCartByItem,
+    onClearCart: clearCart,
+    onPlaceOrder: placeOrder,
+  });
+
+  const updateQty = (id, change) => {
+    setCart(cart.map(i => {
+      if ((i._id || i.id) === id) {
+        const newQty = i.qty + change;
+        return newQty > 0 ? { ...i, qty: newQty } : null;
+      }
+      return i;
+    }).filter(Boolean));
   };
 
   const filteredItems = activeCategory === 'All'

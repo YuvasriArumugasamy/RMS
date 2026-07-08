@@ -108,7 +108,11 @@ router.use(protect);
 router.get('/', async (req, res) => {
   try {
     const filter = {};
-    if (req.query.status) filter.status = req.query.status;
+    // Support comma-separated status values: ?status=Pending,Preparing,Ready
+    if (req.query.status) {
+      const statuses = req.query.status.split(',').map(s => s.trim()).filter(Boolean);
+      filter.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    }
     if (req.query.table) filter.table = req.query.table;
     const orders = await Order.find(filter).sort({ createdAt: -1 }).limit(200);
     res.json({ success: true, data: orders });

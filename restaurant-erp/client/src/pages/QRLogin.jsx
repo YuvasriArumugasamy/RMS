@@ -1,7 +1,42 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import QRCode from 'react-qr-code';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
 
 const QRLogin = () => {
   const navigate = useNavigate();
+  const [tables, setTables] = useState([]);
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch tables to generate QR codes
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/tables`);
+        if (res.data.success && res.data.data.length > 0) {
+          setTables(res.data.data);
+          setSelectedTable(res.data.data[0]);
+          return;
+        }
+      } catch {}
+      // Fallback to localStorage
+      const saved = JSON.parse(localStorage.getItem('tables') || '[]');
+      if (saved.length > 0) {
+        setTables(saved);
+        setSelectedTable(saved[0]);
+      }
+      setLoading(false);
+    };
+    fetchTables().finally(() => setLoading(false));
+  }, []);
+
+  // QR value = the URL customer scans to open CustomerMenu
+  const tableId = selectedTable?._id || selectedTable?.id || selectedTable?.name;
+  const qrValue = tableId ? `${APP_URL}/qr-order/${tableId}` : `${APP_URL}/qr-order/1`;
 
   return (
     <div className="fixed inset-0 bg-white flex flex-col overflow-hidden">
@@ -20,93 +55,78 @@ const QRLogin = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-start px-6 pb-8 overflow-y-auto pt-2">
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">QR Login</h1>
-        <p className="text-sm text-gray-500 text-center mb-8 leading-relaxed">
-          Scan this QR code using your staff app<br/>to login instantly.
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Table QR Codes</h1>
+        <p className="text-sm text-gray-500 text-center mb-5 leading-relaxed">
+          Customers scan this to order directly from their phone.
         </p>
 
-        {/* QR Code box */}
-        <div className="relative mb-8">
-          {/* Corner brackets */}
-          <div className="absolute -top-2 -left-2 w-8 h-8 border-t-[3px] border-l-[3px] border-[#f97316] rounded-tl-md"/>
-          <div className="absolute -top-2 -right-2 w-8 h-8 border-t-[3px] border-r-[3px] border-[#f97316] rounded-tr-md"/>
-          <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-[3px] border-l-[3px] border-[#f97316] rounded-bl-md"/>
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-[3px] border-r-[3px] border-[#f97316] rounded-br-md"/>
+        {/* Table Selector */}
+        {tables.length > 1 && (
+          <div className="w-full max-w-sm mb-5">
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Select Table</p>
+            <div className="flex flex-wrap gap-2">
+              {tables.map(t => {
+                const tid = t._id || t.id;
+                const stid = selectedTable?._id || selectedTable?.id;
+                return (
+                  <button
+                    key={tid}
+                    onClick={() => setSelectedTable(t)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                      tid === stid
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-orange-400'
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-          {/* QR Code SVG */}
-          <div className="w-[220px] h-[220px] flex items-center justify-center bg-white p-3">
-            <svg viewBox="0 0 200 200" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              {/* Top-left finder pattern */}
-              <rect x="10" y="10" width="60" height="60" fill="none" stroke="black" strokeWidth="8"/>
-              <rect x="24" y="24" width="32" height="32" fill="black"/>
-              {/* Top-right finder pattern */}
-              <rect x="130" y="10" width="60" height="60" fill="none" stroke="black" strokeWidth="8"/>
-              <rect x="144" y="24" width="32" height="32" fill="black"/>
-              {/* Bottom-left finder pattern */}
-              <rect x="10" y="130" width="60" height="60" fill="none" stroke="black" strokeWidth="8"/>
-              <rect x="24" y="144" width="32" height="32" fill="black"/>
-              {/* Data modules - random pattern */}
-              <rect x="80" y="10" width="8" height="8" fill="black"/>
-              <rect x="96" y="10" width="8" height="8" fill="black"/>
-              <rect x="112" y="10" width="8" height="8" fill="black"/>
-              <rect x="80" y="26" width="8" height="8" fill="black"/>
-              <rect x="112" y="26" width="8" height="8" fill="black"/>
-              <rect x="88" y="42" width="8" height="8" fill="black"/>
-              <rect x="104" y="42" width="8" height="8" fill="black"/>
-              <rect x="80" y="58" width="8" height="8" fill="black"/>
-              <rect x="96" y="58" width="8" height="8" fill="black"/>
-              <rect x="10" y="80" width="8" height="8" fill="black"/>
-              <rect x="26" y="80" width="8" height="8" fill="black"/>
-              <rect x="42" y="80" width="8" height="8" fill="black"/>
-              <rect x="58" y="80" width="8" height="8" fill="black"/>
-              <rect x="80" y="80" width="8" height="8" fill="black"/>
-              <rect x="96" y="80" width="8" height="8" fill="black"/>
-              <rect x="112" y="80" width="8" height="8" fill="black"/>
-              <rect x="128" y="80" width="8" height="8" fill="black"/>
-              <rect x="144" y="80" width="8" height="8" fill="black"/>
-              <rect x="160" y="80" width="8" height="8" fill="black"/>
-              <rect x="176" y="80" width="8" height="8" fill="black"/>
-              <rect x="10" y="96" width="8" height="8" fill="black"/>
-              <rect x="42" y="96" width="8" height="8" fill="black"/>
-              <rect x="80" y="96" width="8" height="8" fill="black"/>
-              <rect x="104" y="96" width="8" height="8" fill="black"/>
-              <rect x="128" y="96" width="8" height="8" fill="black"/>
-              <rect x="160" y="96" width="8" height="8" fill="black"/>
-              <rect x="26" y="112" width="8" height="8" fill="black"/>
-              <rect x="58" y="112" width="8" height="8" fill="black"/>
-              <rect x="88" y="112" width="8" height="8" fill="black"/>
-              <rect x="112" y="112" width="8" height="8" fill="black"/>
-              <rect x="144" y="112" width="8" height="8" fill="black"/>
-              <rect x="176" y="112" width="8" height="8" fill="black"/>
-              <rect x="80" y="128" width="8" height="8" fill="black"/>
-              <rect x="96" y="128" width="8" height="8" fill="black"/>
-              <rect x="128" y="128" width="8" height="8" fill="black"/>
-              <rect x="160" y="128" width="8" height="8" fill="black"/>
-              <rect x="80" y="144" width="8" height="8" fill="black"/>
-              <rect x="112" y="144" width="8" height="8" fill="black"/>
-              <rect x="144" y="144" width="8" height="8" fill="black"/>
-              <rect x="176" y="144" width="8" height="8" fill="black"/>
-              <rect x="80" y="160" width="8" height="8" fill="black"/>
-              <rect x="96" y="160" width="8" height="8" fill="black"/>
-              <rect x="128" y="160" width="8" height="8" fill="black"/>
-              <rect x="80" y="176" width="8" height="8" fill="black"/>
-              <rect x="112" y="176" width="8" height="8" fill="black"/>
-              <rect x="160" y="176" width="8" height="8" fill="black"/>
-              <rect x="176" y="176" width="8" height="8" fill="black"/>
-            </svg>
+        {/* QR Code Box */}
+        <div className="relative mb-5">
+          {/* Orange corner brackets */}
+          <div className="absolute -top-2 -left-2 w-8 h-8 border-t-[3px] border-l-[3px] border-[#f97316] rounded-tl-md z-10"/>
+          <div className="absolute -top-2 -right-2 w-8 h-8 border-t-[3px] border-r-[3px] border-[#f97316] rounded-tr-md z-10"/>
+          <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-[3px] border-l-[3px] border-[#f97316] rounded-bl-md z-10"/>
+          <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-[3px] border-r-[3px] border-[#f97316] rounded-br-md z-10"/>
+
+          <div className="w-[220px] h-[220px] flex items-center justify-center bg-white p-4 shadow-sm border border-gray-100 rounded-xl">
+            {loading ? (
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"/>
+            ) : (
+              <QRCode
+                value={qrValue}
+                size={192}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="M"
+              />
+            )}
           </div>
         </div>
 
+        {/* Table name + URL */}
+        {selectedTable && (
+          <div className="text-center mb-5">
+            <p className="text-base font-black text-gray-800">{selectedTable.name}</p>
+            <p className="text-[10px] text-gray-400 font-mono mt-1 break-all max-w-xs">{qrValue}</p>
+          </div>
+        )}
+
         {/* Info box */}
-        <div className="w-full max-w-sm bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-start gap-3 mb-8">
+        <div className="w-full max-w-sm bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-start gap-3 mb-5">
           <div className="w-6 h-6 rounded-full border-2 border-[#f97316] flex items-center justify-center flex-shrink-0 mt-0.5">
             <span className="text-[#f97316] text-xs font-black">i</span>
           </div>
           <p className="text-sm text-gray-700 leading-relaxed">
-            Open your <span className="font-bold">RMS Staff App</span> and scan the QR code to login.
+            Customer scans this QR code with their phone camera — no app needed. They can browse the menu and place orders directly.
           </p>
         </div>
 

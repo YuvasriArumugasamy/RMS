@@ -13,12 +13,21 @@ const KitchenDisplay = () => {
   // Fetch orders from API
   const fetchOrders = useCallback(async () => {
     try {
-      const { data } = await api.get('/orders?status=Pending,Preparing,Ready');
-      if (data.success) setOrders(data.data);
-    } catch {
+      // Fetch without status filter first — then filter on client side
+      // (avoids comma-separated status query parsing issues)
+      const { data } = await api.get('/orders');
+      if (data.success) {
+        const active = data.data.filter(o => ['Pending', 'Preparing', 'Ready'].includes(o.status));
+        setOrders(active);
+      }
+    } catch (err) {
+      console.warn('KDS API fetch failed, falling back to localStorage:', err?.message);
       // fallback to localStorage if API unavailable
       const saved = localStorage.getItem('orders');
-      if (saved) setOrders(JSON.parse(saved).filter(o => ['Pending','Preparing','Ready'].includes(o.status)));
+      if (saved) {
+        const parsed = JSON.parse(saved).filter(o => ['Pending', 'Preparing', 'Ready'].includes(o.status));
+        setOrders(parsed);
+      }
     } finally {
       setLoading(false);
     }

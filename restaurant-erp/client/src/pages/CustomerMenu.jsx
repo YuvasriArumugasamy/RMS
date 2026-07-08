@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import axios from 'axios';
@@ -134,6 +134,169 @@ const CustomerMenu = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  // ── Voice Order State ─────────────────────────────────────
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceListening, setVoiceListening] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [voiceStatus, setVoiceStatus] = useState('');
+  const voiceRecogRef = useRef(null);
+
+  const voiceSupported = typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const startVoiceListening = useCallback(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const recog = new SR();
+    recog.lang = lang === 'ta' ? 'ta-IN' : lang === 'hi' ? 'hi-IN' : 'en-IN';
+    recog.interimResults = false;
+    recog.maxAlternatives = 1;
+    voiceRecogRef.current = recog;
+
+    recog.onstart = () => { setVoiceListening(true); setVoiceStatus('Listening...'); };
+    recog.onend   = () => { setVoiceListening(false); };
+
+    recog.onresult = (e) => {
+      const transcript = e.results[0][0].transcript.toLowerCase().trim();
+      setVoiceTranscript(transcript);
+      parseVoiceOrder(transcript);
+    };
+
+    recog.onerror = (e) => {
+      setVoiceListening(false);
+      setVoiceStatus(`❌ Error: ${e.error}`);
+    };
+
+    recog.start();
+  }, [lang, menu]);
+
+  const stopVoiceListening = useCallback(() => {
+    voiceRecogRef.current?.stop();
+    setVoiceListening(false);
+  }, []);
+
+  const parseVoiceOrder = useCallback((transcript) => {
+    // Number words map
+    const numWords = { one:1, a:1, an:1, two:2, three:3, four:4, five:5,
+                       six:6, seven:7, eight:8, nine:9, ten:10,
+                       oru:1, rendu:2, moonu:3, naangu:4, aindhu:5,
+                       ek:1, do:2, teen:3, char:4, paanch:5 };
+
+    let matched = [];
+
+    for (const item of menu) {
+      const name = item.name.toLowerCase();
+      // Check if item name is mentioned
+      if (transcript.includes(name)) {
+        // Look for qty before the item name
+        const words = transcript.split(/\s+/);
+        const idx = words.findIndex(w => name.includes(w) || w.includes(name.split(' ')[0]));
+        let qty = 1;
+        if (idx > 0) {
+          const prev = words[idx - 1];
+          qty = parseInt(prev) || numWords[prev] || 1;
+        }
+        matched.push({ item, qty });
+      }
+    }
+
+    if (matched.length > 0) {
+      matched.forEach(({ item, qty }) => {
+        for (let i = 0; i < qty; i++) {
+          setCart(prev => {
+            const existing = prev.find(c => c.id === item.id);
+            if (existing) return prev.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
+            return [...prev, { ...item, qty: 1, customizations: {}, specialNote: '' }];
+          });
+        }
+      });
+      const summary = matched.map(m => `${m.qty}x ${m.item.name}`).join(', ');
+      setVoiceStatus(`✅ Added: ${summary}`);
+    } else {
+      setVoiceStatus('❓ Could not find items. Try again.');
+    }
+  }, [menu]);
+
+  // Voice UI Panel (shown as bottom sheet on menu stage)
+  const VoicePanel = () => (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setVoiceOpen(false)}/>
+      <div className="relative w-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl p-6 pb-10 z-10 shadow-2xl">
+        {/* Handle */}
+        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5"/>
+
+        <h3 className="text-white font-black text-lg text-center mb-1">🎤 Voice Order</h3>
+        <p className="text-slate-400 text-xs text-center mb-6">
+          {lang === 'ta' ? 'உணவு பேர் சொல்லுங்க' : lang === 'hi' ? 'खाने का नाम बोलें' : 'Say the food name to add to cart'}
+        </p>
+
+        {/* Mic Button */}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <button
+            onClick={voiceListening ? stopVoiceListening : startVoiceListening}
+            className={`relative w-24 h-24 rounded-full text-4xl font-black shadow-2xl transition-all active:scale-95 ${
+              voiceListening
+                ? 'bg-red-500 shadow-red-500/50 animate-pulse'
+                : 'bg-orange-500 shadow-orange-500/30 hover:bg-orange-600'
+            }`}
+          >
+            {voiceListening ? '⏹' : '🎤'}
+            {voiceListening && (
+              <span className="absolute inset-0 rounded-full border-4 border-red-400 animate-ping opacity-60"/>
+            )}
+          </button>
+          <p className="text-slate-400 text-xs font-bold">
+            {voiceListening ? 'Tap to stop' : 'Tap to speak'}
+          </p>
+        </div>
+
+        {/* Transcript */}
+        {voiceTranscript && (
+          <div className="bg-white/10 border border-white/20 rounded-2xl p-4 mb-4 text-center">
+            <p className="text-white text-sm font-bold">"{voiceTranscript}"</p>
+          </div>
+        )}
+
+        {/* Status */}
+        {voiceStatus && (
+          <p className={`text-center text-sm font-bold mb-4 ${
+            voiceStatus.startsWith('✅') ? 'text-emerald-400' :
+            voiceStatus.startsWith('❌') || voiceStatus.startsWith('❓') ? 'text-red-400' :
+            'text-slate-400'
+          }`}>
+            {voiceStatus}
+          </p>
+        )}
+
+        {/* Example commands */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-3">Example Commands</p>
+          <div className="space-y-2">
+            {[
+              ['English', '"2 biryani and 1 lassi"'],
+              ['தமிழ்', '"ரெண்டு பிரியாணி ஒரு லஸ்ஸி"'],
+              ['हिंदी', '"दो बिरयानी एक लस्सी"'],
+            ].map(([l, ex]) => (
+              <div key={l} className="flex items-center gap-3">
+                <span className="text-[10px] text-slate-500 font-bold w-14">{l}</span>
+                <span className="text-[11px] text-orange-300 font-mono">{ex}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cart shortcut */}
+        {cart.length > 0 && (
+          <button
+            onClick={() => { setVoiceOpen(false); setStage('cart'); }}
+            className="w-full mt-5 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black rounded-2xl text-sm shadow-lg">
+            🛒 View Cart ({cart.length} items) — ₹{cart.reduce((s, i) => s + i.price * i.qty, 0)}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   // Get table info
   useEffect(() => {
@@ -405,7 +568,17 @@ const CustomerMenu = () => {
             <p className="text-xs text-slate-400 font-bold">{tableInfo.name}</p>
             <h1 className="text-2xl font-black">{t.title}</h1>
           </div>
-          <button onClick={() => setStage('offers')} className="text-2xl">🎁</button>
+          <div className="flex items-center gap-2">
+            {voiceSupported && (
+              <button
+                onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl text-xs shadow-lg transition-all active:scale-95"
+              >
+                🎤 <span>Voice</span>
+              </button>
+            )}
+            <button onClick={() => setStage('offers')} className="text-2xl">🎁</button>
+          </div>
         </div>
         
         {/* Search */}
@@ -1128,6 +1301,7 @@ const CustomerMenu = () => {
   // Main render
   return (
     <>
+      {voiceOpen && <VoicePanel />}
       {stage === 'welcome' && <WelcomeStage />}
       {stage === 'menu' && <MenuStage />}
       {stage === 'foodDetails' && <FoodDetailsStage />}
