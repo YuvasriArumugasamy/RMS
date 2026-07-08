@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { PageLoader, LoadingButton } from '../components/LoadingSkeleton';
+import ConfirmModal from '../components/ConfirmModal';
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState('items');
@@ -9,6 +10,7 @@ const MenuManagement = () => {
   const [ingredients, setIngredients] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmState, setConfirmState] = useState(null);
 
   // Form states
   const [newItem, setNewItem] = useState({ name: '', category: 'Main Course', price: '', available: true, image: '🍔' });
@@ -86,14 +88,21 @@ const MenuManagement = () => {
   };
 
   const deleteItem = async (id) => {
-    if (!window.confirm('Delete this item?')) return;
-    try {
-      await api.delete(`/menu/${id}`);
-      setMenuItems(prev => prev.filter(item => (item._id || item.id) !== id));
-      toast.success('🗑️ Item deleted');
-    } catch (err) {
-      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
-    }
+    setConfirmState({
+      title: 'Delete Menu Item',
+      message: 'This item will be permanently removed from the menu. This action cannot be undone.',
+      confirmLabel: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/menu/${id}`);
+          setMenuItems(prev => prev.filter(item => (item._id || item.id) !== id));
+          toast.success('🗑️ Item deleted');
+        } catch (err) {
+          toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
+        }
+      },
+    });
   };
 
   const toggleAvailability = async (item) => {
@@ -590,6 +599,10 @@ const MenuManagement = () => {
             )}
           </div>
         </div>
+      )}
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
       )}
     </div>
   );

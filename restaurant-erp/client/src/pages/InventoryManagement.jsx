@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { PageLoader, LoadingButton } from '../components/LoadingSkeleton';
+import ConfirmModal from '../components/ConfirmModal';
 
 const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState('stock');
@@ -9,6 +10,7 @@ const InventoryManagement = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmState, setConfirmState] = useState(null);
 
   // Form states
   const [newIngredient, setNewIngredient] = useState({ name: '', stock: '', unit: 'kg', threshold: 5 });
@@ -64,14 +66,21 @@ const InventoryManagement = () => {
   };
 
   const deleteIngredient = async (id) => {
-    if (!window.confirm('Delete this ingredient?')) return;
-    try {
-      await api.delete(`/inventory/${id}`);
-      setIngredients(prev => prev.filter(i => (i._id || i.id) !== id));
-      toast.success('🗑️ Ingredient deleted');
-    } catch (err) {
-      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
-    }
+    setConfirmState({
+      title: 'Delete Ingredient',
+      message: 'This ingredient will be permanently removed from inventory. Stock records will be lost.',
+      confirmLabel: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/inventory/${id}`);
+          setIngredients(prev => prev.filter(i => (i._id || i.id) !== id));
+          toast.success('🗑️ Ingredient deleted');
+        } catch (err) {
+          toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
+        }
+      },
+    });
   };
 
   const updateStock = async (id, change) => {
@@ -332,6 +341,9 @@ const InventoryManagement = () => {
         </div>
       )}
 
+      {confirmState && (
+        <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 const StaffManagement = () => {
   const [staffList, setStaffList] = useState([]);
@@ -28,6 +29,7 @@ const StaffManagement = () => {
   const [editName, setEditName] = useState('');
   const [editRole, setEditRole] = useState('');
   const [editPhone, setEditPhone] = useState('');
+  const [confirmState, setConfirmState] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,14 +97,21 @@ const StaffManagement = () => {
   };
 
   const deleteStaff = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this employee?')) return;
-    try {
-      await api.delete(`/staff/${id}`);
-      setStaffList(prev => prev.filter(s => (s._id || s.id) !== id));
-      toast.success('🗑️ Employee deleted');
-    } catch (err) {
-      toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
-    }
+    setConfirmState({
+      title: 'Delete Employee',
+      message: 'Are you sure you want to permanently delete this employee? This action cannot be undone.',
+      confirmLabel: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/staff/${id}`);
+          setStaffList(prev => prev.filter(s => (s._id || s.id) !== id));
+          toast.success('🗑️ Employee deleted');
+        } catch (err) {
+          toast.error(`❌ ${err.response?.data?.message || 'Delete failed'}`);
+        }
+      },
+    });
   };
 
   const addStaff = async (e) => {
@@ -589,6 +598,10 @@ const StaffManagement = () => {
             </form>
           </div>
         </div>
+      )}
+      {/* Confirm Modal */}
+      {confirmState && (
+        <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
       )}
      </div>
    );

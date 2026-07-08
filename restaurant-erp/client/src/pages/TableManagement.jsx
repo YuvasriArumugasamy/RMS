@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 const STATUS_COLORS = {
   Available:   { dot:'bg-emerald-500', badge:'bg-emerald-50 text-emerald-700 border-emerald-200',  card:'border-emerald-200 bg-emerald-50/40',  icon:'text-emerald-600' },
@@ -31,6 +32,7 @@ const TableManagement = () => {
   const [activeTab, setActiveTab] = useState('map'); // 'map' | 'reservations'
   const [tables, setTables] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [confirmState, setConfirmState] = useState(null);
   const [loadingRes, setLoadingRes] = useState(false);
 
   // Table map state
@@ -201,14 +203,21 @@ const TableManagement = () => {
   };
 
   const deleteReservation = async (res) => {
-    if (!window.confirm(`Delete reservation for ${res.customerName}?`)) return;
-    const id = res._id || res.id;
-    try {
-      await api.delete(`/reservations/${id}`);
-    } catch { /* silent offline */ }
-    setReservations(prev => prev.filter(r => (r._id || r.id) !== id));
-    saveTables(tables.map(t => t.name === res.tableName ? { ...t, status: 'Available', reservation: null } : t));
-    toast.success('🗑️ Reservation deleted');
+    setConfirmState({
+      title: 'Delete Reservation',
+      message: `Delete reservation for ${res.customerName}? This will free up the table.`,
+      confirmLabel: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        const id = res._id || res.id;
+        try {
+          await api.delete(`/reservations/${id}`);
+        } catch { /* silent offline */ }
+        setReservations(prev => prev.filter(r => (r._id || r.id) !== id));
+        saveTables(tables.map(t => t.name === res.tableName ? { ...t, status: 'Available', reservation: null } : t));
+        toast.success('🗑️ Reservation deleted');
+      },
+    });
   };
 
   // ── Auto table assignment ───────────────────────────────────
@@ -626,8 +635,12 @@ const TableManagement = () => {
           </div>
         </div>
       )}
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
+      )}
     </div>
   );
 };
 
-export default TableManagement;
+export default TableManagement;export default TableManagement;

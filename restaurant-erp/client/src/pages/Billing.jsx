@@ -431,8 +431,17 @@ const Billing = () => {
 
   const handleWhatsAppSend = (e) => {
     e.preventDefault();
-    if (!whatsappNumber) return;
-    toast.success(`📱 Invoice sent to ${whatsappNumber}!`);
+    if (!whatsappNumber || !activeInvoice) return;
+    // Build a text summary of the invoice
+    const orderId = activeInvoice.orderId || activeInvoice.id || '';
+    const items = (activeInvoice.items || []).map(i => `${i.qty}x ${i.name} ₹${i.price * i.qty}`).join('\n');
+    const total = activeInvoice.total || 0;
+    const msg = `🧾 *Invoice from RMS Restaurant*\n\nOrder: *${orderId}*\nTable: ${activeInvoice.table || 'N/A'}\n\n${items}\n\n*Total: ₹${total}*\n\nThank you for dining with us! 🙏`;
+    const encoded = encodeURIComponent(msg);
+    // Remove non-digits from phone number
+    const phone = whatsappNumber.replace(/\D/g, '');
+    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+    toast.success(`📱 WhatsApp opened for ${whatsappNumber}`);
     setShowWhatsAppModal(false);
     setWhatsappNumber('');
   };
