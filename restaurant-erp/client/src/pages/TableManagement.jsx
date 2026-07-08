@@ -54,20 +54,32 @@ const TableManagement = () => {
 
   // ── Fetch tables ────────────────────────────────────────────
   useEffect(() => {
-    const saved = localStorage.getItem('tables');
-    if (saved) {
-      setTables(JSON.parse(saved));
-    } else {
-      const defaults = [
-        { id:1, name:'Table 01', capacity:2, status:'Available', reservation:null },
-        { id:2, name:'Table 02', capacity:4, status:'Available', reservation:null },
-        { id:3, name:'Table 03', capacity:6, status:'Available', reservation:null },
-        { id:4, name:'Table 04', capacity:8, status:'Available', reservation:null },
-        { id:5, name:'Table 05', capacity:4, status:'Available', reservation:null },
-      ];
-      setTables(defaults);
-      localStorage.setItem('tables', JSON.stringify(defaults));
-    }
+    const fetchTables = async () => {
+      try {
+        const { data } = await api.get('/tables');
+        if (data.success && data.data.length > 0) {
+          setTables(data.data);
+          localStorage.setItem('tables', JSON.stringify(data.data));
+          return;
+        }
+      } catch {}
+      // Fallback to localStorage
+      const saved = localStorage.getItem('tables');
+      if (saved) {
+        setTables(JSON.parse(saved));
+      } else {
+        const defaults = [
+          { id:1, name:'Table 01', capacity:2, status:'Available', reservation:null },
+          { id:2, name:'Table 02', capacity:4, status:'Available', reservation:null },
+          { id:3, name:'Table 03', capacity:6, status:'Available', reservation:null },
+          { id:4, name:'Table 04', capacity:8, status:'Available', reservation:null },
+          { id:5, name:'Table 05', capacity:4, status:'Available', reservation:null },
+        ];
+        setTables(defaults);
+        localStorage.setItem('tables', JSON.stringify(defaults));
+      }
+    };
+    fetchTables();
   }, []);
 
   // ── Fetch reservations ──────────────────────────────────────

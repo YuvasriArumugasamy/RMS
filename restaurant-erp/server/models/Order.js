@@ -11,7 +11,7 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   orderId:       { type: String, unique: true },
-  type:          { type: String, enum: ['Dine-in', 'Takeaway', 'Dine-in (QR)', 'Request', 'Merged Bill'], default: 'Dine-in' },
+  type:          { type: String, enum: ['Dine-in', 'Takeaway', 'Dine-in (QR)', 'Takeaway (QR)', 'Request', 'Merged Bill'], default: 'Dine-in' },
   table:         { type: String, default: 'N/A' },
   tableRef:      { type: mongoose.Schema.Types.ObjectId, ref: 'Table' },
   items:         [orderItemSchema],
@@ -28,6 +28,7 @@ const orderSchema = new mongoose.Schema({
   requestType:   { type: String, default: '' },
   chefNote:      { type: String, default: '' },
   prepStartTime: { type: Date },
+  discount:      { type: Number, default: 0 },
   createdBy:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   date:          { type: String },
 }, { timestamps: true });

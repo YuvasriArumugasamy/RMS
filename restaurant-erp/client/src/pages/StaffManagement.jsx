@@ -245,8 +245,6 @@ const StaffManagement = () => {
                       <option>Chef</option>
                       <option>Cashier</option>
                       <option>Manager</option>
-                      <option>Delivery</option>
-                      <option>Cleaner</option>
                     </select>
                   </div>
                   <div>
@@ -284,7 +282,7 @@ const StaffManagement = () => {
                   >
                     <option value="">-- Choose Employee --</option>
                     {staffList.map(s => (
-                      <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+                      <option key={s._id || s.id} value={s._id || s.id}>{s.name} ({s.role})</option>
                     ))}
                   </select>
                 </div>
@@ -347,7 +345,7 @@ const StaffManagement = () => {
                 </thead>
                 <tbody className="text-sm">
                   {staffList.map((staff) => (
-                    <tr key={staff.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/30">
+                    <tr key={staff._id || staff.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/30">
                       <td className="py-4 font-bold text-slate-800">{staff.name}</td>
                       <td className="py-4 font-semibold text-slate-500 text-xs">{staff.role}</td>
                       <td className="py-4 font-semibold text-slate-500 text-xs">{staff.shift}</td>
@@ -560,8 +558,6 @@ const StaffManagement = () => {
                     <option>Chef</option>
                     <option>Cashier</option>
                     <option>Manager</option>
-                    <option>Delivery</option>
-                    <option>Cleaner</option>
                   </select>
                 </div>
                 <div>

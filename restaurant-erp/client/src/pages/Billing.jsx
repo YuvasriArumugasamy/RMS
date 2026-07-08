@@ -469,17 +469,17 @@ const Billing = () => {
           <div className="space-y-3">
             {unpaidOrders.length === 0 && <p className="text-center text-slate-400 text-sm py-10 font-medium">No unpaid bills.</p>}
             {unpaidOrders.map(o => (
-              <div key={o.id} className={`p-4 border rounded-2xl transition-all ${selectedOrders.includes(o.id) ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100 bg-slate-50'}`}>
+              <div key={o._id || o.id} className={`p-4 border rounded-2xl transition-all ${selectedOrders.includes(o._id || o.id) ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100 bg-slate-50'}`}>
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
                     <input 
                       type="checkbox"
-                      checked={selectedOrders.includes(o.id)}
-                      onChange={() => toggleOrderSelection(o.id)}
+                      checked={selectedOrders.includes(o._id || o.id)}
+                      onChange={() => toggleOrderSelection(o._id || o.id)}
                       className="w-4 h-4 text-indigo-600 rounded"
                     />
                     <div>
-                      <span className="font-extrabold text-slate-800 text-sm block">{o.id}</span>
+                      <span className="font-extrabold text-slate-800 text-sm block">{o.orderId || o.id}</span>
                       <span className="text-[10px] font-bold text-slate-400 uppercase">{o.type} {o.table !== 'N/A' && `(${o.table})`}</span>
                     </div>
                   </div>
@@ -516,9 +516,9 @@ const Billing = () => {
           <div className="space-y-3">
             {paidOrders.length === 0 && <p className="text-center text-slate-400 text-sm py-10 font-medium">No paid bills yet.</p>}
             {paidOrders.map(o => (
-              <div key={o.id} className="p-4 border border-slate-100 bg-white hover:bg-slate-50 rounded-2xl transition-all flex justify-between items-center group">
+              <div key={o._id || o.id} className="p-4 border border-slate-100 bg-white hover:bg-slate-50 rounded-2xl transition-all flex justify-between items-center group">
                 <div>
-                  <span className="font-extrabold text-slate-800 text-sm block">{o.id}</span>
+                  <span className="font-extrabold text-slate-800 text-sm block">{o.orderId || o.id}</span>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">{o.type}</span>
                 </div>
                 <div className="flex items-center gap-3">

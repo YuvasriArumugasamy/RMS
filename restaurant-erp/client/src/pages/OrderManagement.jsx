@@ -16,6 +16,7 @@ const OrderManagement = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [orderType, setOrderType] = useState('Dine-in');
   const [selectedTable, setSelectedTable] = useState('Table 01');
+  const [guestCount, setGuestCount] = useState(4);
   const [waiterName, setWaiterName] = useState('');
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -113,6 +114,7 @@ const OrderManagement = () => {
       subtotal: sub,
       gst: Math.round(sub * 0.05),
       total: Math.round(sub * 1.05),
+      guestCount,
       waiterName,
     };
     try {
@@ -351,13 +353,15 @@ const OrderManagement = () => {
                 </div>
               )}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">No. of Guests</label>
-                <input
-                  type="number"
-                  defaultValue={4}
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 text-sm font-semibold"
-                />
-              </div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">No. of Guests</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={guestCount}
+                    onChange={e => setGuestCount(parseInt(e.target.value) || 1)}
+                    className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 text-sm font-semibold"
+                  />
+                </div>
             </div>
 
             {/* Waiter Assignment */}

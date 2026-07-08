@@ -213,18 +213,22 @@ router.put('/:id/status', authorize('Admin', 'Manager', 'Chef', 'Waiter'), async
 // @access  Private (Cashier, Admin, Manager)
 router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req, res) => {
   try {
-    const { paymentMethod } = req.body;
+    const { paymentMethod, discount, finalTotal } = req.body;
 
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      {
-        billingStatus: 'Paid',
-        status: 'Completed',
-        paymentMethod: paymentMethod || 'Cash',
-        paidAt: new Date(),
-      },
-      { new: true }
-    );
+    const updateData = {
+      billingStatus: 'Paid',
+      status: 'Completed',
+      paymentMethod: paymentMethod || 'Cash',
+      paidAt: new Date(),
+    };
+
+    // Apply discount if provided
+    if (discount > 0) {
+      updateData.discount = discount;
+      updateData.total = finalTotal || undefined;
+    }
+
+    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
 
     // Free the table if all orders for this table are paid
