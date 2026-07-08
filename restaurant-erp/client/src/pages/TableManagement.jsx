@@ -643,4 +643,4 @@ const TableManagement = () => {
   );
 };
 
-export default TableManagement;export default TableManagement;
+export default TableManagement;
