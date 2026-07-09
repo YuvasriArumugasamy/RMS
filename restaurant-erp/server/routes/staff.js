@@ -6,8 +6,8 @@ const { protect, authorize } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
-// GET all staff
-router.get('/', authorize('Admin', 'Manager'), async (req, res) => {
+// GET all staff — all roles can read (needed for POS waiter dropdown)
+router.get('/', authorize('Admin', 'Manager', 'Waiter', 'Cashier', 'Chef'), async (req, res) => {
   try {
     const staff = await Staff.find().sort({ name: 1 });
     res.json({ success: true, data: staff });

@@ -5,6 +5,7 @@ const Ingredient = require('../models/Ingredient');
 const MenuItem = require('../models/MenuItem');
 const Customer = require('../models/Customer');
 const { protect, authorize } = require('../middleware/auth');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ router.post('/qr', async (req, res) => {
 
     res.status(201).json({ success: true, data: order });
   } catch (err) {
-    console.error('QR Order error:', err);
+    logger.error('QR Order error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -163,7 +164,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ success: true, data: order });
   } catch (err) {
-    console.error(err);
+    logger.error('Create order error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -248,7 +249,7 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
           await customer.save();
         }
       } catch (loyaltyErr) {
-        console.error('Loyalty update error (non-critical):', loyaltyErr.message);
+        logger.error('Loyalty update error (non-critical):', loyaltyErr.message);
       }
     }
 
@@ -261,6 +262,113 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
       paymentMethod: order.paymentMethod,
       paidAt: order.paidAt,
     });
+
+    res.json({ success: true, data: order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   PATCH /api/orders/:id/cancel
+// @desc    Cancel a Pending order (only Pending orders can be cancelled)
+// @access  Private (Waiter, Admin, Manager)
+router.patch('/:id/cancel', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
+
+    if (order.status === 'Completed') {
+      return res.status(400).json({ success: false, message: 'Cannot cancel a completed order.' });
+    }
+    if (order.status === 'Cancelled') {
+      return res.status(400).json({ success: false, message: 'Order is already cancelled.' });
+    }
+
+    order.status = 'Cancelled';
+    await order.save();
+
+    // Re-stock inventory — reverse the deduction
+    for (const cartItem of order.items) {
+      if (!cartItem.menuItemId) continue;
+      const menuItem = await MenuItem.findById(cartItem.menuItemId).populate('recipe.ingredientId');
+      if (menuItem && menuItem.recipe.length > 0) {
+        for (const r of menuItem.recipe) {
+          await Ingredient.findByIdAndUpdate(r.ingredientId, {
+            $inc: { stock: r.qty * (cartItem.qty || 1) }
+          });
+        }
+      }
+    }
+
+    // 🔌 Notify kitchen and staff
+    const io = req.app.get('io');
+    if (io) {
+      io.to('kitchen').emit('order-status-update', { id: order._id, orderId: order.orderId, status: 'Cancelled', table: order.table });
+      io.to('staff').emit('order-status-update', { id: order._id, orderId: order.orderId, status: 'Cancelled', table: order.table });
+    }
+
+    res.json({ success: true, data: order, message: 'Order cancelled and inventory restored.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   PUT /api/orders/:id/items
+// @desc    Edit items of a Pending order (add/remove/update qty)
+// @access  Private (Waiter, Admin, Manager)
+router.put('/:id/items', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => {
+  try {
+    const { items, subtotal, gst, total } = req.body;
+
+    if (!items || !items.length) {
+      return res.status(400).json({ success: false, message: 'Items cannot be empty. Cancel the order instead.' });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
+
+    if (order.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: `Cannot edit an order in "${order.status}" status. Only Pending orders can be edited.` });
+    }
+
+    // Reverse old inventory deductions
+    for (const cartItem of order.items) {
+      if (!cartItem.menuItemId) continue;
+      const menuItem = await MenuItem.findById(cartItem.menuItemId).populate('recipe.ingredientId');
+      if (menuItem && menuItem.recipe.length > 0) {
+        for (const r of menuItem.recipe) {
+          await Ingredient.findByIdAndUpdate(r.ingredientId, {
+            $inc: { stock: r.qty * (cartItem.qty || 1) }
+          });
+        }
+      }
+    }
+
+    // Apply new inventory deductions
+    for (const cartItem of items) {
+      if (!cartItem.menuItemId) continue;
+      const menuItem = await MenuItem.findById(cartItem.menuItemId).populate('recipe.ingredientId');
+      if (menuItem && menuItem.recipe.length > 0) {
+        for (const r of menuItem.recipe) {
+          await Ingredient.findByIdAndUpdate(r.ingredientId, {
+            $inc: { stock: -(r.qty * (cartItem.qty || 1)) }
+          });
+        }
+      }
+    }
+
+    // Update order
+    order.items    = items;
+    order.subtotal = subtotal || 0;
+    order.gst      = gst || 0;
+    order.total    = total || 0;
+    await order.save();
+
+    // 🔌 Notify kitchen of updated order
+    const io = req.app.get('io');
+    if (io) {
+      io.to('kitchen').emit('order-updated', { id: order._id, orderId: order.orderId, items: order.items, table: order.table });
+    }
 
     res.json({ success: true, data: order });
   } catch (err) {

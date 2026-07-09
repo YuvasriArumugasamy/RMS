@@ -1,14 +1,15 @@
-const express = require('express');
+﻿const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
 const { protect, authorize } = require('../middleware/auth');
 const sendEmail = require('../utils/mailer');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
-// ── Rate limiters ─────────────────────────────────────────────
+// â”€â”€ Rate limiters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Login: max 10 attempts per 15 minutes per IP
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -45,8 +46,8 @@ const signToken = (id) => {
 
 // @route   POST /api/auth/register
 // @desc    Register new user
-//          - If NO users exist in DB → allow freely (initial setup)
-//          - Otherwise → requires existing Admin JWT token
+//          - If NO users exist in DB â†’ allow freely (initial setup)
+//          - Otherwise â†’ requires existing Admin JWT token
 // @access  Public (first user) / Admin only (subsequent users)
 router.post('/register', registerLimiter, async (req, res) => {
   try {
@@ -98,7 +99,7 @@ router.post('/register', registerLimiter, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).json({ success: false, message: 'Server error.', error: err.message });
   }
 });
@@ -137,7 +138,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).json({ success: false, message: 'Server error.', error: err.message });
   }
 });
@@ -152,11 +153,11 @@ router.get('/me', protect, async (req, res) => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // @route   POST /api/auth/forgot-password
 // @desc    Send password reset link to user's registered email
 // @access  Public
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post('/forgot-password', forgotLimiter, async (req, res) => {
   try {
     const { email } = req.body;
@@ -167,7 +168,7 @@ router.post('/forgot-password', forgotLimiter, async (req, res) => {
     // Find user by email (case-insensitive)
     const user = await User.findOne({ email: email.toLowerCase().trim() });
 
-    // Always return the same response — don't reveal whether email exists (security best practice)
+    // Always return the same response â€” don't reveal whether email exists (security best practice)
     const genericMsg = 'If that email is registered, a reset link has been sent.';
 
     if (!user) {
@@ -184,7 +185,7 @@ router.post('/forgot-password', forgotLimiter, async (req, res) => {
 
     const html = `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px;background:#f9fafb;border-radius:12px">
-        <h2 style="color:#1e3a8a;margin-bottom:8px">🔐 Password Reset</h2>
+        <h2 style="color:#1e3a8a;margin-bottom:8px">ðŸ” Password Reset</h2>
         <p style="color:#374151;font-size:14px">Hi <strong>${user.username}</strong>,</p>
         <p style="color:#374151;font-size:14px">
           Someone requested a password reset for your Restaurant Management System account.
@@ -196,35 +197,35 @@ router.post('/forgot-password', forgotLimiter, async (req, res) => {
           Reset My Password
         </a>
         <p style="color:#6b7280;font-size:12px">
-          If you didn't request this, simply ignore this email — your password won't change.
+          If you didn't request this, simply ignore this email â€” your password won't change.
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0"/>
-        <p style="color:#9ca3af;font-size:11px">Restaurant Management System · Automated email, do not reply.</p>
+        <p style="color:#9ca3af;font-size:11px">Restaurant Management System Â· Automated email, do not reply.</p>
       </div>
     `;
 
     try {
-      await sendEmail({ to: user.email, subject: '🔐 RMS Password Reset', html });
+      await sendEmail({ to: user.email, subject: 'ðŸ” RMS Password Reset', html });
       return res.json({ success: true, message: genericMsg });
     } catch (emailErr) {
       // If email fails, clear the token so the user can try again
       user.resetPasswordToken  = undefined;
       user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
-      console.error('Email send failed:', emailErr.message);
+      logger.error('Email send failed:', emailErr.message);
       return res.status(500).json({ success: false, message: 'Email could not be sent. Please contact your Admin.' });
     }
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).json({ success: false, message: 'Server error.', error: err.message });
   }
 });
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // @route   POST /api/auth/reset-password
 // @desc    Reset password using token from email link
 // @access  Public
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, id, password } = req.body;
@@ -266,9 +267,10 @@ router.post('/reset-password', async (req, res) => {
       user: { id: user._id, username: user.username, role: user.role },
     });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).json({ success: false, message: 'Server error.', error: err.message });
   }
 });
 
 module.exports = router;
+

@@ -29,6 +29,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const logger = require('./utils/logger');
 
 // Import routes
 const authRoutes      = require('./routes/auth');
@@ -101,7 +102,7 @@ app.use((req, res) => res.status(404).json({ success: false, message: 'Route not
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(err.stack);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Server Error',
@@ -111,22 +112,22 @@ app.use((err, req, res, next) => {
 
 // Socket.io real-time events
 io.on('connection', (socket) => {
-  console.log(`✅ Client connected: ${socket.id}`);
+  logger.log(`✅ Client connected: ${socket.id}`);
 
   // Join room per table/area for targeted updates
   socket.on('join-room', (room) => {
     socket.join(room);
-    console.log(`📍 Socket ${socket.id} joined room: ${room}`);
+    logger.log(`📍 Socket ${socket.id} joined room: ${room}`);
   });
 
   // Customer joins table-specific room for live order status
   socket.on('join-table', (tableName) => {
     socket.join(`table-${tableName}`);
-    console.log(`🍽️  Customer joined table room: table-${tableName}`);
+    logger.log(`🍽️  Customer joined table room: table-${tableName}`);
   });
 
   socket.on('disconnect', () => {
-    console.log(`❌ Client disconnected: ${socket.id}`);
+    logger.log(`❌ Client disconnected: ${socket.id}`);
   });
 });
 
@@ -137,23 +138,23 @@ const MONGO_URI = process.env.MONGO_URI;
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    console.log('✅ MongoDB Connected');
+    logger.info('✅ MongoDB Connected');
     server.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`🔌 Socket.io ready for real-time sync`);
+      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+      logger.info(`🔌 Socket.io ready for real-time sync`);
     });
   })
   .catch((err) => {
-    console.error('❌ MongoDB Connection Failed:', err.message);
+    logger.error('❌ MongoDB Connection Failed:', err.message);
     process.exit(1);
   });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('⚠️  SIGTERM received, shutting down gracefully...');
+  logger.info('⚠️  SIGTERM received, shutting down gracefully...');
   server.close(() => {
     mongoose.connection.close(false, () => {
-      console.log('🛑 MongoDB connection closed');
+      logger.info('🛑 MongoDB connection closed');
       process.exit(0);
     });
   });

@@ -16,4 +16,11 @@ export default defineConfig({
       },
     },
   },
+  // ── Vitest configuration ─────────────────────────────────
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/tests/setup.js',
+    include: ['src/tests/**/*.test.{js,jsx}'],
+  },
 })

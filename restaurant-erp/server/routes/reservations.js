@@ -1,18 +1,19 @@
-const express = require('express');
+﻿const express = require('express');
 const Reservation = require('../models/Reservation');
 const Table = require('../models/Table');
 const { protect, authorize } = require('../middleware/auth');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
 // All reservation routes require authentication
 router.use(protect);
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // @route   GET /api/reservations
 // @desc    Get all reservations (with optional date filter)
 // @access  Private
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.get('/', async (req, res) => {
   try {
     const filter = {};
@@ -30,11 +31,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // @route   POST /api/reservations
 // @desc    Create a new reservation
 // @access  Private (Waiter, Manager, Admin)
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post('/', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => {
   try {
     const { table, tableName, customerName, customerPhone, partySize, date, time, specialRequest } = req.body;
@@ -72,7 +73,7 @@ router.post('/', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => {
       reservation: { name: customerName, time },
     });
 
-    // 🔌 Emit to all clients
+    // ðŸ”Œ Emit to all clients
     const io = req.app.get('io');
     if (io) {
       io.to('staff').emit('new-reservation', reservation);
@@ -81,16 +82,16 @@ router.post('/', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => {
 
     res.status(201).json({ success: true, data: reservation });
   } catch (err) {
-    console.error('Reservation creation error:', err);
+    logger.error('Reservation creation error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // @route   PUT /api/reservations/:id
 // @desc    Update reservation status (Confirm / Seat / Cancel)
 // @access  Private (Manager, Admin, Waiter)
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.put('/:id', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => {
   try {
     const { status } = req.body;
@@ -105,7 +106,7 @@ router.put('/:id', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => 
       return res.status(404).json({ success: false, message: 'Reservation not found' });
     }
 
-    // If seated → mark table as Occupied
+    // If seated â†’ mark table as Occupied
     if (status === 'Seated') {
       await Table.findByIdAndUpdate(reservation.table, {
         status: 'Occupied',
@@ -113,7 +114,7 @@ router.put('/:id', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => 
       });
     }
 
-    // If cancelled → mark table as Available
+    // If cancelled â†’ mark table as Available
     if (status === 'Cancelled' || status === 'No-show') {
       await Table.findByIdAndUpdate(reservation.table, {
         status: 'Available',
@@ -121,7 +122,7 @@ router.put('/:id', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => 
       });
     }
 
-    // 🔌 Emit update
+    // ðŸ”Œ Emit update
     const io = req.app.get('io');
     if (io) {
       io.to('staff').emit('reservation-update', { id: reservation._id, reservationId: reservation.reservationId, status });
@@ -137,11 +138,11 @@ router.put('/:id', authorize('Admin', 'Manager', 'Waiter'), async (req, res) => 
   }
 });
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // @route   DELETE /api/reservations/:id
 // @desc    Delete a reservation
 // @access  Private (Manager, Admin)
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.delete('/:id', authorize('Admin', 'Manager'), async (req, res) => {
   try {
     const reservation = await Reservation.findById(req.params.id);
@@ -157,7 +158,7 @@ router.delete('/:id', authorize('Admin', 'Manager'), async (req, res) => {
 
     await reservation.deleteOne();
 
-    // 🔌 Emit deletion
+    // ðŸ”Œ Emit deletion
     const io = req.app.get('io');
     if (io) {
       io.to('staff').emit('reservation-deleted', { id: req.params.id });
@@ -171,3 +172,4 @@ router.delete('/:id', authorize('Admin', 'Manager'), async (req, res) => {
 });
 
 module.exports = router;
+
