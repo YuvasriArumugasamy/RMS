@@ -1021,22 +1021,24 @@ const CustomerMenu = () => {
             {voiceSupported && (
               <button 
                 onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
-                className="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-450 text-white text-xs font-black rounded-full px-4 py-2 hover:from-orange-600 hover:to-orange-500 shadow-lg shadow-orange-500/10 transition-all active:scale-95 cursor-pointer"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-450 text-white text-xs font-black rounded-full px-4 py-2 hover:from-orange-600 hover:to-orange-500 shadow-lg shadow-orange-500/10 transition-all active:scale-95 cursor-pointer select-none"
               >
                 🎤 Voice
               </button>
             )}
-            <button className="relative bg-white/10 hover:bg-white/15 rounded-full p-2.5 transition-colors cursor-pointer">
+            <button className="relative bg-white/10 hover:bg-white/15 rounded-full p-2.5 transition-colors cursor-pointer select-none">
               <svg className="h-4.5 w-4.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a9.04 9.04 0 01-1.201 1.492M14.857 17.082a9.04 9.04 0 01-1.201-1.492m0 0a8.96 8.96 0 01-3.204 0m3.204 0V14.3a3 3 0 00-3-3m3 3a3 3 0 003-3v-1.302M12 9V3M3.105 13H5m14 0h1.895M6.208 6.208L7.62 7.62m8.76-8.76L17.79 7.62M3.105 13a9.006 9.006 0 0017.79 0" />
               </svg>
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                9
+              <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[7.5px] font-black rounded-full h-3.5 w-3.5 flex items-center justify-center shadow">
+                1
               </span>
             </button>
-            <div className="h-9 w-9 rounded-full object-cover ring-2 ring-orange-400 bg-orange-400 flex items-center justify-center text-white text-xs font-black select-none shadow-sm">
-              👤
-            </div>
+            <img 
+              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face"
+              alt="Profile"
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-orange-400 shadow-sm select-none"
+            />
           </div>
         </div>
 
