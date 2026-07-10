@@ -483,9 +483,14 @@ const CustomerMenu = () => {
   /* ── STAGE: WELCOME ── */
   const WelcomeStage = () => (
     <div className="flex flex-col h-screen overflow-y-auto bg-[#FFFBF7] text-[#1E293B] px-6 py-10 justify-between relative select-none">
-      <div className="absolute -top-24 -left-24 w-80 h-80 bg-gradient-to-br from-orange-500/20 to-amber-400/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-gradient-to-tr from-orange-500/15 to-amber-300/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-10 right-10 grid grid-cols-5 gap-1.5 opacity-30">
+      {/* Top Wavy background shape */}
+      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-r from-orange-500 to-amber-400 wavy opacity-95 pointer-events-none z-0" />
+      {/* Bottom Wavy background shape */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-r from-orange-500 to-amber-400 wavy rotate-180 opacity-95 pointer-events-none z-0" />
+      {/* Subtle blurs for backing */}
+      <div className="absolute -top-24 -left-24 w-80 h-80 bg-gradient-to-br from-orange-500/10 to-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-gradient-to-tr from-orange-500/10 to-amber-300/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-10 right-10 grid grid-cols-5 gap-1.5 opacity-30 z-10">
         {[...Array(25)].map((_, i) => (
           <div key={i} className="w-1.5 h-1.5 bg-orange-600 rounded-full" />
         ))}

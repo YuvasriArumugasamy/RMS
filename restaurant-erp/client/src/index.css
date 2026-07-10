@@ -74,3 +74,8 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #D1D5DB;
 }
+
+.wavy {
+  clip-path: shape(from 0 35px,curve to 6.52% 21.5px with 4.35% 21px,smooth to 10.87% 12px,smooth to 15.22% 28px,smooth to 19.57% 62px,smooth to 23.91% 38.5px,smooth to 28.26% 28.5px,smooth to 32.61% 32.5px,smooth to 36.96% 14px,smooth to 41.3% 7px,smooth to 45.65% 13.5px,smooth to 50% 16.5px,smooth to 54.35% 27.5px,smooth to 58.7% 31.5px,smooth to 63.04% 39px,smooth to 67.39% 34px,smooth to 71.74% 35.5px,smooth to 76.09% 62.5px,smooth to 80.43% 43.5px,smooth to 84.78% 37.5px,smooth to 89.13% 33.5px,smooth to 93.48% 19.5px,smooth to 100% 35px,vline to calc(100% - 35px),curve to 93.48% calc(100% - 57.5px) with 95.65% calc(100% - 56px),smooth to 89.13% calc(100% - 40px),smooth to 84.78% calc(100% - 11px),smooth to 80.43% calc(100% - 18px),smooth to 76.09% calc(100% - 39px),smooth to 71.74% calc(100% - 40px),smooth to 67.39% calc(100% - 38px),smooth to 63.04% calc(100% - 47.5px),smooth to 58.7% calc(100% - 39px),smooth to 54.35% calc(100% - 43.5px),smooth to 50% calc(100% - 52.5px),smooth to 45.65% calc(100% - 33.5px),smooth to 41.3% calc(100% - 17px),smooth to 36.96% calc(100% - 15.5px),smooth to 32.61% calc(100% - 31.5px),smooth to 28.26% calc(100% - 41px),smooth to 23.91% calc(100% - 33px),smooth to 19.57% calc(100% - 45px),smooth to 15.22% calc(100% - 42px),smooth to 10.87% calc(100% - 38px),smooth to 6.52% calc(100% - 57.5px),smooth to 0 calc(100% - 35px),vline to 0);
+}
+
