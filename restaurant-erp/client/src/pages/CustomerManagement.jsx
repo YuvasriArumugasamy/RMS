@@ -1,3 +1,4 @@
+// Trigger Vercel redeployment after reconnecting Git
 import { useState } from 'react';
 
 const CustomerManagement = () => {
