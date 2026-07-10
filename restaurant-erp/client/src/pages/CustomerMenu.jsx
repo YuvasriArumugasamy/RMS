@@ -482,26 +482,63 @@ const CustomerMenu = () => {
 
   /* ── STAGE: WELCOME ── */
   const WelcomeStage = () => (
-    <div className="flex flex-col h-screen overflow-y-auto bg-[#FFFBF7] text-[#1E293B] px-6 py-10 justify-between relative select-none">
-      {/* Top Wavy background shape */}
-      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-r from-orange-500 to-amber-400 wavy opacity-95 pointer-events-none z-0" />
-      {/* Bottom Wavy background shape */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-r from-orange-500 to-amber-400 wavy rotate-180 opacity-95 pointer-events-none z-0" />
-      {/* Subtle blurs for backing */}
-      <div className="absolute -top-24 -left-24 w-80 h-80 bg-gradient-to-br from-orange-500/10 to-amber-400/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-gradient-to-tr from-orange-500/10 to-amber-300/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-10 right-10 grid grid-cols-5 gap-1.5 opacity-30 z-10">
-        {[...Array(25)].map((_, i) => (
-          <div key={i} className="w-1.5 h-1.5 bg-orange-600 rounded-full" />
+    <div className="flex flex-col h-screen overflow-y-auto bg-[#FAFAFA] text-[#1E293B] px-6 py-8 justify-between relative select-none">
+      <style>{`
+        @keyframes float-slow-1 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(-10px, 15px) scale(1.05); }
+        }
+        @keyframes float-slow-2 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(15px, -10px) scale(1.02); }
+        }
+        .animate-float-1 {
+          animation: float-slow-1 8s ease-in-out infinite;
+        }
+        .animate-float-2 {
+          animation: float-slow-2 10s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Top Left Wave - double layer */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none select-none z-0 animate-float-1">
+        <svg viewBox="0 0 200 200" fill="none" className="w-full h-full opacity-90">
+          <path d="M0 0 C 130 0, 180 80, 100 130 C 50 162.5, 0 110, 0 200 Z" fill="url(#orangeGrad1)" />
+          <path d="M0 0 C 90 0, 140 60, 80 100 C 40 125, 0 85, 0 150 Z" fill="url(#orangeGrad2)" opacity="0.8" />
+          <defs>
+            <linearGradient id="orangeGrad1" x1="0" y1="0" x2="160" y2="160" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#F97316" />
+              <stop offset="1" stopColor="#FBBF24" />
+            </linearGradient>
+            <linearGradient id="orangeGrad2" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#FF7A29" />
+              <stop offset="1" stopColor="#FDE68A" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Bottom Right Wave - double layer */}
+      <div className="absolute bottom-0 right-0 w-72 h-72 pointer-events-none select-none z-0 animate-float-2">
+        <svg viewBox="0 0 200 200" fill="none" className="w-full h-full opacity-90">
+          <path d="M200 200 C 70 200, 20 120, 100 70 C 150 37.5, 200 90, 200 0 Z" fill="url(#orangeGrad1)" />
+          <path d="M200 200 C 110 200, 60 140, 120 100 C 160 75, 200 115, 200 50 Z" fill="url(#orangeGrad2)" opacity="0.8" />
+        </svg>
+      </div>
+
+      {/* Top Right Dot Grid */}
+      <div className="absolute top-10 right-10 grid grid-cols-6 gap-2 opacity-35 select-none pointer-events-none z-0">
+        {[...Array(24)].map((_, i) => (
+          <div key={i} className="w-1.5 h-1.5 bg-[#F97316] rounded-full" />
         ))}
       </div>
 
-      <div />
+      <div /> {/* Spacer */}
 
       <div className="text-center z-10 max-w-sm mx-auto w-full">
         {/* Glow QR Circle */}
-        <div className="relative w-28 h-28 mx-auto mb-6 flex items-center justify-center bg-white rounded-full shadow-[0_12px_36px_rgba(249,115,22,0.15)] border-2 border-orange-100/70 p-4">
-          <div className="absolute inset-0 rounded-full bg-orange-400/10 animate-ping opacity-60" />
+        <div className="relative w-28 h-28 mx-auto mb-6 flex items-center justify-center bg-white rounded-full shadow-[0_12px_36px_rgba(249,115,22,0.12)] border-2 border-orange-100/70 p-4">
+          <div className="absolute inset-0 rounded-full bg-orange-400/10 animate-ping opacity-60 pointer-events-none" />
           <QRCode
             value={window.location.href}
             size={72}
@@ -511,62 +548,80 @@ const CustomerMenu = () => {
           />
         </div>
 
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-800 mb-1">
-          Welcome!
+        {/* Title matches Wel in orange, come! in brown */}
+        <h1 className="text-4xl font-extrabold tracking-tight mb-1 font-sans">
+          <span className="text-[#F97316]">Wel</span>
+          <span className="text-[#4A2E2B]">come!</span>
         </h1>
-        <p className="text-xs text-slate-400 font-extrabold tracking-wider uppercase mb-8">
+        <p className="text-sm text-slate-500 font-semibold tracking-wide mb-8">
           Thank you for choosing us
         </p>
 
         {/* Table Number Card */}
-        <div className="bg-white rounded-[2.2rem] p-7 mb-7 shadow-[0_15px_45px_rgba(0,0,0,0.025)] border border-slate-100 relative overflow-hidden">
+        <div className="bg-white rounded-[2.2rem] p-7 mb-7 shadow-[0_15px_45px_rgba(249,115,22,0.04)] border border-slate-100/80 relative overflow-hidden w-full max-w-[300px] mx-auto transition-transform hover:scale-[1.02] duration-300">
           <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-50/50 rounded-full" />
           <p className="text-[10px] text-orange-500 font-black uppercase tracking-widest mb-1.5">TABLE NUMBER</p>
           <p className="text-6xl font-black tracking-tight text-slate-800 my-2 drop-shadow-sm">
             {'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}
           </p>
-          <div className="mt-4.5 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200/50 px-4 py-1.5 rounded-full text-emerald-600 shadow-sm">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          <div className="mt-4.5 inline-flex items-center gap-1.5 bg-[#E8F5E9] border border-[#C8E6C9] text-[#2E7D32] px-4.5 py-1.5 rounded-full shadow-sm">
+            <span className="w-1.5 h-1.5 bg-[#4CAF50] rounded-full animate-pulse" />
             <span className="text-[10px] font-black tracking-wider uppercase">{t.scanSuccess}</span>
           </div>
         </div>
 
-        {/* 3-step Instructions */}
-        <div className="flex items-center justify-between px-6 mb-8 text-slate-400">
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-3xl">🔍</span>
+        {/* 3-step Instructions with custom SVGs */}
+        <div className="flex items-center justify-between px-4 mb-8 text-slate-400">
+          <div className="flex flex-col items-center gap-1.5 flex-1">
+            <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center shadow-sm">
+              <svg className="w-6 h-6 text-[#F97316]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 00-2 2h-2M7 21H5a2 2 0 01-2-2v-2M9 9h6v6H9V9z" />
+              </svg>
+            </div>
             <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Scan</span>
           </div>
-          <span className="text-slate-300 font-black text-xl mb-4">»</span>
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-3xl">🛎️</span>
+          
+          <span className="text-[#F97316] font-black text-lg mb-6">»</span>
+          
+          <div className="flex flex-col items-center gap-1.5 flex-1">
+            <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center shadow-sm">
+              <svg className="w-6 h-6 text-[#F97316]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3a1 1 0 011 1v1h.062C18.01 5.22 21 8.583 21 12.5v1H3v-1c0-3.917 2.99-7.28 7.938-7.5H11V4a1 1 0 011-1zM3 17h18a1 1 0 011 1v1H2v-1a1 1 0 011-1z" />
+              </svg>
+            </div>
             <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Order</span>
           </div>
-          <span className="text-slate-300 font-black text-xl mb-4">»</span>
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-3xl">😊</span>
+          
+          <span className="text-[#F97316] font-black text-lg mb-6">»</span>
+          
+          <div className="flex flex-col items-center gap-1.5 flex-1">
+            <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center shadow-sm">
+              <svg className="w-6 h-6 text-[#F97316]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
             <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Enjoy</span>
           </div>
         </div>
 
-        {/* Start Ordering Button */}
+        {/* Start Ordering Button (Hover Arrow Slide) */}
         <button onClick={() => setStage('menu')}
-          className="w-full py-4.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-[0_12px_28px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+          className="group w-full py-4.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold rounded-full text-xs shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-between px-7 cursor-pointer hover:shadow-xl hover:shadow-orange-500/25">
           <span className="uppercase tracking-widest font-black">{t.startOrdering}</span>
-          <span className="w-6 h-6 bg-white text-orange-600 rounded-full flex items-center justify-center text-xs font-black shadow-inner">➔</span>
+          <span className="w-7 h-7 bg-white text-[#F97316] rounded-full flex items-center justify-center text-xs font-black shadow-inner transition-transform group-hover:translate-x-1 duration-300">➔</span>
         </button>
       </div>
 
-      {/* Language Selector */}
-      <div className="flex justify-center gap-2 mt-8 z-10">
+      {/* Language Selector matching image styling */}
+      <div className="flex justify-center gap-2.5 mt-8 z-10">
         {Object.keys(LANGS).map(l => {
           const isActive = lang === l;
           return (
             <button key={l} onClick={() => setLang(l)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all ${
+              className={`px-6 py-3 rounded-2xl text-xs font-black transition-all cursor-pointer ${
                 isActive 
-                  ? 'bg-white text-orange-500 border border-orange-500 shadow-md scale-105' 
-                  : 'bg-orange-500 text-white shadow-md active:scale-95'
+                  ? 'bg-white text-[#F97316] border border-orange-200 shadow-md scale-105' 
+                  : 'bg-[#F97316] text-white shadow-md active:scale-95'
               }`}>
               {l === 'en' ? 'English' : l === 'ta' ? 'தமிழ்' : 'हिंदी'}
             </button>
