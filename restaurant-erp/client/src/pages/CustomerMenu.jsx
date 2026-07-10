@@ -494,7 +494,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <div className="relative min-h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-10 select-none">
+      <div className="relative min-h-screen w-full overflow-y-auto bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-10 select-none">
         {/* Decorative gradient blobs */}
         <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0" />
         <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90" />
@@ -510,7 +510,7 @@ const CustomerMenu = () => {
 
         {/* Card */}
         <div
-          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/70 backdrop-blur-sm shadow-xl shadow-orange-100 px-6 pt-16 pb-8 transition-all duration-700 ease-out ${
+          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/70 backdrop-blur-sm shadow-xl shadow-orange-100 px-6 pt-14 pb-6 transition-all duration-700 ease-out ${
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -538,7 +538,7 @@ const CustomerMenu = () => {
           </div>
 
           {/* Table number panel */}
-          <div className="mt-8 rounded-3xl bg-white shadow-sm border border-orange-50 py-8 px-6 text-center">
+          <div className="mt-6 rounded-3xl bg-white shadow-sm border border-orange-50 py-6 px-5 text-center">
             <p className="text-orange-500 font-bold tracking-wide text-xs mb-2">
               {t.tableLabel}
             </p>
@@ -546,7 +546,7 @@ const CustomerMenu = () => {
               {'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}
             </p>
 
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 border border-green-100 shadow-sm text-green-700">
+            <div className="mt-4.5 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 border border-green-100 shadow-sm text-green-700">
               <svg className="w-5 h-5 text-green-600 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -557,7 +557,7 @@ const CustomerMenu = () => {
           </div>
 
           {/* Scan -> Order -> Enjoy steps */}
-          <div className="mt-8 flex items-center justify-center gap-4 select-none">
+          <div className="mt-6 flex items-center justify-center gap-4 select-none">
             <div className="flex flex-col items-center gap-2">
               <div className="text-orange-500">
                 <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -601,7 +601,7 @@ const CustomerMenu = () => {
           {/* CTA Button */}
           <button
             onClick={() => setStage('menu')}
-            className="mt-8 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-4 text-white font-extrabold text-sm shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
+            className="mt-6 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-4 text-white font-extrabold text-sm shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
           >
             <span className="mx-auto">{t.startOrdering}</span>
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-orange-500 ml-2 shadow-inner font-black">
@@ -612,7 +612,7 @@ const CustomerMenu = () => {
           </button>
 
           {/* Language Switcher */}
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-5 flex items-center justify-center gap-3">
             {Object.keys(LANGS).map((code) => (
               <button
                 key={code}
