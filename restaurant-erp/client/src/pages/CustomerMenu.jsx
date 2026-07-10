@@ -635,39 +635,107 @@ const CustomerMenu = () => {
   };
 
   /* ── BOTTOM NAV (Mobile View) ── */
-  const BottomNav = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 flex justify-around shadow-[0_-8px_30px_rgba(0,0,0,0.05)] z-40 pb-safe pt-2">
-      {[
-        { id: 'menu', icon: '🏠', label: t.menu },
-        { id: 'cart', icon: '🛒', label: t.cart, badge: cart.length },
-        { id: 'tracking', icon: '📦', label: t.orders, badge: placedOrders.length },
-        { id: 'feedback', icon: '👤', label: t.profile },
-      ].map(item => {
-        const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback');
-        return (
-          <button key={item.id} onClick={() => {
-            if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
-            else if (item.id === 'feedback') setStage('feedback');
-            else setStage(item.id);
-          }}
-            className={`flex-1 flex flex-col items-center py-2.5 text-[9px] font-black uppercase tracking-wider relative transition-colors ${
-              isActive ? 'text-orange-500' : 'text-slate-400 hover:text-slate-600'
-            }`}>
-            <span className={`text-xl leading-none mb-1 transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
-            {item.badge > 0 && (
-              <span className="absolute top-1.5 right-1/4 w-5.5 h-5.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-md animate-bounce">
-                {item.badge}
-              </span>
-            )}
-            <span>{item.label}</span>
-            {isActive && (
-              <span className="absolute bottom-0 w-2.5 h-1 bg-orange-500 rounded-full shadow-[0_2px_5px_rgba(249,115,22,0.5)]" />
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
+  const BottomNav = () => {
+    const items = [
+      { 
+        id: 'menu', 
+        label: t.menu || 'Menu', 
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21h8.25M6 18h12M12 3c-4.97 0-9 2.686-9 6 0 1.574.92 3.012 2.454 4.093A3.75 3.75 0 004.5 15v3h15v-3a3.75 3.75 0 00-.954-1.907C20.08 12.012 21 10.574 21 9c0-3.314-4.03-6-9-6z" />
+          </svg>
+        )
+      },
+      { 
+        id: 'cart', 
+        label: t.cart || 'Cart', 
+        badge: cart.length,
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+        )
+      },
+      { 
+        id: 'scan', 
+        label: 'SCAN QR', 
+        isCenter: true,
+        icon: (
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM3.75 14.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM13.125 4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM6.75 6.75h.008v.008H6.75V6.75zM6.75 16.5h.008v.008H6.75V16.5zM16.125 6.75h.008v.008h-.008V6.75zM12 12h.008v.008H12V12zM12 16.5h.008v.008H12V16.5zM16.5 12h.008v.008h-.008V12zM18 18h.008v.008H18V18zM15 15h.008v.008H15V15z" />
+          </svg>
+        )
+      },
+      { 
+        id: 'tracking', 
+        label: t.orders || 'Orders', 
+        badge: placedOrders.length,
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        )
+      },
+      { 
+        id: 'feedback', 
+        label: t.profile || 'Profile', 
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+        )
+      },
+    ];
+
+    return (
+      <div className="fixed bottom-4 left-4 right-4 bg-[#181614] rounded-[2rem] px-4 py-2 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.3)] z-40 select-none border border-white/[0.03]">
+        {items.map(item => {
+          const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback');
+          
+          if (item.isCenter) {
+            return (
+              <button
+                key={item.id}
+                onClick={() => setStage('welcome')}
+                className="flex flex-col items-center -mt-8 cursor-pointer select-none"
+              >
+                <span className="h-15 w-15 rounded-full bg-gradient-to-br from-orange-500 to-orange-400 flex flex-col items-center justify-center ring-4 ring-[#181614] shadow-lg active:scale-95 transition-transform text-white gap-0.5">
+                  {item.icon}
+                  <span className="text-[7.5px] font-black tracking-wider uppercase text-white mt-0.5">{item.label}</span>
+                </span>
+              </button>
+            );
+          }
+
+          return (
+            <button 
+              key={item.id} 
+              onClick={() => {
+                if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
+                else if (item.id === 'feedback') setStage('feedback');
+                else setStage(item.id);
+              }}
+              className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all cursor-pointer relative ${
+                isActive 
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <div className="relative">
+                {item.icon}
+                {item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-[#f97316] text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-md animate-bounce">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-white' : 'text-gray-400'}`}>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
 
   /* ── COMMON SHELL WRAPPER ── */
   const AppShell = ({ children }) => {
