@@ -497,7 +497,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <div className="relative min-h-screen w-full overflow-y-auto bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-10 select-none">
+      <div className="relative h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 select-none">
         {/* Decorative gradient blobs */}
         <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0" />
         <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90" />
@@ -513,7 +513,7 @@ const CustomerMenu = () => {
 
         {/* Card */}
         <div
-          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/70 backdrop-blur-sm shadow-xl shadow-orange-100 px-6 pt-14 pb-6 transition-all duration-700 ease-out ${
+          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/70 backdrop-blur-sm shadow-xl shadow-orange-100 px-5 pt-12 pb-5 transition-all duration-700 ease-out ${
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -529,41 +529,105 @@ const CustomerMenu = () => {
           </div>
 
           {/* Heading */}
-          <div className="text-center mt-4">
-            <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-b from-orange-500 to-amber-800 bg-clip-text text-transparent">
+          <div className="text-center mt-4 px-2">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-b from-orange-500 to-amber-800 bg-clip-text text-transparent truncate-none leading-tight">
               {t.welcome}
             </h1>
-            <p className="mt-2 text-gray-500 text-sm font-semibold">{t.subtitle}</p>
+            <p className="mt-1.5 text-gray-500 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
           </div>
 
           {/* Table number panel */}
-          <div className="mt-6 rounded-3xl bg-white shadow-sm border border-orange-50 py-6 px-5 text-center">
-            <p className="text-orange-500 font-bold tracking-wide text-xs mb-2">
+          <div className="mt-5 rounded-2xl bg-white shadow-sm border border-orange-50 py-4.5 px-4 text-center">
+            <p className="text-orange-500 font-bold tracking-wide text-[10px] mb-1.5">
               {t.tableLabel}
             </p>
-            <p className="text-7xl font-black text-gray-900 tabular-nums">
+            <p className="text-6xl font-black text-gray-900 tabular-nums leading-none my-1">
               {'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}
             </p>
 
-            <div className="mt-4.5 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 border border-green-100 shadow-sm text-green-700">
-              <svg className="w-5 h-5 text-green-600 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1.5 border border-green-100 shadow-sm text-green-700">
+              <svg className="w-4 h-4 text-green-600 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-bold text-xs uppercase tracking-wider">
+              <span className="font-bold text-[10px] uppercase tracking-wider">
                 {t.scanSuccess}
               </span>
             </div>
           </div>
 
           {/* Scan -> Order -> Enjoy steps */}
-          <div className="mt-6 flex items-center justify-center gap-4 select-none">
-            <div className="flex flex-col items-center gap-2">
+          <div className="mt-5 flex items-center justify-center gap-4 select-none">
+            <div className="flex flex-col items-center gap-1.5">
               <div className="text-orange-500">
-                <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M5 12h14" />
                 </svg>
               </div>
-              <span className="text-xs text-gray-600 font-bold uppercase tracking-wider">Scan</span>
+              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Scan</span>
+            </div>
+            
+            <span className="text-orange-400 font-bold text-lg mb-4">&raquo;</span>
+
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="text-orange-500">
+                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="m15 11-5 5" />
+                  <path d="m19 7-3 3" />
+                  <path d="M21 3v5c0 1.5-1.5 3-3 3h-1L12 16v5H8v-6l5-5V9c0-1.5 1.5-3 3-3V3Z" />
+                  <path d="M3 14h3v7H3Z" />
+                  <path d="M3 3v7c0 1.5 1.5 3 3 3v8" />
+                  <path d="M9 3v7M6 3v4" />
+                </svg>
+              </div>
+              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Order</span>
+            </div>
+
+            <span className="text-orange-400 font-bold text-lg mb-4">&raquo;</span>
+
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="text-orange-500">
+                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                  <line x1="9" x2="9.01" y1="9" y2="9" />
+                  <line x1="15" x2="15.01" y1="9" y2="9" />
+                </svg>
+              </div>
+              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Enjoy</span>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={() => setStage('menu')}
+            className="mt-5 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-5.5 py-3 text-white font-extrabold text-xs shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
+          >
+            <span className="mx-auto">{t.startOrdering}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-orange-500 ml-2 shadow-inner font-black">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </span>
+          </button>
+
+          {/* Language Switcher */}
+          <div className="mt-4 flex items-center justify-center gap-3">
+            {Object.keys(LANGS).map((code) => (
+              <button
+                key={code}
+                onClick={() => handleLanguageSelect(code)}
+                className={`rounded-full px-4.5 py-2 text-[10px] font-black border transition-all cursor-pointer ${
+                  lang === code
+                    ? "bg-orange-500 text-white border-orange-500 shadow-md scale-105"
+                    : "bg-white text-orange-650 border-orange-200 hover:bg-slate-50 active:scale-95"
+                }`}
+              >
+                {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>racking-wider">Scan</span>
             </div>
             
             <span className="text-orange-400 font-bold text-xl mb-4">&raquo;</span>
