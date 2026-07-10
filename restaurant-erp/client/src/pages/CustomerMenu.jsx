@@ -498,11 +498,31 @@ const CustomerMenu = () => {
 
     return (
       <div className="relative h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 select-none">
-        {/* Decorative gradient blobs */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0" />
-        <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90" />
-        <div className="pointer-events-none absolute top-1/3 right-6 h-24 w-24 rounded-full bg-orange-100 opacity-40 blur-xl" />
-        <div className="pointer-events-none absolute bottom-1/4 left-4 h-16 w-16 rounded-full bg-[#FFE7D6] opacity-40 blur-lg" />
+        {/* Style block for blob floating animations */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes floatBlob1 {
+            0% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(20px, -20px) scale(1.06); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+          @keyframes floatBlob2 {
+            0% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(-25px, 25px) scale(0.94); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+          .animate-blob1 {
+            animation: floatBlob1 12s infinite ease-in-out;
+          }
+          .animate-blob2 {
+            animation: floatBlob2 15s infinite ease-in-out;
+          }
+        `}} />
+
+        {/* Decorative animated gradient blobs */}
+        <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0 animate-blob1" />
+        <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90 animate-blob2" />
+        <div className="pointer-events-none absolute top-1/3 right-6 h-24 w-24 rounded-full bg-orange-100 opacity-40 blur-xl animate-blob1" />
+        <div className="pointer-events-none absolute bottom-1/4 left-4 h-16 w-16 rounded-full bg-[#FFE7D6] opacity-40 blur-lg animate-blob2" />
 
         {/* Dot grid decoration (top-right) */}
         <div className="pointer-events-none absolute top-8 right-8 grid grid-cols-5 gap-2">
