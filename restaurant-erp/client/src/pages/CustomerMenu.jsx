@@ -1045,7 +1045,49 @@ const CustomerMenu = () => {
       {/* Categories Horizontal Scroll */}
       <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none mb-6 select-none">
         {categories.map(c => {
-          const icons = { All: '🍽️', Starters: '🥗', 'Main Course': '🍛', Beverages: '🥤', Bread: '🍞', Desserts: '🍰' };
+          const categorySvgIcons = {
+            All: (
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
+              </svg>
+            ),
+            Beverages: (
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+                <line x1="6" x2="6" y1="2" y2="8" />
+              </svg>
+            ),
+            Bread: (
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M7 20h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3z" />
+                <path d="M7 8h10M7 12h10M7 16h10" />
+              </svg>
+            ),
+            'Main Course': (
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M3 17h18a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2z" />
+                <path d="M5 17a7 7 0 0 1 14 0" />
+                <circle cx="12" cy="10" r="1" />
+              </svg>
+            ),
+            Starters: (
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M2 12h20M12 2v10" />
+                <path d="M2 12a10 10 0 0 0 20 0Z" />
+              </svg>
+            ),
+            Desserts: (
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 7v10l10 5 10-5V7" />
+                <circle cx="12" cy="12" r="1.5" />
+              </svg>
+            )
+          };
           const isActive = activeCategory === c;
           return (
             <button key={c} onClick={() => setActiveCategory(c)}
@@ -1054,7 +1096,13 @@ const CustomerMenu = () => {
                   ? 'bg-orange-100 text-orange-650 border-orange-300 shadow-sm scale-105' 
                   : 'bg-white text-gray-700 border-gray-100 hover:bg-slate-50 active:scale-95'
               }`}>
-              <span>{icons[c] || '🍴'}</span>
+              <span className={isActive ? 'text-orange-600' : 'text-gray-500'}>
+                {categorySvgIcons[c] || (
+                  <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                )}
+              </span>
               <span>{c}</span>
             </button>
           );
@@ -1118,67 +1166,90 @@ const CustomerMenu = () => {
             return viewMode === 'grid' ? (
               /* Grid Layout Card */
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
-                className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden flex flex-col p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer group relative">
+                className="bg-white rounded-3xl border border-slate-100/70 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex flex-col justify-between relative group select-none">
                 
-                {/* Veg/Nonveg label badge */}
-                <div className="flex justify-between items-center mb-3 select-none">
-                  <div className="bg-white p-1 rounded-lg border border-slate-100 shadow-sm flex items-center justify-center w-6 h-6">
-                    <div className={`w-4 h-4 border flex items-center justify-center rounded ${isNonVeg ? 'border-red-500 bg-red-50' : 'border-emerald-500 bg-emerald-50'}`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${isNonVeg ? 'bg-red-500' : 'bg-emerald-500'}`} />
-                    </div>
-                  </div>
-                  
+                {/* Top Badge and Fav */}
+                <div className="flex justify-between items-center select-none mb-3">
                   {item.category === 'Desserts' ? (
-                    <span className="text-[8px] bg-orange-50 text-orange-700 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Bestseller</span>
+                    <span className="text-[8.5px] bg-orange-50 text-orange-700 font-extrabold px-2 py-0.8 rounded-lg uppercase tracking-wider border border-orange-100 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500" /> Bestseller
+                    </span>
                   ) : isNonVeg ? (
-                    <span className="text-[8px] bg-red-55 text-red-700 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Spicy</span>
+                    <span className="text-[8.5px] bg-red-50 text-red-700 font-extrabold px-2 py-0.8 rounded-lg uppercase tracking-wider border border-red-100 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Spicy
+                    </span>
                   ) : (
-                    <span className="text-[8px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Veg</span>
+                    <span className="text-[8.5px] bg-emerald-50 text-emerald-700 font-extrabold px-2 py-0.8 rounded-lg uppercase tracking-wider border border-emerald-100 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Veg
+                    </span>
                   )}
                   
-                  <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-350 hover:text-red-500 transition-colors">
-                    <span className="text-sm">❤️</span>
+                  <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-350 hover:text-red-500 transition-colors p-1 bg-slate-50/50 rounded-full active:scale-90">
+                    <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
                   </button>
                 </div>
 
-                {/* Center Food Graphic */}
-                <div className="h-28 w-full flex items-center justify-center mb-4 group-hover:scale-105 transition-transform select-none">
-                  <MenuItemImage src={item.image} alt={item.name}
-                    imgClassName="h-28 w-full object-cover rounded-2xl"
-                    emojiClassName="text-6xl drop-shadow-md" />
-                </div>
-
-                {/* Details */}
-                <div className="space-y-1 flex-grow">
-                  <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
-                  <p className="text-[10px] text-slate-400 leading-relaxed line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
-                </div>
-
-                {/* Price & Add Block */}
-                <div className="flex items-center justify-between mt-4 border-t border-slate-50 pt-3 select-none">
-                  <span className="text-sm font-black text-orange-600">₹{item.price}</span>
+                {/* Content middle: Image on left, Details on right */}
+                <div className="flex gap-3 items-center mb-3">
+                  <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform duration-300">
+                    <MenuItemImage src={item.image} alt={item.name}
+                      imgClassName="w-20 h-20 object-cover"
+                      emojiClassName="text-4xl" />
+                  </div>
                   
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <h4 className="text-xs font-black text-slate-800 line-clamp-1 leading-tight">{item.name}</h4>
+                    <p className="text-[9.5px] text-slate-400 mt-1 leading-normal line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
+                    <span className="text-xs font-black text-orange-500 mt-1.5">₹{item.price}</span>
+                  </div>
+                </div>
+
+                {/* Bottom Row Actions */}
+                <div className="flex items-center justify-between border-t border-slate-50 pt-2.5" onClick={e => e.stopPropagation()}>
                   {qtyInCart > 0 ? (
-                    <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-xl p-0.5" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center gap-1 bg-slate-100/50 border border-slate-150/50 rounded-xl p-0.5">
                       <button onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
                         if (idx > -1) {
                           if (cart[idx].qty === 1) removeFromCart(idx);
                           else updateQty(idx, -1);
                         }
-                      }} className="w-6 h-6 rounded-lg bg-white shadow-sm font-extrabold text-orange-655 flex items-center justify-center active:scale-90">-</button>
+                      }} className="w-6.5 h-6.5 rounded-lg bg-white shadow-sm font-extrabold text-orange-655 flex items-center justify-center active:scale-90">-</button>
                       <span className="text-[10px] font-black text-slate-800 px-1 w-4.5 text-center">{qtyInCart}</span>
                       <button onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
                         updateQty(idx, 1);
-                      }} className="w-6 h-6 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
+                      }} className="w-6.5 h-6.5 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
                     </div>
                   ) : (
-                    <button onClick={(e) => { e.stopPropagation(); addToCart(item); toast.success(`🛒 Added ${item.name}!`); }}
-                      className="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-500 border border-orange-200/50 hover:border-orange-500 text-orange-600 hover:text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
-                      <span>ADD</span>
-                    </button>
+                    <div className="flex items-center gap-1 bg-slate-100/50 border border-slate-155/50 rounded-xl p-0.5">
+                      <button className="w-6.5 h-6.5 rounded-lg bg-white/70 font-extrabold text-slate-300 flex items-center justify-center">-</button>
+                      <span className="text-[10px] font-black text-slate-400 px-1 w-4.5 text-center">1</span>
+                      <button onClick={() => { addToCart(item); toast.success(`🛒 Added ${item.name}!`); }} className="w-6.5 h-6.5 rounded-lg bg-white shadow-sm hover:bg-slate-50 font-extrabold text-orange-500 flex items-center justify-center active:scale-90">+</button>
+                    </div>
                   )}
+
+                  <button onClick={() => {
+                    if (qtyInCart === 0) {
+                      addToCart(item);
+                      toast.success(`🛒 Added ${item.name}!`);
+                    } else {
+                      setStage('cart');
+                    }
+                  }}
+                    className={`px-3.5 py-1.8 flex items-center gap-1 text-[9px] font-black rounded-xl cursor-pointer transition-all active:scale-95 ${
+                      qtyInCart > 0 
+                        ? 'bg-emerald-500 text-white shadow-sm'
+                        : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md shadow-orange-500/10'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                    <span>{qtyInCart > 0 ? 'ADDED' : 'ADD'}</span>
+                  </button>
                 </div>
 
               </div>
