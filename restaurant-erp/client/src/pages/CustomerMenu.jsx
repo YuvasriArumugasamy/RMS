@@ -749,10 +749,13 @@ const CustomerMenu = () => {
                 }}
                 className="flex flex-col items-center -mt-8 cursor-pointer select-none"
               >
-                <span className="h-15 w-15 rounded-full bg-gradient-to-br from-orange-500 to-orange-400 flex flex-col items-center justify-center ring-4 ring-white shadow-lg active:scale-95 transition-transform text-white gap-0.5">
-                  {item.icon}
-                  <span className="text-[7.5px] font-black tracking-wider uppercase text-white mt-0.5">{item.label}</span>
-                </span>
+                <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center ring-4 ring-white shadow-xl active:scale-95 transition-transform overflow-hidden border border-slate-100/50">
+                  <img 
+                    src={logoImage} 
+                    alt="Scan Menu" 
+                    className="w-full h-full object-cover rounded-full" 
+                  />
+                </div>
               </button>
             );
           }
