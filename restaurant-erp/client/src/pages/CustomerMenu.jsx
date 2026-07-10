@@ -1068,14 +1068,7 @@ const CustomerMenu = () => {
             </div>
           </div>
 
-          {/* Burger Graphic on desktop */}
-          <div className="hidden lg:block relative shrink-0">
-            <img
-              src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=700&q=80"
-              alt="Burger and fries"
-              className="rounded-3xl w-full h-48 object-cover shadow-2xl border border-white/5"
-            />
-          </div>
+
         </div>
       </div>
 
