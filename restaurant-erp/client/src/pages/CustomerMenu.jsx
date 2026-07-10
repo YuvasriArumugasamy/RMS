@@ -1056,7 +1056,7 @@ const CustomerMenu = () => {
                   value={searchQuery} 
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder={t.searchPlaceholder}
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-400 text-xs font-semibold focus:outline-none focus:bg-white/10 focus:border-orange-500/50 transition-all"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/25 focus:border-orange-500 transition-all shadow-md border border-slate-100/50"
                 />
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
               </div>
