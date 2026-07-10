@@ -5,6 +5,7 @@ import axios from 'axios';
 import QRCode from 'react-qr-code';
 import { toast } from 'react-toastify';
 import MenuItemImage from '../components/MenuItemImage';
+import logoImage from '../assets/Screenshot 2026-07-02 173735.png';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -516,18 +517,14 @@ const CustomerMenu = () => {
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          {/* QR Code medallion */}
+          {/* Logo medallion */}
           <div className="absolute -top-14 left-1/2 -translate-x-1/2">
-            <div className="rounded-full bg-white p-3 shadow-lg shadow-orange-200 ring-4 ring-white">
-              <div className="rounded-full bg-white p-3">
-                <QRCode
-                  value={window.location.href}
-                  size={100}
-                  level="H"
-                  fgColor="#1a1a1a"
-                  bgColor="#ffffff"
-                />
-              </div>
+            <div className="rounded-full bg-white p-1.5 shadow-lg shadow-orange-200 ring-4 ring-white flex items-center justify-center">
+              <img 
+                src={logoImage} 
+                alt="Resto Logo" 
+                className="w-24 h-24 rounded-full object-cover" 
+              />
             </div>
           </div>
 
