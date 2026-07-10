@@ -998,7 +998,7 @@ const CustomerMenu = () => {
     <AppShell>
       {/* Hero Banner */}
       <div 
-        className="relative rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-6 bg-cover bg-center select-none"
+        className="relative -mx-6 sm:mx-0 rounded-none rounded-b-[2.2rem] sm:rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-0 sm:mt-6 bg-cover bg-center select-none"
         style={{ backgroundImage: `url(${bannerBgImage})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-0" />
