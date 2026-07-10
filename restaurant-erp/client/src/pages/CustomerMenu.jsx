@@ -1009,7 +1009,7 @@ const CustomerMenu = () => {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsDrawerOpen(true)}
-              className="text-white text-2xl hover:text-orange-400 transition-colors focus:outline-none cursor-pointer"
+              className="lg:hidden text-white text-2xl hover:text-orange-400 transition-colors focus:outline-none cursor-pointer"
             >
               ☰
             </button>
@@ -2252,42 +2252,84 @@ const CustomerMenu = () => {
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 flex overflow-hidden lg:hidden" onClick={() => setIsDrawerOpen(false)}>
           {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/45 transition-opacity duration-300" />
+          <div className="fixed inset-0 bg-black/55 transition-opacity duration-300" />
           
           {/* Drawer Panel */}
           <div 
-            className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-2xl transition-transform duration-300 transform translate-x-0"
+            className="relative flex-1 flex flex-col max-w-xs w-full bg-[#0B0F19] text-white shadow-2xl transition-transform duration-300 transform translate-x-0"
             onClick={e => e.stopPropagation()}
           >
-            {/* Header: User Profile Card */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between select-none">
+            {/* Header: Resto QR Brand Logo */}
+            <div className="p-6 border-b border-white/5 flex items-center justify-between select-none">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-400 bg-orange-400 flex items-center justify-center text-white text-lg font-black select-none shadow-sm">
-                  👤
-                </div>
+                <div className="w-11 h-11 bg-amber-500/10 rounded-2xl flex items-center justify-center text-2xl">👨‍🍳</div>
                 <div>
-                  <h4 className="text-sm font-black text-slate-800 leading-tight">Guest User</h4>
-                  <p className="text-[10px] text-slate-400 font-bold mt-0.5">table{tableId || '01'}@restaurant.com</p>
+                  <h2 className="text-base font-black tracking-tight text-white flex items-center gap-1">
+                    Resto <span className="text-[8px] bg-orange-500 text-white font-extrabold px-1.5 py-0.5 rounded ml-1">QR</span>
+                  </h2>
+                  <p className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5">Delicious Food</p>
                 </div>
               </div>
               
               <button 
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-sm font-black"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-350 hover:text-white flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-sm"
               >
                 ✕
               </button>
             </div>
 
             {/* Scrollable Navigation List */}
-            <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5 scrollbar-none select-none">
+            <div className="flex-1 overflow-y-auto py-5 px-4 space-y-1.5 scrollbar-none select-none">
               {[
-                { id: 'welcome', label: 'Home', icon: '🏠' },
-                { id: 'menu', label: 'Menu', icon: '🍽️' },
-                { id: 'cart', label: 'Cart', badge: cart.length, icon: '🛒' },
-                { id: 'tracking', label: 'Orders', badge: placedOrders.length, icon: '📋' },
-                { id: 'favorites', label: 'Favorites', badge: favorites.length, icon: '❤️' },
-                { id: 'feedback', label: 'Profile', icon: '👤' },
+                { 
+                  id: 'menu', 
+                  label: t.menu || 'Menu', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                  )
+                },
+                { 
+                  id: 'cart', 
+                  label: t.cart || 'Cart', 
+                  badge: cart.length,
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                  )
+                },
+                { 
+                  id: 'tracking', 
+                  label: t.orders || 'Orders', 
+                  badge: placedOrders.length,
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  )
+                },
+                { 
+                  id: 'favorites', 
+                  label: 'Favorites', 
+                  badge: favorites.length,
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                  ) 
+                },
+                { 
+                  id: 'feedback', 
+                  label: t.profile || 'Profile', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  ) 
+                },
               ].map(item => {
                 const isActive = (item.id === 'favorites')
                   ? (activeCategory === 'Favorites' && stage === 'menu')
@@ -2310,18 +2352,20 @@ const CustomerMenu = () => {
                         setStage(item.id);
                       }
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       isActive 
-                        ? 'bg-orange-55/60 text-orange-500 border border-orange-100/50 shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                        ? 'bg-orange-500 text-white shadow-md shadow-orange-500/10' 
+                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3.5">
-                      <span className="text-sm">{item.icon}</span>
+                      <span className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-orange-400'}>
+                        {item.icon}
+                      </span>
                       <span>{item.label}</span>
                     </div>
                     {item.badge > 0 && (
-                      <span className="bg-orange-500 text-white text-[9px] font-extrabold rounded-full px-2 py-0.5 shadow-sm">
+                      <span className="bg-orange-600 text-white text-[9px] font-extrabold rounded-full px-2 py-0.5">
                         {item.badge}
                       </span>
                     )}
@@ -2329,16 +2373,29 @@ const CustomerMenu = () => {
                 );
               })}
 
-              <div className="h-px bg-slate-100 my-4" />
+              <div className="h-px bg-white/5 my-4" />
 
               {/* Secondary links */}
               {[
-                { id: 'offers', label: 'Offers', icon: '🏷️' },
-                { id: 'combo', label: 'Combo Offers', icon: '🎁' },
-                { id: 'wallet', label: 'Wallet', icon: '👛' },
-                { id: 'addresses', label: 'Addresses', icon: '📍' },
-                { id: 'support', label: 'Help & Support', icon: '❓' },
-                { id: 'settings', label: 'Settings', icon: '⚙️' },
+                { 
+                  id: 'offers', 
+                  label: t.offersForYou || 'Offers for You', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.43 1.43 0 002.022 0l4.318-4.318a1.43 1.43 0 000-2.022L10.16 3.659A2.25 2.25 0 009.568 3z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+                    </svg>
+                  )
+                },
+                { 
+                  id: 'support', 
+                  label: 'Help & Support', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                  )
+                },
               ].map(item => (
                 <button
                   key={item.id}
@@ -2347,42 +2404,34 @@ const CustomerMenu = () => {
                     if (item.id === 'offers') setStage('offers');
                     else toast.info(`ℹ️ ${item.label} section is coming soon!`);
                   }}
-                  className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer"
+                  className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-xs font-semibold text-gray-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer"
                 >
-                  <span className="text-sm">{item.icon}</span>
+                  <span className="text-gray-400 group-hover:text-orange-400">{item.icon}</span>
                   <span>{item.label}</span>
                 </button>
               ))}
 
               {/* Combo Offer Banner Card inside Drawer */}
-              <div className="relative bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-4 text-white overflow-hidden shadow-md mt-6 select-none flex flex-col gap-2">
+              <div className="relative bg-slate-900/60 rounded-3xl p-4 overflow-hidden border border-slate-800/80 select-none mt-6 flex flex-col gap-2">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-wider text-orange-100">Combo Offer!</p>
-                  <p className="text-white text-[11px] font-extrabold mt-0.5 leading-snug">Add any 2 items & get 15% OFF</p>
+                  <p className="text-orange-500 font-black text-xs">Today's Special</p>
+                  <p className="text-slate-300 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
                 </div>
-                <div className="relative h-20 rounded-xl overflow-hidden mt-1">
+                <div className="relative h-20 rounded-xl overflow-hidden mt-1 group">
                   <img 
                     src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" 
                     alt="Promo Combo" 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/15" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                  <button 
+                    onClick={() => { setIsDrawerOpen(false); setStage('offers'); }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[8px] font-black rounded-lg transition-all active:scale-95 uppercase cursor-pointer"
+                  >
+                    ORDER NOW
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Drawer Footer: Logout button */}
-            <div className="p-4 border-t border-slate-100">
-              <button 
-                onClick={() => {
-                  setIsDrawerOpen(false);
-                  toast.success('👋 Checked out successfully!');
-                  setStage('welcome');
-                }}
-                className="w-full py-3.5 border border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-500 hover:text-red-500 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <span>🔄</span> Logout
-              </button>
             </div>
 
           </div>
