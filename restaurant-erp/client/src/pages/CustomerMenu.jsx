@@ -559,28 +559,30 @@ const CustomerMenu = () => {
           <div className="mt-5 flex items-center justify-center gap-4 select-none">
             <div className="flex flex-col items-center gap-1">
               <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M4 12h16" />
+                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="6" height="6" rx="1" />
+                  <rect x="15" y="3" width="6" height="6" rx="1" />
+                  <rect x="3" y="15" width="6" height="6" rx="1" />
+                  <path d="M16 16h2v2h-2zm-3-3h3v3h-3zm3 0h2v2h-2zm0 5h2v2h-2zm-3 0h2v2h-2z" />
                 </svg>
               </div>
-              <span className="text-[9px] text-[#334155] font-black uppercase tracking-widest mt-1">Scan</span>
+              <span className="text-[10px] text-gray-550 font-bold mt-1">Scan</span>
             </div>
             
-            <span className="text-orange-500 font-black text-xs mb-4">&raquo;</span>
+            <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
 
             <div className="flex flex-col items-center gap-1">
               <div className="text-orange-500">
                 <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M6 2v7a3 3 0 0 0 3 3v8h2v-8a3 3 0 0 0 3-3V2" />
-                  <path d="M9 2v5" />
-                  <path d="M12 2v5" />
-                  <path d="M18 2v6a3 3 0 0 1-3 3v9h-2v-9a3 3 0 0 1-3-3V2z" />
+                  <path d="M3 17h18a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2z" />
+                  <path d="M5 17a7 7 0 0 1 14 0" />
+                  <path d="M12 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                 </svg>
               </div>
-              <span className="text-[9px] text-[#334155] font-black uppercase tracking-widest mt-1">Order</span>
+              <span className="text-[10px] text-gray-550 font-bold mt-1">Order</span>
             </div>
 
-            <span className="text-orange-500 font-black text-xs mb-4">&raquo;</span>
+            <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
 
             <div className="flex flex-col items-center gap-1">
               <div className="text-orange-500">
@@ -591,7 +593,7 @@ const CustomerMenu = () => {
                   <line x1="15" x2="15.01" y1="9" y2="9" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </div>
-              <span className="text-[9px] text-[#334155] font-black uppercase tracking-widest mt-1">Enjoy</span>
+              <span className="text-[10px] text-gray-550 font-bold mt-1">Enjoy</span>
             </div>
           </div>
 
