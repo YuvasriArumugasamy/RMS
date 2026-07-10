@@ -136,6 +136,7 @@ const CustomerMenu = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // grid | list
 
   // ── Voice Order State ─────────────────────────────────────
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -714,84 +715,48 @@ const CustomerMenu = () => {
                       <span>{item.label}</span>
                     </div>
                     {item.badge > 0 && (
-                      <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Bottom special item */}
-          <div className="relative bg-slate-900 rounded-3xl p-5 overflow-hidden border border-slate-800 shadow-2xl">
-            <div className="absolute inset-0 bg-black/60 z-10" />
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400')] bg-cover bg-center" />
-            <div className="relative z-20 space-y-3">
-              <span className="text-[8px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Today's Special</span>
-              <h3 className="text-xs font-black text-white leading-normal">Get 20% OFF on your first order!</h3>
-              <button onClick={() => setStage('offers')} className="w-full py-2 bg-white hover:bg-slate-100 text-[#0B0F19] font-black text-[9px] rounded-xl transition-all uppercase tracking-wider">Order Now</button>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
-          {/* Header */}
-          <header className="flex items-center justify-between bg-white border-b border-slate-100 px-6 py-4.5 shrink-0 select-none">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 px-3.5 py-1.5 rounded-full text-orange-600 shadow-sm">
-                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-wider">{'Table ' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              {voiceSupported && (
-                <button
-                  onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
-                  className="flex items-center gap-1.5 px-4.5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  🎤 <span>Voice</span>
-                </button>
-              )}
-              <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                <span className="text-lg">🔔</span>
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full" />
-              </button>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 border-2 border-white shadow-sm flex items-center justify-center text-white font-black text-xs">
-                👤
-              </div>
-            </div>
-          </header>
-
-          {/* Main content body */}
-          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 p-6">
-            {children}
-          </main>
-
-          {/* Mobile bottom nav */}
-          <div className="lg:hidden">
-            <BottomNav />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  /* ── STAGE: MENU ── */
+                      <span classN  /* ── STAGE: MENU ── */
   const MenuStage = () => (
     <AppShell>
       {/* Hero Banner */}
-      <div className="relative bg-gradient-to-br from-[#0B0F19] to-slate-900 rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6">
+      <div className="relative bg-gradient-to-r from-[#181614] via-[#221c17] to-[#2b1f14] rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-44 h-44 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-4 max-w-md text-center md:text-left w-full">
-            <span className="text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 font-black px-3 py-1 rounded-full uppercase tracking-wider">Resto Special</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">Good Food,<br />Great Mood!</h2>
+        {/* Table, Voice, Notification inside Hero Header */}
+        <div className="flex items-center justify-between mb-6 select-none relative z-10">
+          <span className="inline-block border border-orange-400 text-orange-400 text-[10px] font-bold tracking-wide rounded-full px-4 py-1.5 uppercase">
+            TABLE {tableInfo.name.match(/\d+/)?.[0] || tableId}
+          </span>
+          <div className="flex items-center gap-3">
+            {voiceSupported && (
+              <button 
+                onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
+                className="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-450 text-white text-xs font-black rounded-full px-4 py-2 hover:from-orange-600 hover:to-orange-500 shadow-lg shadow-orange-500/10 transition-all active:scale-95 cursor-pointer"
+              >
+                🎤 Voice
+              </button>
+            )}
+            <button className="relative bg-white/10 hover:bg-white/15 rounded-full p-2.5 transition-colors cursor-pointer">
+              <svg className="h-4.5 w-4.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a9.04 9.04 0 01-1.201 1.492M14.857 17.082a9.04 9.04 0 01-1.201-1.492m0 0a8.96 8.96 0 01-3.204 0m3.204 0V14.3a3 3 0 00-3-3m3 3a3 3 0 003-3v-1.302M12 9V3M3.105 13H5m14 0h1.895M6.208 6.208L7.62 7.62m8.76-8.76L17.79 7.62M3.105 13a9.006 9.006 0 0017.79 0" />
+              </svg>
+              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                9
+              </span>
+            </button>
+            <div className="h-9 w-9 rounded-full object-cover ring-2 ring-orange-400 bg-orange-400 flex items-center justify-center text-white text-xs font-black select-none shadow-sm">
+              👤
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 grid lg:grid-cols-2 gap-6 items-center">
+          <div className="space-y-4 max-w-md">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+              Good Food,<br />
+              <span className="text-orange-400">Great</span> Mood!
+            </h2>
             <p className="text-[11px] text-slate-400 font-medium">Explore our delicious menu and place your order</p>
             
             {/* Search Input nested in hero */}
@@ -806,30 +771,36 @@ const CustomerMenu = () => {
                 />
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
               </div>
-              <button className="p-3.5 bg-orange-500 hover:bg-orange-600 rounded-2xl text-white shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center shrink-0">
-                <span className="text-xs">⚙️</span>
+              <button className="p-3.5 bg-orange-500 hover:bg-orange-600 rounded-2xl text-white shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                </svg>
               </button>
             </div>
           </div>
 
-          {/* Burger Graphic */}
-          <div className="w-36 h-36 md:w-44 md:h-44 relative shrink-0">
-            <span className="text-8xl md:text-9xl drop-shadow-2xl animate-bounce block select-none">🍔</span>
+          {/* Burger Graphic on desktop */}
+          <div className="hidden lg:block relative shrink-0">
+            <img
+              src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=700&q=80"
+              alt="Burger and fries"
+              className="rounded-3xl w-full h-48 object-cover shadow-2xl border border-white/5"
+            />
           </div>
         </div>
       </div>
 
       {/* Categories Horizontal Scroll */}
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none mb-6">
+      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none mb-6 select-none">
         {categories.map(c => {
           const icons = { All: '🍽️', Starters: '🥗', 'Main Course': '🍛', Beverages: '🥤', Bread: '🍞', Desserts: '🍰' };
           const isActive = activeCategory === c;
           return (
             <button key={c} onClick={() => setActiveCategory(c)}
-              className={`flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-black transition-all ${
+              className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black transition-all border ${
                 isActive 
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 scale-105' 
-                  : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 active:scale-95'
+                  ? 'bg-orange-100 text-orange-650 border-orange-300 shadow-sm scale-105' 
+                  : 'bg-white text-gray-700 border-gray-100 hover:bg-slate-50 active:scale-95'
               }`}>
               <span>{icons[c] || '🍴'}</span>
               <span>{c}</span>
@@ -838,33 +809,67 @@ const CustomerMenu = () => {
         })}
       </div>
 
-      {/* Grid of Dishes */}
+      {/* Popular dishes header */}
       <div className="space-y-4">
-        <div className="flex justify-between items-center select-none">
-          <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Popular Dishes</h3>
+        <div className="flex justify-between items-center select-none flex-wrap gap-3">
+          <h3 className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase tracking-wider">
+            <span className="text-orange-500">✦</span> Popular Dishes
+          </h3>
           <div className="flex items-center gap-3">
-            <select className="text-[10px] font-bold text-slate-500 bg-white border border-slate-150 rounded-xl px-2.5 py-1.5 focus:outline-none">
-              <option>Sort by: Popular</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-            </select>
-            <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
-              <button className="p-1.5 bg-white shadow-sm rounded-lg text-[10px]">📅</button>
-              <button className="p-1.5 text-slate-400 text-[10px]">📋</button>
-            </div>
+            <button className="flex items-center gap-1.5 bg-white border border-slate-150 rounded-full px-4 py-2 text-xs font-bold text-gray-600 shadow-sm">
+              Sort by: Popular 
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+            
+            {/* View Mode Buttons */}
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`rounded-full p-2.5 transition-colors cursor-pointer shadow-sm ${
+                viewMode === "grid"
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {/* Grid icon */}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`rounded-full p-2.5 transition-colors cursor-pointer shadow-sm ${
+                viewMode === "list"
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {/* List icon */}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {/* Dish cards mapping */}
+        <div className={`grid gap-5 ${
+          viewMode === "grid"
+            ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            : "grid-cols-1"
+        }`}>
           {filteredMenu.map(item => {
             const isNonVeg = ['chicken', 'biryani', 'fish', 'prawn', 'meat', 'mutton', 'egg'].some(keyword => item.name.toLowerCase().includes(keyword));
             const qtyInCart = cart.find(ci => ci.id === item.id)?.qty || 0;
-            return (
+            
+            return viewMode === 'grid' ? (
+              /* Grid Layout Card */
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
                 className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden flex flex-col p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer group relative">
                 
                 {/* Veg/Nonveg label badge */}
-                <div className="flex justify-between items-center mb-3">
+                <div className="flex justify-between items-center mb-3 select-none">
                   <div className="bg-white p-1 rounded-lg border border-slate-100 shadow-sm flex items-center justify-center w-6 h-6">
                     <div className={`w-4 h-4 border flex items-center justify-center rounded ${isNonVeg ? 'border-red-500 bg-red-50' : 'border-emerald-500 bg-emerald-50'}`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${isNonVeg ? 'bg-red-500' : 'bg-emerald-500'}`} />
@@ -872,21 +877,21 @@ const CustomerMenu = () => {
                   </div>
                   
                   {item.category === 'Desserts' ? (
-                    <span className="text-[8px] bg-orange-50 text-orange-600 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Bestseller</span>
+                    <span className="text-[8px] bg-orange-50 text-orange-700 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Bestseller</span>
                   ) : isNonVeg ? (
-                    <span className="text-[8px] bg-red-50 text-red-600 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Spicy</span>
+                    <span className="text-[8px] bg-red-55 text-red-700 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Spicy</span>
                   ) : (
-                    <span className="text-[8px] bg-emerald-50 text-emerald-600 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Veg</span>
+                    <span className="text-[8px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Veg</span>
                   )}
                   
-                  <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-300 hover:text-red-500 transition-colors">
+                  <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-350 hover:text-red-500 transition-colors">
                     <span className="text-sm">❤️</span>
                   </button>
                 </div>
 
                 {/* Center Food Graphic */}
-                <div className="h-28 w-full flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <span className="text-6xl drop-shadow-md select-none">{item.image}</span>
+                <div className="h-28 w-full flex items-center justify-center mb-4 group-hover:scale-105 transition-transform select-none">
+                  <span className="text-6xl drop-shadow-md">{item.image}</span>
                 </div>
 
                 {/* Details */}
@@ -896,7 +901,7 @@ const CustomerMenu = () => {
                 </div>
 
                 {/* Price & Add Block */}
-                <div className="flex items-center justify-between mt-4 border-t border-slate-50 pt-3">
+                <div className="flex items-center justify-between mt-4 border-t border-slate-50 pt-3 select-none">
                   <span className="text-sm font-black text-orange-600">₹{item.price}</span>
                   
                   {qtyInCart > 0 ? (
@@ -907,7 +912,7 @@ const CustomerMenu = () => {
                           if (cart[idx].qty === 1) removeFromCart(idx);
                           else updateQty(idx, -1);
                         }
-                      }} className="w-6 h-6 rounded-lg bg-white shadow-sm font-extrabold text-orange-600 flex items-center justify-center active:scale-90">-</button>
+                      }} className="w-6 h-6 rounded-lg bg-white shadow-sm font-extrabold text-orange-655 flex items-center justify-center active:scale-90">-</button>
                       <span className="text-[10px] font-black text-slate-800 px-1 w-4.5 text-center">{qtyInCart}</span>
                       <button onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
@@ -916,7 +921,67 @@ const CustomerMenu = () => {
                     </div>
                   ) : (
                     <button onClick={(e) => { e.stopPropagation(); addToCart(item); toast.success(`🛒 Added ${item.name}!`); }}
-                      className="px-3 py-1.5 bg-orange-50 hover:bg-orange-500 border border-orange-200/50 hover:border-orange-500 text-orange-600 hover:text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
+                      className="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-500 border border-orange-200/50 hover:border-orange-500 text-orange-600 hover:text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
+                      <span>ADD</span>
+                    </button>
+                  )}
+                </div>
+
+              </div>
+            ) : (
+              /* List Layout Card */
+              <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
+                className="bg-white rounded-[1.5rem] border border-slate-100 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex gap-5 items-center relative select-none">
+                
+                {/* Food Graphic Left */}
+                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <span className="text-4xl">{item.image}</span>
+                </div>
+                
+                {/* Content Center */}
+                <div className="flex-grow min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5 select-none">
+                    <div className="bg-white p-0.5 rounded border border-slate-100 shadow-sm flex items-center justify-center w-5 h-5">
+                      <div className={`w-3 h-3 border flex items-center justify-center rounded-sm ${isNonVeg ? 'border-red-500 bg-red-50' : 'border-emerald-500 bg-emerald-50'}`}>
+                        <div className={`w-1 h-1 rounded-full ${isNonVeg ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                      </div>
+                    </div>
+                    
+                    {item.category === 'Desserts' ? (
+                      <span className="text-[8.5px] bg-orange-50 text-orange-700 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Bestseller</span>
+                    ) : isNonVeg ? (
+                      <span className="text-[8.5px] bg-red-50 text-red-700 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Spicy</span>
+                    ) : (
+                      <span className="text-[8.5px] bg-emerald-50 text-emerald-700 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Veg</span>
+                    )}
+                  </div>
+                  
+                  <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
+                  <p className="text-[10px] text-slate-400 mt-1 leading-relaxed line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
+                </div>
+                
+                {/* Actions Right */}
+                <div className="flex flex-col items-end gap-3.5 shrink-0 select-none">
+                  <span className="text-xs font-black text-orange-600">₹{item.price}</span>
+                  
+                  {qtyInCart > 0 ? (
+                    <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-xl p-0.5" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => {
+                        const idx = cart.findIndex(ci => ci.id === item.id);
+                        if (idx > -1) {
+                          if (cart[idx].qty === 1) removeFromCart(idx);
+                          else updateQty(idx, -1);
+                        }
+                      }} className="w-6 h-6 rounded-lg bg-white shadow-sm font-extrabold text-orange-600 flex items-center justify-center active:scale-90">-</button>
+                      <span className="text-[10px] font-black text-slate-800 px-1 w-4 text-center">{qtyInCart}</span>
+                      <button onClick={() => {
+                        const idx = cart.findIndex(ci => ci.id === item.id);
+                        updateQty(idx, 1);
+                      }} className="w-6 h-6 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
+                    </div>
+                  ) : (
+                    <button onClick={(e) => { e.stopPropagation(); addToCart(item); toast.success(`🛒 Added ${item.name}!`); }}
+                      className="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-500 border border-orange-200/50 hover:border-orange-500 text-orange-600 hover:text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
                       <span>ADD</span>
                     </button>
                   )}
@@ -926,7 +991,6 @@ const CustomerMenu = () => {
             );
           })}
         </div>
-
         {/* Combo Offer Banner */}
         <div className="bg-[#FFF7ED] rounded-3xl p-5 border border-orange-100 flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 select-none shadow-sm">
           <div className="flex items-center gap-3">
