@@ -950,34 +950,6 @@ const CustomerMenu = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col h-full overflow-hidden">
-          {/* Header */}
-          <header className="flex items-center justify-between bg-white border-b border-slate-100 px-6 py-4.5 shrink-0 select-none">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 px-3.5 py-1.5 rounded-full text-orange-600 shadow-sm">
-                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-wider">{'Table ' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              {voiceSupported && (
-                <button
-                  onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
-                  className="flex items-center gap-1.5 px-4.5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  🎤 <span>Voice</span>
-                </button>
-              )}
-              <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                <span className="text-lg">🔔</span>
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full" />
-              </button>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 border-2 border-white shadow-sm flex items-center justify-center text-white font-black text-xs">
-                👤
-              </div>
-            </div>
-          </header>
-
           {/* Main content body */}
           <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 p-6">
             {children}
