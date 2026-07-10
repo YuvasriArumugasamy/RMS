@@ -733,7 +733,7 @@ const CustomerMenu = () => {
     ];
 
     return (
-      <div className="fixed bottom-4 left-4 right-4 bg-white rounded-[2rem] px-5 py-2.5 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.06)] z-40 select-none border border-slate-100/80">
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[1.8rem] px-6 py-3 flex items-center justify-between shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-40 select-none border-t border-slate-100 pb-safe">
         {items.map(item => {
           const isActive = (item.id === 'menu')
             ? (stage === 'menu' && activeCategory !== 'Favorites')
@@ -976,7 +976,7 @@ const CustomerMenu = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* Main content body */}
-          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 p-6">
+          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 px-6 pt-0">
             {children}
           </main>
 
@@ -993,7 +993,7 @@ const CustomerMenu = () => {
   const MenuStage = () => (
     <AppShell>
       {/* Hero Banner */}
-      <div className="relative bg-gradient-to-r from-[#181614] via-[#221c17] to-[#2b1f14] rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6">
+      <div className="relative bg-gradient-to-r from-[#181614] via-[#221c17] to-[#2b1f14] rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-44 h-44 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
         
