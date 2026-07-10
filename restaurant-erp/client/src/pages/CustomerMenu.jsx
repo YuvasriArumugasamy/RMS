@@ -6,6 +6,7 @@ import QRCode from 'react-qr-code';
 import { toast } from 'react-toastify';
 import MenuItemImage from '../components/MenuItemImage';
 import logoImage from '../assets/Screenshot 2026-07-02 173735.png';
+import bannerBgImage from '../assets/ChatGPT Image Jul 10, 2026, 06_08_46 PM.png';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -996,9 +997,11 @@ const CustomerMenu = () => {
   const MenuStage = () => (
     <AppShell>
       {/* Hero Banner */}
-      <div className="relative bg-gradient-to-r from-[#181614] via-[#221c17] to-[#2b1f14] rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-6">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-44 h-44 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div 
+        className="relative rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-6 bg-cover bg-center select-none"
+        style={{ backgroundImage: `url(${bannerBgImage})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-0" />
         
         {/* Table, Voice, Notification inside Hero Header */}
         <div className="flex items-center justify-between mb-6 select-none relative z-10">
