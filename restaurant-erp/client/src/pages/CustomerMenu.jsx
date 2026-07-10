@@ -1202,9 +1202,9 @@ const CustomerMenu = () => {
 
                 {/* Content middle: Image on left, Details on right */}
                 <div className="flex gap-3 items-center mb-3">
-                  <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform duration-300">
+                  <div className="w-20 h-20 flex items-center justify-center shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
-                      imgClassName="w-20 h-20 object-cover"
+                      imgClassName="w-20 h-20 object-cover rounded-2xl"
                       emojiClassName="text-4xl" />
                   </div>
                   
@@ -1217,44 +1217,59 @@ const CustomerMenu = () => {
 
                 {/* Bottom Row Actions */}
                 <div className="flex items-center justify-between border-t border-slate-50 pt-2.5" onClick={e => e.stopPropagation()}>
-                  {qtyInCart > 0 ? (
-                    <div className="flex items-center gap-1 bg-slate-100/50 border border-slate-150/50 rounded-xl p-0.5">
-                      <button onClick={() => {
+                  {/* Counter Selector */}
+                  <div className="flex items-center gap-1.5 bg-[#FFF8F2] border border-[#FFEADA] rounded-xl p-0.5 shadow-inner">
+                    <button 
+                      onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
                         if (idx > -1) {
                           if (cart[idx].qty === 1) removeFromCart(idx);
                           else updateQty(idx, -1);
                         }
-                      }} className="w-6.5 h-6.5 rounded-lg bg-white shadow-sm font-extrabold text-orange-655 flex items-center justify-center active:scale-90">-</button>
-                      <span className="text-[10px] font-black text-slate-800 px-1 w-4.5 text-center">{qtyInCart}</span>
-                      <button onClick={() => {
+                      }} 
+                      className={`w-6.5 h-6.5 rounded-full bg-white shadow-sm font-extrabold flex items-center justify-center transition-colors active:scale-95 ${
+                        qtyInCart > 0 ? 'text-orange-500 hover:bg-slate-50' : 'text-slate-200 cursor-not-allowed'
+                      }`}
+                      disabled={qtyInCart === 0}
+                    >
+                      -
+                    </button>
+                    <span className="text-[10px] font-black text-slate-800 px-1 w-4 text-center select-none">
+                      {qtyInCart > 0 ? qtyInCart : 1}
+                    </span>
+                    <button 
+                      onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
-                        updateQty(idx, 1);
-                      }} className="w-6.5 h-6.5 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 bg-slate-100/50 border border-slate-155/50 rounded-xl p-0.5">
-                      <button className="w-6.5 h-6.5 rounded-lg bg-white/70 font-extrabold text-slate-300 flex items-center justify-center">-</button>
-                      <span className="text-[10px] font-black text-slate-400 px-1 w-4.5 text-center">1</span>
-                      <button onClick={() => { addToCart(item); toast.success(`🛒 Added ${item.name}!`); }} className="w-6.5 h-6.5 rounded-lg bg-white shadow-sm hover:bg-slate-50 font-extrabold text-orange-500 flex items-center justify-center active:scale-90">+</button>
-                    </div>
-                  )}
+                        if (idx > -1) {
+                          updateQty(idx, 1);
+                        } else {
+                          addToCart(item);
+                          toast.success(`🛒 Added ${item.name}!`);
+                        }
+                      }} 
+                      className="w-6.5 h-6.5 rounded-full bg-white shadow-sm font-extrabold text-orange-500 hover:bg-slate-50 flex items-center justify-center transition-colors active:scale-95"
+                    >
+                      +
+                    </button>
+                  </div>
 
-                  <button onClick={() => {
-                    if (qtyInCart === 0) {
-                      addToCart(item);
-                      toast.success(`🛒 Added ${item.name}!`);
-                    } else {
-                      setStage('cart');
-                    }
-                  }}
-                    className={`px-3.5 py-1.8 flex items-center gap-1 text-[9px] font-black rounded-xl cursor-pointer transition-all active:scale-95 ${
+                  {/* Add Button */}
+                  <button 
+                    onClick={() => {
+                      if (qtyInCart === 0) {
+                        addToCart(item);
+                        toast.success(`🛒 Added ${item.name}!`);
+                      } else {
+                        setStage('cart');
+                      }
+                    }}
+                    className={`px-4 py-2 flex items-center gap-1.5 text-[9px] font-black rounded-xl cursor-pointer transition-all active:scale-95 shadow-sm ${
                       qtyInCart > 0 
                         ? 'bg-emerald-500 text-white shadow-sm'
-                        : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md shadow-orange-500/10'
+                        : 'bg-orange-500 text-white hover:bg-orange-655'
                     }`}
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                     </svg>
                     <span>{qtyInCart > 0 ? 'ADDED' : 'ADD'}</span>
