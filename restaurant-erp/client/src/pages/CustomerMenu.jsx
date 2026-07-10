@@ -499,10 +499,10 @@ const CustomerMenu = () => {
     return (
       <div className="relative h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 select-none">
         {/* Decorative gradient blobs */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0" />
-        <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90" />
-        <div className="pointer-events-none absolute top-1/3 right-6 h-24 w-24 rounded-full bg-orange-100 opacity-40 blur-xl" />
-        <div className="pointer-events-none absolute bottom-1/4 left-4 h-16 w-16 rounded-full bg-[#FFE7D6] opacity-40 blur-lg" />
+        <div className="pointer-events-none absolute -top-20 -left-20 h-80 w-80 rounded-full bg-gradient-to-br from-orange-500/25 to-amber-300/25 opacity-80 blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="pointer-events-none absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-500/20 via-orange-300/20 to-amber-200/20 opacity-70 blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
+        <div className="pointer-events-none absolute top-1/3 right-6 h-24 w-24 rounded-full bg-orange-100/40 opacity-40 blur-xl" />
+        <div className="pointer-events-none absolute bottom-1/4 left-4 h-16 w-16 rounded-full bg-[#FFE7D6]/40 opacity-40 blur-lg" />
 
         {/* Dot grid decoration (top-right) */}
         <div className="pointer-events-none absolute top-8 right-8 grid grid-cols-5 gap-2">
@@ -555,22 +555,24 @@ const CustomerMenu = () => {
             </div>
           </div>
 
-          {/* Scan -> Order -> Enjoy steps */}
-          <div className="mt-5 flex items-center justify-center gap-4 select-none">
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          {/* Scan -> Order -> Enjoy steps with custom animation cards */}
+          <div className="mt-5 flex items-center justify-center gap-3.5 select-none">
+            <div className="flex flex-col items-center gap-1 group">
+              <div className="w-13 h-13 bg-orange-50/70 hover:bg-orange-100/70 border border-orange-100/50 rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(249,115,22,0.04)] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer">
+                <svg className="w-6 h-6 text-orange-500 group-hover:animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M5 12h14" />
                 </svg>
               </div>
-              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Scan</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider mt-0.5">Scan</span>
             </div>
             
-            <span className="text-orange-400 font-bold text-lg mb-4">&raquo;</span>
+            <div className="flex items-center text-orange-350 font-black text-base animate-pulse py-3 select-none">
+              &raquo;
+            </div>
 
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <div className="flex flex-col items-center gap-1 group">
+              <div className="w-13 h-13 bg-orange-50/70 hover:bg-orange-100/70 border border-orange-100/50 rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(249,115,22,0.04)] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer">
+                <svg className="w-6 h-6 text-orange-500 group-hover:animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="m15 11-5 5" />
                   <path d="m19 7-3 3" />
                   <path d="M21 3v5c0 1.5-1.5 3-3 3h-1L12 16v5H8v-6l5-5V9c0-1.5 1.5-3 3-3V3Z" />
@@ -579,21 +581,23 @@ const CustomerMenu = () => {
                   <path d="M9 3v7M6 3v4" />
                 </svg>
               </div>
-              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Order</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider mt-0.5">Order</span>
             </div>
 
-            <span className="text-orange-400 font-bold text-lg mb-4">&raquo;</span>
+            <div className="flex items-center text-orange-350 font-black text-base animate-pulse py-3 select-none">
+              &raquo;
+            </div>
 
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <div className="flex flex-col items-center gap-1 group">
+              <div className="w-13 h-13 bg-orange-50/70 hover:bg-orange-100/70 border border-orange-100/50 rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(249,115,22,0.04)] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer">
+                <svg className="w-6 h-6 text-orange-500 group-hover:animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M8 14s1.5 2 4 2 4-2 4-2" />
                   <line x1="9" x2="9.01" y1="9" y2="9" />
                   <line x1="15" x2="15.01" y1="9" y2="9" />
                 </svg>
               </div>
-              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Enjoy</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider mt-0.5">Enjoy</span>
             </div>
           </div>
 
