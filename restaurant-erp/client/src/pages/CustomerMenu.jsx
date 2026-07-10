@@ -140,6 +140,7 @@ const CustomerMenu = () => {
   const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // grid | list
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -1005,9 +1006,17 @@ const CustomerMenu = () => {
         
         {/* Table, Voice, Notification inside Hero Header */}
         <div className="flex items-center justify-between mb-6 select-none relative z-10">
-          <span className="inline-block border border-orange-400 text-orange-400 text-[10px] font-bold tracking-wide rounded-full px-4 py-1.5 uppercase">
-            TABLE {tableInfo.name.match(/\d+/)?.[0] || tableId}
-          </span>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsDrawerOpen(true)}
+              className="text-white text-2xl hover:text-orange-400 transition-colors focus:outline-none cursor-pointer"
+            >
+              ☰
+            </button>
+            <span className="inline-block border border-orange-400 text-orange-400 text-[10px] font-bold tracking-wide rounded-full px-4 py-1.5 uppercase">
+              TABLE {tableInfo.name.match(/\d+/)?.[0] || tableId}
+            </span>
+          </div>
           <div className="flex items-center gap-3">
             {voiceSupported && (
               <button 
@@ -2245,6 +2254,147 @@ const CustomerMenu = () => {
       {stage === 'offers' && <OffersStage />}
       {stage === 'feedback' && <FeedbackStage />}
       {stage === 'thankYou' && <ThankYouStage />}
+
+      {/* Mobile Navigation Drawer Overlay */}
+      {isDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex overflow-hidden lg:hidden" onClick={() => setIsDrawerOpen(false)}>
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/45 transition-opacity duration-300" />
+          
+          {/* Drawer Panel */}
+          <div 
+            className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-2xl transition-transform duration-300 transform translate-x-0"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header: User Profile Card */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between select-none">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-400 bg-orange-400 flex items-center justify-center text-white text-lg font-black select-none shadow-sm">
+                  👤
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-800 leading-tight">Guest User</h4>
+                  <p className="text-[10px] text-slate-400 font-bold mt-0.5">table{tableId || '01'}@restaurant.com</p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setIsDrawerOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-sm font-black"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Scrollable Navigation List */}
+            <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5 scrollbar-none select-none">
+              {[
+                { id: 'welcome', label: 'Home', icon: '🏠' },
+                { id: 'menu', label: 'Menu', icon: '🍽️' },
+                { id: 'cart', label: 'Cart', badge: cart.length, icon: '🛒' },
+                { id: 'tracking', label: 'Orders', badge: placedOrders.length, icon: '📋' },
+                { id: 'favorites', label: 'Favorites', badge: favorites.length, icon: '❤️' },
+                { id: 'feedback', label: 'Profile', icon: '👤' },
+              ].map(item => {
+                const isActive = (item.id === 'favorites')
+                  ? (activeCategory === 'Favorites' && stage === 'menu')
+                  : ((item.id === 'menu' && activeCategory !== 'Favorites') 
+                      ? (stage === 'menu') 
+                      : (stage === item.id));
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setIsDrawerOpen(false);
+                      if (item.id === 'favorites') {
+                        setActiveCategory('Favorites');
+                        setStage('menu');
+                      } else {
+                        if (item.id === 'menu') {
+                          setActiveCategory('All');
+                        }
+                        setStage(item.id);
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-orange-55/60 text-orange-500 border border-orange-100/50 shadow-sm' 
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="text-sm">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    {item.badge > 0 && (
+                      <span className="bg-orange-500 text-white text-[9px] font-extrabold rounded-full px-2 py-0.5 shadow-sm">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              <div className="h-px bg-slate-100 my-4" />
+
+              {/* Secondary links */}
+              {[
+                { id: 'offers', label: 'Offers', icon: '🏷️' },
+                { id: 'combo', label: 'Combo Offers', icon: '🎁' },
+                { id: 'wallet', label: 'Wallet', icon: '👛' },
+                { id: 'addresses', label: 'Addresses', icon: '📍' },
+                { id: 'support', label: 'Help & Support', icon: '❓' },
+                { id: 'settings', label: 'Settings', icon: '⚙️' },
+              ].map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setIsDrawerOpen(false);
+                    if (item.id === 'offers') setStage('offers');
+                    else toast.info(`ℹ️ ${item.label} section is coming soon!`);
+                  }}
+                  className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer"
+                >
+                  <span className="text-sm">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+
+              {/* Combo Offer Banner Card inside Drawer */}
+              <div className="relative bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-4 text-white overflow-hidden shadow-md mt-6 select-none flex flex-col gap-2">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-orange-100">Combo Offer!</p>
+                  <p className="text-white text-[11px] font-extrabold mt-0.5 leading-snug">Add any 2 items & get 15% OFF</p>
+                </div>
+                <div className="relative h-20 rounded-xl overflow-hidden mt-1">
+                  <img 
+                    src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" 
+                    alt="Promo Combo" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/15" />
+                </div>
+              </div>
+            </div>
+
+            {/* Drawer Footer: Logout button */}
+            <div className="p-4 border-t border-slate-100">
+              <button 
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  toast.success('👋 Checked out successfully!');
+                  setStage('welcome');
+                }}
+                className="w-full py-3.5 border border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-500 hover:text-red-500 font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <span>🔄</span> Logout
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </>
   );
 };
