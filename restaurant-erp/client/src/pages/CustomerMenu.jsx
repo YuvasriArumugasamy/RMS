@@ -479,166 +479,158 @@ const CustomerMenu = () => {
     const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCategory && matchSearch;
   });
-  const WelcomeStage = () => (
-    <div className="min-h-screen bg-slate-50 flex font-sans overflow-hidden select-none">
-      {/* Left side: Premium Image Banner (Desktop only) */}
-      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-slate-900 select-none">
-        <div className="absolute inset-0 bg-black/45 z-10" />
-        <img 
-          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1000" 
-          alt="Gourmet food" 
-          className="absolute inset-0 w-full h-full object-cover animate-scale-slow"
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent z-15" />
-        
-        <div className="relative z-20 flex flex-col justify-between p-12 text-white h-full">
-          {/* Top Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl">👨‍🍳</div>
-            <div>
-              <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
-                Resto <span className="text-[9px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded">QR</span>
-              </h2>
-              <p className="text-[9px] text-slate-350 font-extrabold uppercase tracking-widest">Delicious Experience</p>
-            </div>
-          </div>
 
-          {/* Bottom Pitch text */}
-          <div className="space-y-4 max-w-md">
-            <span className="text-[9px] bg-orange-500 text-white font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider">Smart Dining</span>
-            <h2 className="text-4xl font-extrabold leading-tight">Savor the Taste of Premium Dining</h2>
-            <p className="text-xs text-slate-300 font-medium leading-relaxed">Scan the QR code at your table, choose your favorite dishes, and experience seamless tableside ordering.</p>
-          </div>
+  /* ── STAGE: WELCOME ── */
+  const WelcomeStage = () => {
+    const [showContent, setShowContent] = useState(false);
 
-          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">© 2026 Resto QR Inc. All rights reserved.</p>
-        </div>
-      </div>
+    useEffect(() => {
+      const t = setTimeout(() => setShowContent(true), 80);
+      return () => clearTimeout(t);
+    }, []);
 
-      {/* Right side: Welcome Form Panel (Spans 100% on mobile, 45% on desktop) */}
-      <div className="flex-1 lg:w-[45%] flex flex-col justify-between p-8 bg-white relative overflow-y-auto min-h-screen">
-        
-        {/* Top-right subtle grid of dots */}
-        <div className="absolute top-10 right-10 grid grid-cols-5 gap-1.5 opacity-25 select-none pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <div key={i} className="w-1.5 h-1.5 bg-[#F97316] rounded-full" />
+    const handleLanguageSelect = (code) => {
+      setLang(code);
+    };
+
+    return (
+      <div className="relative min-h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-10 select-none">
+        {/* Decorative gradient blobs */}
+        <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0" />
+        <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90" />
+        <div className="pointer-events-none absolute top-1/3 right-6 h-24 w-24 rounded-full bg-orange-100 opacity-40 blur-xl" />
+        <div className="pointer-events-none absolute bottom-1/4 left-4 h-16 w-16 rounded-full bg-[#FFE7D6] opacity-40 blur-lg" />
+
+        {/* Dot grid decoration (top-right) */}
+        <div className="pointer-events-none absolute top-8 right-8 grid grid-cols-5 gap-2">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <span key={i} className="h-1.5 w-1.5 rounded-full bg-orange-455/60" />
           ))}
         </div>
 
-        {/* Floating gradient circles on right panel */}
-        <div className="absolute -top-24 -left-24 w-72 h-72 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div /> {/* Top flex spacer */}
-
-        <div className="max-w-sm w-full mx-auto text-center z-10 space-y-8 py-8">
-          
-          {/* Logo / QR Glowing Container */}
-          <div className="relative w-28 h-28 mx-auto flex items-center justify-center bg-white rounded-[2rem] shadow-[0_12px_36px_rgba(249,115,22,0.12)] border border-orange-100 p-4 transition-transform hover:rotate-3 duration-300">
-            <div className="absolute inset-0 rounded-[2rem] bg-orange-400/10 animate-ping opacity-60 pointer-events-none" />
-            <QRCode
-              value={window.location.href}
-              size={76}
-              level="H"
-              fgColor="#1E293B"
-              bgColor="#ffffff"
-            />
+        {/* Card */}
+        <div
+          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/70 backdrop-blur-sm shadow-xl shadow-orange-100 px-6 pt-16 pb-8 transition-all duration-700 ease-out ${
+            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+        >
+          {/* QR Code medallion */}
+          <div className="absolute -top-14 left-1/2 -translate-x-1/2">
+            <div className="rounded-full bg-white p-3 shadow-lg shadow-orange-200 ring-4 ring-white">
+              <div className="rounded-full bg-white p-3">
+                <QRCode
+                  value={window.location.href}
+                  size={100}
+                  level="H"
+                  fgColor="#1a1a1a"
+                  bgColor="#ffffff"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Heading */}
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black tracking-tight font-sans">
-              <span className="text-[#F97316]">Wel</span>
-              <span className="text-[#334155]">come!</span>
+          <div className="text-center mt-4">
+            <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-b from-orange-500 to-amber-800 bg-clip-text text-transparent">
+              {t.welcome}
             </h1>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{t.subtitle}</p>
+            <p className="mt-2 text-gray-500 text-sm font-semibold">{t.subtitle}</p>
           </div>
 
-          {/* Table Card */}
-          <div className="bg-white rounded-[2rem] p-7 shadow-[0_15px_45px_rgba(249,115,22,0.04)] border border-slate-100/90 relative overflow-hidden transition-all hover:shadow-[0_20px_50px_rgba(249,115,22,0.08)] duration-300 group">
-            <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-50/50 rounded-full transition-transform group-hover:scale-110 duration-300" />
-            <p className="text-[10px] text-orange-500 font-extrabold uppercase tracking-widest mb-1.5">TABLE NUMBER</p>
-            <p className="text-6xl font-black tracking-tight text-slate-800 my-2 drop-shadow-sm select-all">
+          {/* Table number panel */}
+          <div className="mt-8 rounded-3xl bg-white shadow-sm border border-orange-50 py-8 px-6 text-center">
+            <p className="text-orange-500 font-bold tracking-wide text-xs mb-2">
+              {t.tableLabel}
+            </p>
+            <p className="text-7xl font-black text-gray-900 tabular-nums">
               {'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}
             </p>
-            <div className="mt-4 inline-flex items-center gap-1.5 bg-[#E8F5E9] border border-[#C8E6C9] text-[#2E7D32] px-4.5 py-1.5 rounded-full shadow-sm">
-              <span className="w-1.5 h-1.5 bg-[#4CAF50] rounded-full animate-pulse" />
-              <span className="text-[10px] font-black tracking-wider uppercase">{t.scanSuccess}</span>
+
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 border border-green-100 shadow-sm text-green-700">
+              <svg className="w-5 h-5 text-green-600 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-bold text-xs uppercase tracking-wider">
+                {t.scanSuccess}
+              </span>
             </div>
           </div>
 
-          {/* 3-step Instructions */}
-          <div className="flex items-center justify-between px-2 text-slate-400">
-            <div className="flex flex-col items-center gap-1.5 flex-1">
-              <div className="w-11 h-11 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shadow-sm">
-                <svg className="w-5.5 h-5.5 text-[#F97316]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 00-2 2h-2M7 21H5a2 2 0 01-2-2v-2M9 9h6v6H9V9z" />
+          {/* Scan -> Order -> Enjoy steps */}
+          <div className="mt-8 flex items-center justify-center gap-4 select-none">
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-orange-500">
+                <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M5 12h14" />
                 </svg>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 mt-1">Scan</span>
+              <span className="text-xs text-gray-600 font-bold uppercase tracking-wider">Scan</span>
             </div>
             
-            <span className="text-[#F97316] font-black text-lg mb-5 select-none">»</span>
-            
-            <div className="flex flex-col items-center gap-1.5 flex-1">
-              <div className="w-11 h-11 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shadow-sm">
-                <svg className="w-5.5 h-5.5 text-[#F97316]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3a1 1 0 011 1v1h.062C18.01 5.22 21 8.583 21 12.5v1H3v-1c0-3.917 2.99-7.28 7.938-7.5H11V4a1 1 0 011-1zM3 17h18a1 1 0 011 1v1H2v-1a1 1 0 011-1z" />
+            <span className="text-orange-400 font-bold text-xl mb-4">&raquo;</span>
+
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-orange-500">
+                <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="m15 11-5 5" />
+                  <path d="m19 7-3 3" />
+                  <path d="M21 3v5c0 1.5-1.5 3-3 3h-1L12 16v5H8v-6l5-5V9c0-1.5 1.5-3 3-3V3Z" />
+                  <path d="M3 14h3v7H3Z" />
+                  <path d="M3 3v7c0 1.5 1.5 3 3 3v8" />
+                  <path d="M9 3v7M6 3v4" />
                 </svg>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 mt-1">Order</span>
+              <span className="text-xs text-gray-600 font-bold uppercase tracking-wider">Order</span>
             </div>
-            
-            <span className="text-[#F97316] font-black text-lg mb-5 select-none">»</span>
-            
-            <div className="flex flex-col items-center gap-1.5 flex-1">
-              <div className="w-11 h-11 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shadow-sm">
-                <svg className="w-5.5 h-5.5 text-[#F97316]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+            <span className="text-orange-400 font-bold text-xl mb-4">&raquo;</span>
+
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-orange-500">
+                <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                  <line x1="9" x2="9.01" y1="9" y2="9" />
+                  <line x1="15" x2="15.01" y1="9" y2="9" />
                 </svg>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 mt-1">Enjoy</span>
+              <span className="text-xs text-gray-600 font-bold uppercase tracking-wider">Enjoy</span>
             </div>
           </div>
 
-          {/* Action Button */}
-          <button onClick={() => setStage('menu')}
-            className="group w-full py-4.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold rounded-full text-xs shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-between px-7 cursor-pointer hover:shadow-xl hover:shadow-orange-500/25">
-            <span className="uppercase tracking-widest font-black">{t.startOrdering}</span>
-            <span className="w-7 h-7 bg-white text-orange-600 rounded-full flex items-center justify-center text-xs font-black shadow-inner transition-transform group-hover:translate-x-1 duration-300">➔</span>
+          {/* CTA Button */}
+          <button
+            onClick={() => setStage('menu')}
+            className="mt-8 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-4 text-white font-extrabold text-sm shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
+          >
+            <span className="mx-auto">{t.startOrdering}</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-orange-500 ml-2 shadow-inner font-black">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </span>
           </button>
-        </div>
 
-        {/* Bottom Language Selector */}
-        <div className="flex justify-center gap-2.5 mt-8 z-10 pb-4">
-          {Object.keys(LANGS).map(l => {
-            const isActive = lang === l;
-            return (
-              <button key={l} onClick={() => setLang(l)}
-                className={`px-6 py-3 rounded-2xl text-[10px] font-black transition-all cursor-pointer ${
-                  isActive 
-                    ? 'bg-[#F97316] text-white border border-orange-500 shadow-md scale-105 shadow-orange-500/20' 
-                    : 'bg-slate-50 text-slate-500 border border-slate-100 hover:bg-slate-100 active:scale-95'
-                }`}>
-                {l === 'en' ? 'English' : l === 'ta' ? 'தமிழ்' : 'हिंदी'}
+          {/* Language Switcher */}
+          <div className="mt-6 flex items-center justify-center gap-3">
+            {Object.keys(LANGS).map((code) => (
+              <button
+                key={code}
+                onClick={() => handleLanguageSelect(code)}
+                className={`rounded-full px-5 py-2.5 text-xs font-black border transition-all cursor-pointer ${
+                  lang === code
+                    ? "bg-orange-500 text-white border-orange-500 shadow-md scale-105"
+                    : "bg-white text-orange-650 border-orange-200 hover:bg-slate-50 active:scale-95"
+                }`}
+              >
+                {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
-
       </div>
-
-      <style>{`
-        @keyframes scale-slow {
-          0%, 100% { transform: scale(1.02); }
-          50% { transform: scale(1.08); }
-        }
-        .animate-scale-slow {
-          animation: scale-slow 20s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
-  );
+    );
+  };
 
   /* ── BOTTOM NAV (Mobile View) ── */
   const BottomNav = () => (
