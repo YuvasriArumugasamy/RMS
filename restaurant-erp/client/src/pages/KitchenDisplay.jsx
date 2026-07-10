@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useSocket } from '../context/SocketContext';
 import { api } from '../context/AuthContext';
@@ -20,9 +20,8 @@ const KitchenDisplay = () => {
         const active = data.data.filter(o => ['Pending', 'Preparing', 'Ready'].includes(o.status));
         setOrders(active);
       }
-    } catch (err) {
-      console.warn('KDS API fetch failed, falling back to localStorage:', err?.message);
-      // fallback to localStorage if API unavailable
+    } catch {
+      // API unavailable — fallback to localStorage
       const saved = localStorage.getItem('orders');
       if (saved) {
         const parsed = JSON.parse(saved).filter(o => ['Pending', 'Preparing', 'Ready'].includes(o.status));

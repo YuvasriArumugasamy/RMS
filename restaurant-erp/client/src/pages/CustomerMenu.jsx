@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import axios from 'axios';
@@ -445,8 +445,8 @@ const CustomerMenu = () => {
         setStage('tracking');
         return;
       }
-    } catch (err) {
-      console.error('Order failed:', err);
+    } catch {
+      toast.error('Order placement failed. Please try again.');
     }
 
     // Fallback to localStorage

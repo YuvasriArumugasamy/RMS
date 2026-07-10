@@ -32,7 +32,6 @@ export const SocketProvider = ({ children }) => {
 
     socket.on('connect', () => {
       setConnected(true);
-      console.log('🔌 Socket connected:', socket.id);
       // Join role-based room so server can broadcast to specific roles
       socket.emit('join-room', 'kitchen');
       socket.emit('join-room', 'staff');
@@ -41,11 +40,9 @@ export const SocketProvider = ({ children }) => {
 
     socket.on('disconnect', () => {
       setConnected(false);
-      console.log('🔌 Socket disconnected');
     });
 
-    socket.on('connect_error', (err) => {
-      console.warn('Socket connection error:', err.message);
+    socket.on('connect_error', () => {
       setConnected(false);
     });
 
@@ -55,7 +52,7 @@ export const SocketProvider = ({ children }) => {
         try {
           new Notification(title, { body, icon, badge: '/favicon.png' });
         } catch (e) {
-          console.warn('Push notification failed:', e.message);
+          // push notification not supported or blocked
         }
       }
     };

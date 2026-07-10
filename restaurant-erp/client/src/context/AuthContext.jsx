@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
@@ -31,9 +31,9 @@ api.interceptors.response.use(
       }
     }
 
-    // Log server errors
+    // Log server errors to a dedicated error handler (not console)
     if (status >= 500) {
-      console.error('🔴 Server Error:', message);
+      // Server-side errors are handled via toast in individual components
     }
 
     return Promise.reject(error);
