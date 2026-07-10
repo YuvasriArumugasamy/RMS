@@ -364,13 +364,13 @@ const CustomerMenu = () => {
             menuItemId: item._id,
           }));
           setMenu(items);
-          setCategories(['All', ...new Set(items.map(i => i.category))]);
+          setCategories(['All', 'Favorites', ...new Set(items.map(i => i.category))]);
           return;
         }
       } catch {}
       const items = JSON.parse(localStorage.getItem('menuItems') || '[]').filter(m => m.available);
       setMenu(items);
-      setCategories(['All', ...new Set(items.map(i => i.category))]);
+      setCategories(['All', 'Favorites', ...new Set(items.map(i => i.category))]);
     };
     fetchMenu();
   }, []);
@@ -722,11 +722,12 @@ const CustomerMenu = () => {
         )
       },
       { 
-        id: 'feedback', 
-        label: t.profile || 'Profile', 
+        id: 'favorites', 
+        label: 'Favorites', 
+        badge: favorites.length,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
           </svg>
         )
       },
@@ -735,7 +736,11 @@ const CustomerMenu = () => {
     return (
       <div className="fixed bottom-4 left-4 right-4 bg-[#181614] rounded-[2rem] px-4 py-2 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.3)] z-40 select-none border border-white/[0.03]">
         {items.map(item => {
-          const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback');
+          const isActive = (item.id === 'favorites')
+            ? (activeCategory === 'Favorites' && stage === 'menu')
+            : ((item.id === 'menu' && activeCategory !== 'Favorites') 
+                ? (stage === 'menu') 
+                : (stage === item.id || (item.id === 'tracking' && stage === 'tracking')));
           
           if (item.isCenter) {
             return (
@@ -757,8 +762,15 @@ const CustomerMenu = () => {
               key={item.id} 
               onClick={() => {
                 if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
-                else if (item.id === 'feedback') setStage('feedback');
-                else setStage(item.id);
+                else if (item.id === 'favorites') {
+                  setActiveCategory('Favorites');
+                  setStage('menu');
+                } else {
+                  if (item.id === 'menu' && activeCategory === 'Favorites') {
+                    setActiveCategory('All');
+                  }
+                  setStage(item.id);
+                }
               }}
               className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all cursor-pointer relative ${
                 isActive 
@@ -1064,6 +1076,11 @@ const CustomerMenu = () => {
                 <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
                 <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
                 <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity="0.1" />
+              </svg>
+            ),
+            Favorites: (
+              <svg className="w-4.5 h-4.5 text-red-500 fill-red-500" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
               </svg>
             ),
             Beverages: (
