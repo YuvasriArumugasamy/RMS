@@ -52,20 +52,73 @@ const seedDatabase = async () => {
 
     // Create menu items with recipes
     const menuItems = await MenuItem.create([
-      { name: 'Chicken Biryani', category: 'Main Course', price: 280, available: true, image: '🍗',
-        recipe: [{ ingredientId: ingredients[0]._id, qty: 0.2 }, { ingredientId: ingredients[1]._id, qty: 0.15 }] },
-      { name: 'Paneer Tikka', category: 'Starters', price: 220, available: true, image: '🍢',
+      // Starters
+      { name: 'Veg Spring Roll', category: 'Starters', price: 149, available: true, image: '🥟', recipe: [] },
+      { name: 'Paneer Tikka', category: 'Starters', price: 199, available: true, image: '🍢',
         recipe: [{ ingredientId: ingredients[4]._id, qty: 0.2 }, { ingredientId: ingredients[5]._id, qty: 0.05 }] },
-      { name: 'Fresh Lime Soda', category: 'Beverages', price: 80, available: true, image: '🍹', recipe: [] },
-      { name: 'Butter Naan', category: 'Bread', price: 40, available: true, image: '🫓', recipe: [] },
-      { name: 'Butter Chicken', category: 'Main Course', price: 250, available: true, image: '🍛',
-        recipe: [{ ingredientId: ingredients[0]._id, qty: 0.25 }] },
-      { name: 'Veg Biryani', category: 'Main Course', price: 180, available: true, image: '🍚',
+      { name: 'Chicken 65', category: 'Starters', price: 199, available: true, image: '🍗',
+        recipe: [{ ingredientId: ingredients[0]._id, qty: 0.2 }] },
+      { name: 'Chicken Wings', category: 'Starters', price: 199, available: true, image: '🍗',
+        recipe: [{ ingredientId: ingredients[0]._id, qty: 0.2 }] },
+      { name: 'Fish Finger', category: 'Starters', price: 199, available: true, image: '🐟', recipe: [] },
+      { name: 'French Fries', category: 'Starters', price: 149, available: true, image: '🍟', recipe: [] },
+
+      // Main Course
+      { name: 'Veg Biryani', category: 'Main Course', price: 249, available: true, image: '🍚',
         recipe: [{ ingredientId: ingredients[1]._id, qty: 0.15 }, { ingredientId: ingredients[2]._id, qty: 0.1 }] },
-      { name: 'Masala Dosa', category: 'Main Course', price: 90, available: true, image: '🥞', recipe: [] },
-      { name: 'Pepsi', category: 'Beverages', price: 50, available: true, image: '🥤', recipe: [] },
+      { name: 'Chicken Biryani', category: 'Main Course', price: 299, available: true, image: '🍗',
+        recipe: [{ ingredientId: ingredients[0]._id, qty: 0.2 }, { ingredientId: ingredients[1]._id, qty: 0.15 }] },
+      { name: 'Paneer Butter Masala', category: 'Main Course', price: 249, available: true, image: '🍛',
+        recipe: [{ ingredientId: ingredients[4]._id, qty: 0.2 }] },
+      { name: 'Chicken Butter Masala', category: 'Main Course', price: 299, available: true, image: '🍛',
+        recipe: [{ ingredientId: ingredients[0]._id, qty: 0.25 }] },
+      { name: 'Veg Fried Rice', category: 'Main Course', price: 199, available: true, image: '🍚', recipe: [] },
+      { name: 'Chicken Fried Rice', category: 'Main Course', price: 249, available: true, image: '🍚', recipe: [] },
+      { name: 'Veg Noodles', category: 'Main Course', price: 199, available: true, image: '🍜', recipe: [] },
+      { name: 'Chicken Noodles', category: 'Main Course', price: 249, available: true, image: '🍜', recipe: [] },
+
+      // Bread
+      { name: 'Tandoori Roti', category: 'Bread', price: 30, available: true, image: '🫓', recipe: [] },
+      { name: 'Butter Roti', category: 'Bread', price: 40, available: true, image: '🫓', recipe: [] },
+      { name: 'Naan', category: 'Bread', price: 60, available: true, image: '🫓', recipe: [] },
+      { name: 'Butter Naan', category: 'Bread', price: 70, available: true, image: '🫓', recipe: [] },
+      { name: 'Garlic Naan', category: 'Bread', price: 80, available: true, image: '🫓', recipe: [] },
+      { name: 'Stuffed Paratha', category: 'Bread', price: 80, available: true, image: '🫓', recipe: [] },
+
+      // Pizza
+      { name: 'Margherita Pizza', category: 'Pizza', price: 249, available: true, image: '🍕', recipe: [] },
+      { name: 'Veggie Pizza', category: 'Pizza', price: 299, available: true, image: '🍕', recipe: [] },
+      { name: 'Paneer Pizza', category: 'Pizza', price: 349, available: true, image: '🍕', recipe: [] },
+      { name: 'Farm House Pizza', category: 'Pizza', price: 349, available: true, image: '🍕', recipe: [] },
+      { name: 'Chicken Tikka Pizza', category: 'Pizza', price: 399, available: true, image: '🍕', recipe: [] },
+      { name: 'BBQ Chicken Pizza', category: 'Pizza', price: 399, available: true, image: '🍕', recipe: [] },
+
+      // Beverages
+      { name: 'Fresh Lime Soda', category: 'Beverages', price: 69, available: true, image: '🍹', recipe: [] },
+      { name: 'Mint Mojito', category: 'Beverages', price: 99, available: true, image: '🍹', recipe: [] },
+      { name: 'Cold Coffee', category: 'Beverages', price: 129, available: true, image: '☕', recipe: [] },
+      { name: 'Milkshake', category: 'Beverages', price: 129, available: true, image: '🥤', recipe: [] },
+      { name: 'Lassi (Sweet / Salt)', category: 'Beverages', price: 79, available: true, image: '🥛', recipe: [] },
+      { name: 'Soft Drinks', category: 'Beverages', price: 49, available: true, image: '🥤', recipe: [] },
+      { name: 'Mineral Water', category: 'Beverages', price: 20, available: true, image: '💧', recipe: [] },
+
+      // Desserts
+      { name: 'Gulab Jamun (2 Pcs)', category: 'Desserts', price: 79, available: true, image: '🥣', recipe: [] },
+      { name: 'Ice Cream (2 Scoops)', category: 'Desserts', price: 89, available: true, image: '🍨', recipe: [] },
+      { name: 'Chocolate Brownie', category: 'Desserts', price: 129, available: true, image: '🍰', recipe: [] },
+      { name: 'Fruit Salad with Ice Cream', category: 'Desserts', price: 129, available: true, image: '🍧', recipe: [] },
+
+      // Waffles
+      { name: 'Classic Belgian Waffle', category: 'Waffles', price: 199, available: true, image: '🧇', recipe: [] },
+      { name: 'Strawberry Waffle', category: 'Waffles', price: 249, available: true, image: '🧇', recipe: [] },
+      { name: 'Blueberry Waffle', category: 'Waffles', price: 269, available: true, image: '🧇', recipe: [] },
+      { name: 'Red Velvet Waffle', category: 'Waffles', price: 299, available: true, image: '🧇', recipe: [] },
+      { name: 'Brownie Waffle', category: 'Waffles', price: 319, available: true, image: '🧇', recipe: [] },
+      { name: 'Chocolate Overload Waffle', category: 'Waffles', price: 299, available: true, image: '🧇', recipe: [] },
+      { name: 'Caramel Banana Waffle', category: 'Waffles', price: 289, available: true, image: '🧇', recipe: [] },
+      { name: 'Oreo Waffle', category: 'Waffles', price: 299, available: true, image: '🧇', recipe: [] }
     ]);
-    console.log('✅ Created 8 menu items');
+    console.log(`✅ Seeded ${menuItems.length} menu items`);
 
     // Create tables
     const tables = await Table.create([
