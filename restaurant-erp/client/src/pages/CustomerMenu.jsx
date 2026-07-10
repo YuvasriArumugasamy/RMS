@@ -1067,7 +1067,7 @@ const CustomerMenu = () => {
       </div>
 
       {/* Categories Horizontal Scroll */}
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none mb-6 select-none">
+      <div className="sticky top-0 z-30 bg-[#F8FAFC] pt-3 pb-3 -mx-6 px-6 flex gap-2 overflow-x-auto scrollbar-none mb-6 select-none border-b border-slate-100/50">
         {categories.map(c => {
           const categorySvgIcons = {
             All: (
