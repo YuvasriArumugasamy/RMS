@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import QRCode from 'react-qr-code';
+import { toast } from 'react-toastify';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -177,7 +179,6 @@ const CustomerMenu = () => {
   }, []);
 
   const parseVoiceOrder = useCallback((transcript) => {
-    // Number words map
     const numWords = { one:1, a:1, an:1, two:2, three:3, four:4, five:5,
                        six:6, seven:7, eight:8, nine:9, ten:10,
                        oru:1, rendu:2, moonu:3, naangu:4, aindhu:5,
@@ -187,9 +188,7 @@ const CustomerMenu = () => {
 
     for (const item of menu) {
       const name = item.name.toLowerCase();
-      // Check if item name is mentioned
       if (transcript.includes(name)) {
-        // Look for qty before the item name
         const words = transcript.split(/\s+/);
         const idx = words.findIndex(w => name.includes(w) || w.includes(name.split(' ')[0]));
         let qty = 1;
@@ -222,8 +221,7 @@ const CustomerMenu = () => {
   const VoicePanel = () => (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setVoiceOpen(false)}/>
-      <div className="relative w-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl p-6 pb-10 z-10 shadow-2xl">
-        {/* Handle */}
+      <div className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl p-6 pb-10 z-10 shadow-2xl">
         <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5"/>
 
         <h3 className="text-white font-black text-lg text-center mb-1">🎤 Voice Order</h3>
@@ -231,14 +229,13 @@ const CustomerMenu = () => {
           {lang === 'ta' ? 'உணவு பேர் சொல்லுங்க' : lang === 'hi' ? 'खाने का नाम बोलें' : 'Say the food name to add to cart'}
         </p>
 
-        {/* Mic Button */}
         <div className="flex flex-col items-center gap-4 mb-6">
           <button
             onClick={voiceListening ? stopVoiceListening : startVoiceListening}
-            className={`relative w-24 h-24 rounded-full text-4xl font-black shadow-2xl transition-all active:scale-95 ${
+            className={`relative w-24 h-24 rounded-full text-4xl font-black shadow-2xl transition-all active:scale-95 flex items-center justify-center ${
               voiceListening
-                ? 'bg-red-500 shadow-red-500/50 animate-pulse'
-                : 'bg-orange-500 shadow-orange-500/30 hover:bg-orange-600'
+                ? 'bg-red-500 shadow-red-500/50 animate-pulse text-white'
+                : 'bg-orange-500 shadow-orange-500/30 hover:bg-orange-600 text-white'
             }`}
           >
             {voiceListening ? '⏹' : '🎤'}
@@ -251,14 +248,12 @@ const CustomerMenu = () => {
           </p>
         </div>
 
-        {/* Transcript */}
         {voiceTranscript && (
           <div className="bg-white/10 border border-white/20 rounded-2xl p-4 mb-4 text-center">
             <p className="text-white text-sm font-bold">"{voiceTranscript}"</p>
           </div>
         )}
 
-        {/* Status */}
         {voiceStatus && (
           <p className={`text-center text-sm font-bold mb-4 ${
             voiceStatus.startsWith('✅') ? 'text-emerald-400' :
@@ -269,7 +264,6 @@ const CustomerMenu = () => {
           </p>
         )}
 
-        {/* Example commands */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
           <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-3">Example Commands</p>
           <div className="space-y-2">
@@ -286,7 +280,6 @@ const CustomerMenu = () => {
           </div>
         </div>
 
-        {/* Cart shortcut */}
         {cart.length > 0 && (
           <button
             onClick={() => { setVoiceOpen(false); setStage('cart'); }}
@@ -449,7 +442,6 @@ const CustomerMenu = () => {
       toast.error('Order placement failed. Please try again.');
     }
 
-    // Fallback to localStorage
     const localOrder = {
       id: `ORD-QR-${Date.now().toString().slice(-4)}`,
       ...orderPayload,
@@ -490,83 +482,123 @@ const CustomerMenu = () => {
 
   /* ── STAGE: WELCOME ── */
   const WelcomeStage = () => (
-    <div className="flex flex-col h-screen overflow-y-auto bg-gradient-to-br from-[#0b0f19] via-[#1e293b] to-[#0f172a] text-white px-6 py-10 justify-between relative">
-      {/* Decorative Blur Spheres */}
-      <div className="absolute top-10 left-10 w-44 h-44 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-20 right-10 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="flex flex-col h-screen overflow-y-auto bg-[#FFFBF7] text-[#1E293B] px-6 py-10 justify-between relative select-none">
+      <div className="absolute -top-24 -left-24 w-80 h-80 bg-gradient-to-br from-orange-500/20 to-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-gradient-to-tr from-orange-500/15 to-amber-300/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-10 right-10 grid grid-cols-5 gap-1.5 opacity-30">
+        {[...Array(25)].map((_, i) => (
+          <div key={i} className="w-1.5 h-1.5 bg-orange-600 rounded-full" />
+        ))}
+      </div>
 
-      <div></div>
-      <div className="text-center z-10">
-        {/* Logo */}
-        <div className="w-28 h-28 bg-white/5 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl relative group transition-transform hover:rotate-6">
-          <div className="absolute inset-2 bg-gradient-to-tr from-orange-500 to-amber-400 rounded-full opacity-10 blur-md" />
-          <span className="text-6xl animate-pulse">👨‍🍳</span>
+      <div />
+
+      <div className="text-center z-10 max-w-sm mx-auto w-full">
+        {/* Glow QR Circle */}
+        <div className="relative w-28 h-28 mx-auto mb-6 flex items-center justify-center bg-white rounded-full shadow-[0_12px_36px_rgba(249,115,22,0.15)] border-2 border-orange-100/70 p-4">
+          <div className="absolute inset-0 rounded-full bg-orange-400/10 animate-ping opacity-60" />
+          <QRCode
+            value={window.location.href}
+            size={72}
+            level="H"
+            fgColor="#1E293B"
+            bgColor="#ffffff"
+          />
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-white via-slate-100 to-orange-400 bg-clip-text text-transparent">
-          {t.welcome}
+
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-800 mb-1">
+          Welcome!
         </h1>
-        <p className="text-sm text-slate-400 font-medium mb-8 max-w-xs mx-auto">{t.subtitle}</p>
-        
-        {/* Table Glass Panel */}
-        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 mb-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-white/5 rounded-full" />
-          <p className="text-xs text-orange-400 font-bold uppercase tracking-widest mb-2">{t.tableLabel}</p>
-          <p className="text-6xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]">
+        <p className="text-xs text-slate-400 font-extrabold tracking-wider uppercase mb-8">
+          Thank you for choosing us
+        </p>
+
+        {/* Table Number Card */}
+        <div className="bg-white rounded-[2.2rem] p-7 mb-7 shadow-[0_15px_45px_rgba(0,0,0,0.025)] border border-slate-100 relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-50/50 rounded-full" />
+          <p className="text-[10px] text-orange-500 font-black uppercase tracking-widest mb-1.5">TABLE NUMBER</p>
+          <p className="text-6xl font-black tracking-tight text-slate-800 my-2 drop-shadow-sm">
             {'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-emerald-400">
-            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
-            <span className="text-xs font-bold uppercase tracking-wider">{t.scanSuccess}</span>
+          <div className="mt-4.5 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200/50 px-4 py-1.5 rounded-full text-emerald-600 shadow-sm">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-black tracking-wider uppercase">{t.scanSuccess}</span>
+          </div>
+        </div>
+
+        {/* 3-step Instructions */}
+        <div className="flex items-center justify-between px-6 mb-8 text-slate-400">
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="text-3xl">🔍</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Scan</span>
+          </div>
+          <span className="text-slate-300 font-black text-xl mb-4">»</span>
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="text-3xl">🛎️</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Order</span>
+          </div>
+          <span className="text-slate-300 font-black text-xl mb-4">»</span>
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="text-3xl">😊</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Enjoy</span>
           </div>
         </div>
 
         {/* Start Ordering Button */}
         <button onClick={() => setStage('menu')}
-          className="w-full py-5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold rounded-2xl text-base shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98] hover:scale-[1.01]">
-          {t.startOrdering}
+          className="w-full py-4.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-[0_12px_28px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+          <span className="uppercase tracking-widest font-black">{t.startOrdering}</span>
+          <span className="w-6 h-6 bg-white text-orange-600 rounded-full flex items-center justify-center text-xs font-black shadow-inner">➔</span>
         </button>
       </div>
 
-      {/* Language selector */}
-      <div className="flex justify-center gap-3 mt-8 z-10">
-        {Object.keys(LANGS).map(l => (
-          <button key={l} onClick={() => setLang(l)}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              lang === l 
-                ? 'bg-white text-[#0b0f19] shadow-lg scale-105' 
-                : 'bg-white/[0.06] text-slate-300 border border-white/10 hover:bg-white/10 active:scale-95'
-            }`}>
-            {l === 'en' ? 'English' : l === 'ta' ? 'தமிழ்' : 'हिंदी'}
-          </button>
-        ))}
+      {/* Language Selector */}
+      <div className="flex justify-center gap-2 mt-8 z-10">
+        {Object.keys(LANGS).map(l => {
+          const isActive = lang === l;
+          return (
+            <button key={l} onClick={() => setLang(l)}
+              className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all ${
+                isActive 
+                  ? 'bg-white text-orange-500 border border-orange-500 shadow-md scale-105' 
+                  : 'bg-orange-500 text-white shadow-md active:scale-95'
+              }`}>
+              {l === 'en' ? 'English' : l === 'ta' ? 'தமிழ்' : 'हिंदी'}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 
-  /* ── BOTTOM NAV ── */
+  /* ── BOTTOM NAV (Mobile View) ── */
   const BottomNav = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 flex shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-40 pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 flex justify-around shadow-[0_-8px_30px_rgba(0,0,0,0.05)] z-40 pb-safe pt-2">
       {[
         { id: 'menu', icon: '🏠', label: t.menu },
         { id: 'cart', icon: '🛒', label: t.cart, badge: cart.length },
         { id: 'tracking', icon: '📦', label: t.orders, badge: placedOrders.length },
-        { id: 'profile', icon: '👤', label: t.profile },
+        { id: 'feedback', icon: '👤', label: t.profile },
       ].map(item => {
-        const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'profile' && stage === 'feedback');
+        const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback');
         return (
-          <button key={item.id} onClick={() => item.id === 'tracking' && placedOrders.length > 0 ? setStage('tracking') : item.id === 'profile' ? setStage('feedback') : setStage(item.id)}
-            className={`flex-1 flex flex-col items-center py-3 text-[10px] font-bold relative transition-colors ${
+          <button key={item.id} onClick={() => {
+            if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
+            else if (item.id === 'feedback') setStage('feedback');
+            else setStage(item.id);
+          }}
+            className={`flex-1 flex flex-col items-center py-2.5 text-[9px] font-black uppercase tracking-wider relative transition-colors ${
               isActive ? 'text-orange-500' : 'text-slate-400 hover:text-slate-600'
             }`}>
-            <span className={`text-2xl leading-none mb-1 transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
+            <span className={`text-xl leading-none mb-1 transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
             {item.badge > 0 && (
-              <span className="absolute top-2.5 right-1/4 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-md animate-bounce">
+              <span className="absolute top-1.5 right-1/4 w-5.5 h-5.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-md animate-bounce">
                 {item.badge}
               </span>
             )}
-            <span className="leading-none font-extrabold tracking-wide mt-0.5">{item.label}</span>
+            <span>{item.label}</span>
             {isActive && (
-              <span className="absolute bottom-1 w-1.5 h-1.5 bg-orange-500 rounded-full shadow-[0_2px_5px_rgba(249,115,22,0.5)]" />
+              <span className="absolute bottom-0 w-2.5 h-1 bg-orange-500 rounded-full shadow-[0_2px_5px_rgba(249,115,22,0.5)]" />
             )}
           </button>
         );
@@ -574,107 +606,279 @@ const CustomerMenu = () => {
     </div>
   );
 
+  /* ── COMMON SHELL WRAPPER ── */
+  const AppShell = ({ children }) => {
+    return (
+      <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+        {/* Desktop Left Sidebar */}
+        <aside className="hidden lg:flex flex-col w-72 bg-[#0B0F19] text-white p-6 justify-between shrink-0 select-none">
+          <div className="space-y-8">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl">👨‍🍳</div>
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+                  Resto <span className="text-[9px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded">QR</span>
+                </h2>
+                <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">Delicious Food</p>
+              </div>
+            </div>
+
+            {/* Navigation links */}
+            <nav className="space-y-1.5">
+              {[
+                { id: 'menu', label: t.menu, icon: '🏠' },
+                { id: 'cart', label: t.cart, icon: '🛒', badge: cart.length },
+                { id: 'tracking', label: t.orders, icon: '📦', badge: placedOrders.length },
+                { id: 'feedback', label: t.profile, icon: '👤' },
+                { id: 'offers', label: t.offersForYou, icon: '🎁' },
+              ].map(item => {
+                const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback');
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
+                      else if (item.id === 'feedback') setStage('feedback');
+                      else setStage(item.id);
+                    }}
+                    className={`w-full flex items-center justify-between px-4.5 py-3.5 rounded-2xl text-xs font-bold transition-all ${
+                      isActive 
+                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 scale-105' 
+                        : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="text-base">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    {item.badge > 0 && (
+                      <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Bottom special item */}
+          <div className="relative bg-slate-900 rounded-3xl p-5 overflow-hidden border border-slate-800 shadow-2xl">
+            <div className="absolute inset-0 bg-black/60 z-10" />
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400')] bg-cover bg-center" />
+            <div className="relative z-20 space-y-3">
+              <span className="text-[8px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Today's Special</span>
+              <h3 className="text-xs font-black text-white leading-normal">Get 20% OFF on your first order!</h3>
+              <button onClick={() => setStage('offers')} className="w-full py-2 bg-white hover:bg-slate-100 text-[#0B0F19] font-black text-[9px] rounded-xl transition-all uppercase tracking-wider">Order Now</button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          <header className="flex items-center justify-between bg-white border-b border-slate-100 px-6 py-4.5 shrink-0 select-none">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 px-3.5 py-1.5 rounded-full text-orange-600 shadow-sm">
+                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
+                <span className="text-[10px] font-black uppercase tracking-wider">{'Table ' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {voiceSupported && (
+                <button
+                  onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
+                  className="flex items-center gap-1.5 px-4.5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  🎤 <span>Voice</span>
+                </button>
+              )}
+              <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                <span className="text-lg">🔔</span>
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full" />
+              </button>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 border-2 border-white shadow-sm flex items-center justify-center text-white font-black text-xs">
+                👤
+              </div>
+            </div>
+          </header>
+
+          {/* Main content body */}
+          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 p-6">
+            {children}
+          </main>
+
+          {/* Mobile bottom nav */}
+          <div className="lg:hidden">
+            <BottomNav />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   /* ── STAGE: MENU ── */
   const MenuStage = () => (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-      {/* Header */}
-      <div className="bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-lg rounded-b-[2rem]">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full w-max mb-1">
-              <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
-              <p className="text-[10px] text-slate-300 font-bold uppercase tracking-wider">{tableInfo.name}</p>
-            </div>
-            <h1 className="text-2xl font-black tracking-tight">{t.title}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            {voiceSupported && (
-              <button
-                onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
-                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-xl text-xs shadow-lg transition-all active:scale-95"
-              >
-                🎤 <span>Voice</span>
-              </button>
-            )}
-            <button onClick={() => setStage('offers')} className="text-2xl hover:scale-110 active:scale-95 transition-transform">🎁</button>
-          </div>
-        </div>
+    <AppShell>
+      {/* Hero Banner */}
+      <div className="relative bg-gradient-to-br from-[#0B0F19] to-slate-900 rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-44 h-44 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
         
-        {/* Search */}
-        <div className="relative mb-4">
-          <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            placeholder={t.searchPlaceholder}
-            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-400 text-sm font-medium focus:outline-none focus:bg-white/10 focus:border-orange-500/50 transition-all"/>
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base text-slate-400">🔍</span>
-        </div>
-
-        {/* Categories */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
-          {categories.map(c => {
-            const icons = { All: '🍽️', Starters: '🥗', 'Main Course': '🍛', Beverages: '🥤', Bread: '🍞', Desserts: '🍰' };
-            const isActive = activeCategory === c;
-            return (
-              <button key={c} onClick={() => setActiveCategory(c)}
-                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 scale-105' 
-                    : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10 active:scale-95'
-                }`}>
-                <span>{icons[c] || '🍴'}</span>
-                <span className="font-extrabold">{c}</span>
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-4 max-w-md text-center md:text-left w-full">
+            <span className="text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 font-black px-3 py-1 rounded-full uppercase tracking-wider">Resto Special</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">Good Food,<br />Great Mood!</h2>
+            <p className="text-[11px] text-slate-400 font-medium">Explore our delicious menu and place your order</p>
+            
+            {/* Search Input nested in hero */}
+            <div className="flex gap-2 w-full mt-2">
+              <div className="relative flex-1">
+                <input 
+                  type="text" 
+                  value={searchQuery} 
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={t.searchPlaceholder}
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-400 text-xs font-semibold focus:outline-none focus:bg-white/10 focus:border-orange-500/50 transition-all"
+                />
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
+              </div>
+              <button className="p-3.5 bg-orange-500 hover:bg-orange-600 rounded-2xl text-white shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center shrink-0">
+                <span className="text-xs">⚙️</span>
               </button>
-            );
-          })}
+            </div>
+          </div>
+
+          {/* Burger Graphic */}
+          <div className="w-36 h-36 md:w-44 md:h-44 relative shrink-0">
+            <span className="text-8xl md:text-9xl drop-shadow-2xl animate-bounce block select-none">🍔</span>
+          </div>
         </div>
       </div>
 
-      {/* Menu Items */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
-        <div className="grid grid-cols-1 gap-4">
+      {/* Categories Horizontal Scroll */}
+      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none mb-6">
+        {categories.map(c => {
+          const icons = { All: '🍽️', Starters: '🥗', 'Main Course': '🍛', Beverages: '🥤', Bread: '🍞', Desserts: '🍰' };
+          const isActive = activeCategory === c;
+          return (
+            <button key={c} onClick={() => setActiveCategory(c)}
+              className={`flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-black transition-all ${
+                isActive 
+                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 scale-105' 
+                  : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 active:scale-95'
+              }`}>
+              <span>{icons[c] || '🍴'}</span>
+              <span>{c}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Grid of Dishes */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center select-none">
+          <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Popular Dishes</h3>
+          <div className="flex items-center gap-3">
+            <select className="text-[10px] font-bold text-slate-500 bg-white border border-slate-150 rounded-xl px-2.5 py-1.5 focus:outline-none">
+              <option>Sort by: Popular</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+            </select>
+            <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+              <button className="p-1.5 bg-white shadow-sm rounded-lg text-[10px]">📅</button>
+              <button className="p-1.5 text-slate-400 text-[10px]">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredMenu.map(item => {
             const isNonVeg = ['chicken', 'biryani', 'fish', 'prawn', 'meat', 'mutton', 'egg'].some(keyword => item.name.toLowerCase().includes(keyword));
+            const qtyInCart = cart.find(ci => ci.id === item.id)?.qty || 0;
             return (
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
-                className="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden flex gap-4 p-4 cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all transform active:scale-[0.99]">
+                className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden flex flex-col p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer group relative">
                 
-                {/* Food Image Container */}
-                <div className="w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/50 shadow-inner relative">
-                  <span className="text-5xl">{item.image}</span>
-                  {/* Veg/Nonveg Badge */}
-                  <div className="absolute top-2 left-2 bg-white p-1 rounded border border-slate-200 shadow-sm flex items-center justify-center w-5.5 h-5.5">
-                    <div className={`w-3.5 h-3.5 border-2 flex items-center justify-center rounded-sm ${isNonVeg ? 'border-red-600 bg-red-50' : 'border-emerald-600 bg-emerald-50'}`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${isNonVeg ? 'bg-red-600' : 'bg-emerald-600'}`} />
+                {/* Veg/Nonveg label badge */}
+                <div className="flex justify-between items-center mb-3">
+                  <div className="bg-white p-1 rounded-lg border border-slate-100 shadow-sm flex items-center justify-center w-6 h-6">
+                    <div className={`w-4 h-4 border flex items-center justify-center rounded ${isNonVeg ? 'border-red-500 bg-red-50' : 'border-emerald-500 bg-emerald-50'}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${isNonVeg ? 'bg-red-500' : 'bg-emerald-500'}`} />
                     </div>
                   </div>
+                  
+                  {item.category === 'Desserts' ? (
+                    <span className="text-[8px] bg-orange-50 text-orange-600 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Bestseller</span>
+                  ) : isNonVeg ? (
+                    <span className="text-[8px] bg-red-50 text-red-600 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Spicy</span>
+                  ) : (
+                    <span className="text-[8px] bg-emerald-50 text-emerald-600 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Veg</span>
+                  )}
+                  
+                  <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-300 hover:text-red-500 transition-colors">
+                    <span className="text-sm">❤️</span>
+                  </button>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 flex flex-col justify-between py-0.5">
-                  <div>
-                    <div className="flex justify-between items-start gap-2 mb-1">
-                      <h3 className="text-base font-extrabold text-slate-800 line-clamp-1">{item.name}</h3>
-                      <div className="flex items-center gap-0.5 bg-amber-500/10 px-1.5 py-0.5 rounded text-[10px] font-black text-amber-600">
-                        ⭐ <span>4.5</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-400 font-medium line-clamp-2 leading-relaxed">{item.description || 'Delicious dish with special spices.'}</p>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-lg font-black text-orange-600">₹{item.price}</span>
-                    <button onClick={(e) => { e.stopPropagation(); addToCart(item); toast.success(`🛒 Added ${item.name} to cart!`); }}
-                      className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-extrabold rounded-xl shadow-sm transition-all transform active:scale-95">
-                      {t.addToCart}
-                    </button>
-                  </div>
+                {/* Center Food Graphic */}
+                <div className="h-28 w-full flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <span className="text-6xl drop-shadow-md select-none">{item.image}</span>
                 </div>
+
+                {/* Details */}
+                <div className="space-y-1 flex-grow">
+                  <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
+                  <p className="text-[10px] text-slate-400 leading-relaxed line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
+                </div>
+
+                {/* Price & Add Block */}
+                <div className="flex items-center justify-between mt-4 border-t border-slate-50 pt-3">
+                  <span className="text-sm font-black text-orange-600">₹{item.price}</span>
+                  
+                  {qtyInCart > 0 ? (
+                    <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-xl p-0.5" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => {
+                        const idx = cart.findIndex(ci => ci.id === item.id);
+                        if (idx > -1) {
+                          if (cart[idx].qty === 1) removeFromCart(idx);
+                          else updateQty(idx, -1);
+                        }
+                      }} className="w-6 h-6 rounded-lg bg-white shadow-sm font-extrabold text-orange-600 flex items-center justify-center active:scale-90">-</button>
+                      <span className="text-[10px] font-black text-slate-800 px-1 w-4.5 text-center">{qtyInCart}</span>
+                      <button onClick={() => {
+                        const idx = cart.findIndex(ci => ci.id === item.id);
+                        updateQty(idx, 1);
+                      }} className="w-6 h-6 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
+                    </div>
+                  ) : (
+                    <button onClick={(e) => { e.stopPropagation(); addToCart(item); toast.success(`🛒 Added ${item.name}!`); }}
+                      className="px-3 py-1.5 bg-orange-50 hover:bg-orange-500 border border-orange-200/50 hover:border-orange-500 text-orange-600 hover:text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
+                      <span>ADD</span>
+                    </button>
+                  )}
+                </div>
+
               </div>
             );
           })}
         </div>
-      </div>
 
-      <BottomNav />
-    </div>
+        {/* Combo Offer Banner */}
+        <div className="bg-[#FFF7ED] rounded-3xl p-5 border border-orange-100 flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 select-none shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🎁</span>
+            <div>
+              <h4 className="text-xs font-black text-orange-800 uppercase tracking-wide">Combo Offer!</h4>
+              <p className="text-xs text-orange-700 font-bold mt-0.5">Add any 2 items & get 15% OFF</p>
+            </div>
+          </div>
+          <button onClick={() => setStage('offers')} className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-black text-[9px] rounded-xl transition-all uppercase tracking-wider shadow-md shadow-orange-500/10">Explore Combos</button>
+        </div>
+      </div>
+    </AppShell>
   );
 
   /* ── STAGE: FOOD DETAILS ── */
@@ -699,42 +903,43 @@ const CustomerMenu = () => {
     };
 
     return (
-      <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
-        <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center transition-all font-black text-white">
-              ←
-            </button>
-            <h1 className="text-lg font-black tracking-tight">Food Details</h1>
+      <AppShell>
+        <div className="flex items-center gap-3.5 mb-6">
+          <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
+            ←
+          </button>
+          <div>
+            <h2 className="text-base font-black text-slate-800 leading-tight">Food Details</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Customize your dish</p>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto pb-28">
-          {/* Food Image */}
-          <div className="w-full h-56 bg-gradient-to-br from-orange-100 via-amber-100 to-orange-200 flex items-center justify-center shadow-inner relative">
-            <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]" />
-            <span className="text-8xl relative z-10 drop-shadow-xl animate-bounce">{item.image}</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+          {/* Left: Food graphic details */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-center items-center p-8 h-80 relative select-none">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/30 rounded-full blur-2xl pointer-events-none" />
+            <span className="text-9xl drop-shadow-2xl animate-bounce">{item.image}</span>
           </div>
 
-          <div className="p-5 space-y-5">
-            {/* Title & Price Card */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-              <div className="flex justify-between items-start mb-2">
-                <h2 className="text-2xl font-black text-slate-800 leading-tight">{item.name}</h2>
-                <p className="text-2xl font-black text-orange-600">₹{item.price}</p>
+          {/* Right: Info and custom choices */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm space-y-4">
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-black text-slate-800 leading-snug">{item.name}</h3>
+                <span className="text-xl font-black text-orange-600">₹{item.price}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-yellow-500 text-sm">⭐</span>
-                <span className="text-xs font-extrabold text-slate-500">4.5 · Delicious Recipe</span>
+                <span className="text-yellow-500 text-xs">⭐</span>
+                <span className="text-[10px] font-black text-slate-400">4.5 · Highly Recommended Recipe</span>
               </div>
-              <p className="text-xs text-slate-400 font-medium leading-relaxed mt-3 border-t border-slate-100 pt-3">
-                {item.description || 'Delicious dish prepared with fresh ingredients and special spices. A must-try!'}
+              <p className="text-[11px] text-slate-400 leading-relaxed pt-3 border-t border-slate-50">
+                {item.description || 'Prepared fresh with high quality organic ingredients, seasoned to absolute deliciousness.'}
               </p>
             </div>
 
-            {/* Customize Section */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-              <h3 className="text-sm font-black text-slate-800 mb-3 tracking-wide uppercase text-[11px] text-slate-400">{t.customize}</h3>
+            {/* Custom Choices */}
+            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm space-y-4">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.customize}</h4>
               <div className="space-y-2.5">
                 {[
                   { key: 'extraCheese', label: t.extraCheese, price: '₹50' },
@@ -746,221 +951,326 @@ const CustomerMenu = () => {
                     <div key={opt.key} onClick={() => setLocalCustom(p => ({ ...p, [opt.key]: !p[opt.key] }))}
                       className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                         isChecked 
-                          ? 'border-orange-500 bg-orange-50/30' 
+                          ? 'border-orange-500 bg-orange-50/20' 
                           : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
                       }`}>
                       <div className="flex items-center gap-3">
                         <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
                           isChecked ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-white'
                         }`}>
-                          {isChecked && <span className="text-[10px] font-black">✓</span>}
+                          {isChecked && <span className="text-[9px] font-black">✓</span>}
                         </div>
-                        <span className={`text-sm font-extrabold transition-colors ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{opt.label}</span>
+                        <span className={`text-xs font-bold transition-colors ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{opt.label}</span>
                       </div>
-                      <span className="text-xs font-black text-slate-400 bg-white border border-slate-100 px-2 py-0.5 rounded-lg">{opt.price}</span>
+                      <span className="text-[10px] font-black text-slate-400 bg-white border border-slate-100 px-2 py-0.5 rounded-lg">{opt.price}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-center justify-between">
-              <span className="text-sm font-black text-slate-800">{t.qty}</span>
-              <div className="flex items-center gap-4 bg-slate-100/80 rounded-2xl px-3 py-1.5">
-                <button onClick={() => setLocalQty(p => Math.max(1, p - 1))}
-                  className="w-8 h-8 rounded-xl bg-white shadow-sm hover:shadow active:scale-95 text-orange-600 font-black text-lg flex items-center justify-center transition-all">−</button>
-                <span className="text-lg font-black text-slate-800 w-6 text-center">{localQty}</span>
-                <button onClick={() => setLocalQty(p => p + 1)}
-                  className="w-8 h-8 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md active:scale-95 text-white font-black text-lg flex items-center justify-center transition-all">+</button>
+            {/* Quantity select & Buy Block */}
+            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">{t.qty}</span>
+                <div className="flex items-center gap-3 bg-slate-100/75 rounded-2xl px-2.5 py-1">
+                  <button onClick={() => setLocalQty(p => Math.max(1, p - 1))}
+                    className="w-7.5 h-7.5 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-extrabold flex items-center justify-center transition-all cursor-pointer">-</button>
+                  <span className="text-sm font-black text-slate-800 w-5 text-center">{localQty}</span>
+                  <button onClick={() => setLocalQty(p => p + 1)}
+                    className="w-7.5 h-7.5 rounded-xl bg-orange-500 text-white shadow-md font-extrabold flex items-center justify-center transition-all cursor-pointer">+</button>
+                </div>
               </div>
+
+              <button onClick={handleAddToCart}
+                className="w-full sm:w-auto px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all uppercase tracking-widest active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <span>{t.addToCart}</span>
+                <span>|</span>
+                <span>₹{item.price * localQty}</span>
+              </button>
             </div>
+
           </div>
         </div>
-
-        {/* Add to Cart Button Block */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 p-4 z-40">
-          <button onClick={handleAddToCart}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98]">
-            {t.addToCart} | ₹{item.price * localQty}
-          </button>
-        </div>
-      </div>
+      </AppShell>
     );
   };
 
   /* ── STAGE: CART ── */
-  const CartStage = () => (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-      <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-black tracking-tight">{t.myCart}</h1>
-          <button onClick={() => setStage('menu')} className="bg-white/10 hover:bg-white/20 active:scale-95 px-3 py-1.5 rounded-xl text-orange-400 text-xs font-extrabold transition-all">{t.edit}</button>
-        </div>
-      </div>
+  const CartStage = () => {
+    const freeDeliveryThreshold = 200;
+    const progressPercent = Math.min(100, Math.round((cartSubtotal / freeDeliveryThreshold) * 100));
+    const neededAmount = Math.max(0, freeDeliveryThreshold - cartSubtotal);
 
-      <div className="flex-1 overflow-y-auto p-4 pb-48">
+    return (
+      <AppShell>
+        <div className="flex items-center justify-between mb-6 select-none">
+          <div>
+            <h2 className="text-xl font-black text-slate-800">{t.myCart}</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Manage items & review summary</p>
+          </div>
+          {cart.length > 0 && (
+            <button onClick={() => setStage('menu')} className="px-4 py-2 border border-slate-150 rounded-xl text-orange-500 text-xs font-black bg-white hover:bg-slate-50 transition-all shadow-sm">
+              Add More Items
+            </button>
+          )}
+        </div>
+
         {cart.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4 border border-slate-200/50">
-              <span className="text-5xl animate-bounce">🛒</span>
-            </div>
-            <p className="font-extrabold text-base text-slate-600">Cart is empty</p>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Add delicious dishes to start ordering.</p>
-            <button onClick={() => setStage('menu')} className="mt-5 px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold rounded-2xl shadow-md transition-all active:scale-95">
+          <div className="flex flex-col items-center justify-center py-20 bg-white border border-slate-100 rounded-3xl p-8 shadow-sm text-center">
+            <span className="text-6xl mb-4 animate-bounce block select-none">🛒</span>
+            <h3 className="text-base font-black text-slate-800">Cart is Empty</h3>
+            <p className="text-xs text-slate-400 font-medium max-w-xs mt-1">Browse our delicious menu and add some food here!</p>
+            <button onClick={() => setStage('menu')} className="mt-6 px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 text-xs uppercase tracking-wider">
               Browse Menu
             </button>
           </div>
         ) : (
-          <div className="space-y-3.5">
-            {cart.map((item, index) => (
-              <div key={index} className="bg-white rounded-3xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.01)] border border-slate-100 flex items-center gap-4">
-                <div className="w-16 h-16 bg-slate-50 border border-slate-200/50 rounded-2xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-3.5xl">{item.image}</span>
+          <div className="space-y-6 pb-20">
+            {/* Free Delivery Bar */}
+            <div className="bg-[#FFF7ED] border border-orange-100 rounded-3xl p-4.5 flex items-center justify-between gap-4 shadow-sm select-none">
+              <div className="flex-1 space-y-2">
+                <p className="text-[11px] text-orange-800 font-black">
+                  {neededAmount > 0 
+                    ? `Add items worth ₹${neededAmount} more to get FREE delivery!` 
+                    : '🎉 You qualify for FREE delivery!'}
+                </p>
+                <div className="relative w-full h-2 bg-orange-100 rounded-full overflow-hidden">
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" 
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-extrabold text-slate-800 truncate mb-0.5">{item.name}</h3>
-                  <p className="text-xs text-orange-600 font-extrabold">₹{item.price}</p>
+                <p className="text-[9px] text-orange-600 font-extrabold uppercase">₹{cartSubtotal} / ₹{freeDeliveryThreshold}</p>
+              </div>
+              <div className="text-3xl animate-pulse">🛵</div>
+            </div>
+
+            {/* Cart Items List */}
+            <div className="space-y-3.5">
+              {cart.map((item, index) => (
+                <div key={index} className="bg-white rounded-3xl p-4 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0">
+                      <span className="text-4xl select-none">{item.image}</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
+                      <p className="text-[9px] bg-slate-50 border border-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-md mt-1 w-max uppercase tracking-wider">{item.category}</p>
+                      <p className="text-xs text-orange-600 font-black mt-1">₹{item.price}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-155 rounded-xl p-0.5">
+                      <button onClick={() => index > -1 && cart[index].qty === 1 ? removeFromCart(index) : updateQty(index, -1)}
+                        className="w-6.5 h-6.5 rounded-lg bg-white shadow-sm font-extrabold text-orange-600 flex items-center justify-center active:scale-90">-</button>
+                      <span className="text-xs font-black text-slate-800 w-4 text-center">{item.qty}</span>
+                      <button onClick={() => updateQty(index, 1)}
+                        className="w-6.5 h-6.5 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
+                    </div>
+                    <button onClick={() => removeFromCart(index)} className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all active:scale-90 flex items-center justify-center">
+                      <span className="text-sm">🗑️</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/50 rounded-xl p-1">
-                  <button onClick={() => index > -1 && cart[index].qty === 1 ? removeFromCart(index) : updateQty(index, -1)}
-                    className="w-7 h-7 rounded-lg bg-white shadow-sm hover:shadow text-orange-600 font-extrabold flex items-center justify-center active:scale-95 transition-all">−</button>
-                  <span className="text-xs font-black text-slate-800 w-5 text-center">{item.qty}</span>
-                  <button onClick={() => updateQty(index, 1)}
-                    className="w-7 h-7 rounded-lg bg-orange-500 text-white font-extrabold flex items-center justify-center active:scale-95 transition-all">+</button>
+              ))}
+            </div>
+
+            {/* Split Checkout Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-none">
+              {/* Left Column */}
+              <div className="space-y-4">
+                {/* Coupon Panel */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)]">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Have a coupon?</h4>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Enter coupon code (FLAT10 / WELCOME20)" 
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-white transition-all uppercase"
+                      id="couponCodeInput"
+                    />
+                    <button onClick={() => {
+                      const code = document.getElementById('couponCodeInput')?.value?.toUpperCase();
+                      if (code === 'FLAT10') {
+                        setAppliedCoupon({ code: 'FLAT10', discount: 100 });
+                        toast.success('Coupon applied: FLAT10');
+                      } else if (code === 'WELCOME20') {
+                        setAppliedCoupon({ code: 'WELCOME20', discount: Math.round(cartSubtotal * 0.2) });
+                        toast.success('Coupon applied: WELCOME20');
+                      } else {
+                        toast.error('Invalid coupon code');
+                      }
+                    }} className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl transition-all shadow-md shadow-orange-500/10 cursor-pointer">Apply</button>
+                  </div>
+                </div>
+
+                {/* Trust Badges */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex justify-between text-center">
+                  <div className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-2xl">🛡️</span>
+                    <span className="text-[10px] font-black text-slate-800">Safe & Secure</span>
+                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Payments</span>
+                  </div>
+                  <div className="w-px bg-slate-100" />
+                  <div className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-2xl">🛵</span>
+                    <span className="text-[10px] font-black text-slate-800">Fast Delivery</span>
+                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">On Time</span>
+                  </div>
+                  <div className="w-px bg-slate-100" />
+                  <div className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-2xl">🏆</span>
+                    <span className="text-[10px] font-black text-slate-800">Best Quality</span>
+                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Always</span>
+                  </div>
                 </div>
               </div>
-            ))}
+
+              {/* Right Column: Order Summary & Checkout */}
+              <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-4">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Summary</h4>
+                <div className="space-y-2.5 border-b border-slate-100 pb-4">
+                  <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                    <span>Item Total</span>
+                    <span>₹{cartSubtotal}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                    <span>GST (5%)</span>
+                    <span>₹{finalGst}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-xs text-emerald-600 font-black">
+                      <span>Discount ({appliedCoupon.code})</span>
+                      <span>-₹{discount}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between items-center text-xs font-black text-[#0B0F19]">
+                  <span className="text-sm">Total Amount</span>
+                  <span className="text-lg text-orange-600 font-black">₹{finalTotal}</span>
+                </div>
+                {appliedCoupon && (
+                  <div className="bg-emerald-50 border border-emerald-100 text-emerald-600 px-3.5 py-2 rounded-2xl text-[9px] font-black text-center uppercase tracking-wider">
+                    🎉 You saved ₹{discount} on this order
+                  </div>
+                )}
+
+                <button onClick={() => setStage('confirm')}
+                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+                  <span>PLACE ORDER</span>
+                  <span className="w-5 h-5 bg-white text-orange-500 rounded-full flex items-center justify-center text-[10px] font-black">➔</span>
+                </button>
+              </div>
+            </div>
+
           </div>
         )}
-      </div>
-
-      {cart.length > 0 && (
-        <div className="fixed bottom-14 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 p-4 z-40">
-          <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 space-y-2 mb-4 shadow-inner">
-            <div className="flex justify-between text-xs text-slate-500 font-bold">
-              <span>{t.itemTotal}</span>
-              <span>₹{cartSubtotal}</span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500 font-bold">
-              <span>{t.gstLabel}</span>
-              <span>₹{gst(finalSubtotal)}</span>
-            </div>
-            {appliedCoupon && (
-              <div className="flex justify-between text-xs text-emerald-600 font-bold">
-                <span>Discount ({appliedCoupon.code})</span>
-                <span>-₹{discount}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-sm font-extrabold text-[#0b0f19] border-t border-slate-200/60 pt-2 mt-1">
-              <span>{t.total}</span>
-              <span className="text-orange-600 text-base font-black">₹{finalTotal}</span>
-            </div>
-          </div>
-          <button onClick={() => setStage('confirm')}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98]">
-            {t.placeOrder}
-          </button>
-        </div>
-      )}
-
-      <BottomNav />
-    </div>
-  );
+      </AppShell>
+    );
+  };
 
   /* ── STAGE: CONFIRM ORDER ── */
   const ConfirmStage = () => (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-      <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setStage('cart')} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center transition-all font-black text-white">←</button>
-          <h1 className="text-xl font-black tracking-tight">{t.confirmOrder}</h1>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-5 pb-28 space-y-4">
-        {/* Table Number Card */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{t.tableLabel}</p>
-            <p className="text-2xl font-black text-slate-800">{'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</p>
-          </div>
-          <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl">🍽️</div>
-        </div>
-
-        {/* Order Type Card */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">{t.orderType}</p>
-          <div className="flex gap-3 bg-slate-50 border border-slate-100 p-1.5 rounded-2xl">
-            {['Dine In', 'Take Away'].map(type => {
-              const isActive = orderType === type;
-              return (
-                <button key={type} onClick={() => setOrderType(type)}
-                  className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm' 
-                      : 'bg-transparent text-slate-500 hover:text-slate-800'
-                  }`}>
-                  {type === 'Dine In' ? t.dineIn : t.takeAway}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Special Instructions Card */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t.specialInstructions}</p>
-          <textarea value={specialInstructions} onChange={e => setSpecialInstructions(e.target.value)}
-            placeholder={t.siPlaceholder}
-            className="w-full p-4 border border-slate-150 rounded-2xl text-xs focus:outline-none focus:border-orange-500/50 focus:bg-slate-50/30 transition-all resize-none"
-            rows="3"/>
-        </div>
-
-        {/* Bill Details Card */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">{t.billDetails}</p>
-          <div className="space-y-2 border-slate-100">
-            <div className="flex justify-between text-xs text-slate-500 font-bold">
-              <span>{t.subtotal}</span>
-              <span>₹{cartSubtotal}</span>
-            </div>
-            {appliedCoupon && (
-              <div className="flex justify-between text-xs text-emerald-600 font-bold">
-                <span>Discount</span>
-                <span>-₹{discount}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-xs text-slate-500 font-bold">
-              <span>{t.gstLabel}</span>
-              <span>₹{finalGst}</span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500 font-bold">
-              <span>{t.serviceChargeLabel}</span>
-              <span>₹{finalService}</span>
-            </div>
-            <div className="flex justify-between text-base font-black text-slate-800 border-t border-slate-100 pt-3 mt-2">
-              <span>{t.total}</span>
-              <span className="text-orange-600">₹{finalTotal}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Confirm Button Block */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 p-4 z-40">
-        <button onClick={placeOrder} disabled={isPlacingOrder}
-          className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-          {isPlacingOrder ? (
-            <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Placing...</span></>
-          ) : (
-            <span>{t.confirmOrderBtn}</span>
-          )}
+    <AppShell>
+      <div className="flex items-center gap-3.5 mb-6">
+        <button onClick={() => setStage('cart')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
+          ←
         </button>
+        <div>
+          <h2 className="text-base font-black text-slate-800 leading-tight">{t.confirmOrder}</h2>
+          <p className="text-[10px] text-slate-400 font-bold mt-0.5">Final details before checkout</p>
+        </div>
       </div>
-    </div>
-  );
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-none pb-20">
+        <div className="space-y-4">
+          {/* Table Details */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex items-center justify-between">
+            <div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.tableLabel}</p>
+              <p className="text-2xl font-black text-slate-800">{'Table ' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</p>
+            </div>
+            <div className="w-12 h-12 bg-orange-50 text-orange-600 border border-orange-100 rounded-2xl flex items-center justify-center text-2xl shadow-sm">🍽️</div>
+          </div>
+
+          {/* Order Type Toggle */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-3.5">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.orderType}</h4>
+            <div className="flex gap-3 bg-slate-50 border border-slate-100 p-1.5 rounded-2xl">
+              {['Dine In', 'Take Away'].map(type => {
+                const isActive = orderType === type;
+                return (
+                  <button key={type} onClick={() => setOrderType(type)}
+                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${
+                      isActive 
+                        ? 'bg-orange-500 text-white shadow-sm' 
+                        : 'bg-transparent text-slate-400 hover:text-slate-700'
+                    }`}>
+                    {type === 'Dine In' ? t.dineIn : t.takeAway}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Special Instructions */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-2">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.specialInstructions}</h4>
+            <textarea 
+              value={specialInstructions} 
+              onChange={e => setSpecialInstructions(e.target.value)}
+              placeholder={t.siPlaceholder}
+              className="w-full p-4 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-slate-50/30 transition-all resize-none"
+              rows="3"
+            />
+          </div>
+        </div>
+
+        {/* Billing details card */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.billDetails}</h4>
+            <div className="space-y-3 border-slate-100 pb-3 border-b">
+              <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                <span>{t.subtotal}</span>
+                <span>₹{cartSubtotal}</span>
+              </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-xs text-emerald-600 font-black">
+                  <span>Discount</span>
+                  <span>-₹{discount}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                <span>{t.gstLabel}</span>
+                <span>₹{finalGst}</span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                <span>{t.serviceChargeLabel}</span>
+                <span>₹{finalService}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center text-xs font-black text-slate-800">
+              <span className="text-sm">Grand Total</span>
+              <span className="text-lg text-orange-600 font-black">₹{finalTotal}</span>
+            </div>
+          </div>
+
+          <button onClick={placeOrder} disabled={isPlacingOrder}
+            className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-6 sm:mt-0">
+            {isPlacingOrder ? (
+              <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Placing Order...</span></>
+            ) : (
+              <span>CONFIRM & PLACE ORDER</span>
+            )}
+          </button>
+        </div>
+      </div>
+    </AppShell>
+  );
 
   /* ── STAGE: ORDER TRACKING ── */
   const TrackingStage = () => {
@@ -970,86 +1280,164 @@ const CustomerMenu = () => {
       : null;
 
     return (
-      <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-        <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-          <h1 className="text-2xl font-black tracking-tight">{t.orderStatus}</h1>
-          <p className="text-[10px] text-slate-400 font-extrabold uppercase mt-1">ID: {latest?.orderId || latest?.id}</p>
+      <AppShell>
+        <div className="flex items-center justify-between mb-6 select-none">
+          <div>
+            <h2 className="text-xl font-black text-slate-800">{t.orderStatus}</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Track your order in real time</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setStage('callWaiter')} className="px-4 py-2 border border-slate-150 rounded-xl text-slate-650 text-xs font-black bg-white hover:bg-slate-50 transition-all shadow-sm cursor-pointer">
+              Need Help?
+            </button>
+            <div className="px-3.5 py-2 bg-white border border-slate-155 rounded-xl flex items-center gap-1.5 text-xs font-black text-slate-800 shadow-sm">
+              <span className="text-slate-400 font-bold">ID:</span>
+              <span className="font-mono text-orange-600">{latest?.orderId || latest?.id || '#ORD1234'}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 pb-28">
-          {!latest ? (
-            <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 border border-slate-200/50">
-                <span className="text-4xl">📍</span>
-              </div>
-              <p className="font-extrabold text-base text-slate-600">No active order</p>
-              <button onClick={() => setStage('menu')} className="mt-5 px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold rounded-2xl shadow-md transition-all active:scale-95">
-                Start Ordering
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                <div className="space-y-6 relative pl-4 border-l-2 border-slate-100">
-                  {['Pending', 'Preparing', 'Ready', 'Served'].map((status) => {
-                    const meta = STATUS_META[status];
-                    const isCurrent = latest.status === status;
-                    const isPast = meta.step < (STATUS_META[latest.status]?.step || 1);
-                    const isActive = isCurrent || isPast;
-                    return (
-                      <div key={status} className="relative flex gap-4 items-start">
-                        <div className={`absolute -left-[29px] w-6 h-6 rounded-full border-4 border-white flex items-center justify-center text-[10px] transition-all shadow-sm ${
-                          isCurrent ? 'bg-orange-500 scale-125' : isPast ? 'bg-emerald-500' : 'bg-slate-200'
-                        }`}>
-                          {isPast && <span className="text-white font-black">✓</span>}
-                          {isCurrent && <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />}
-                        </div>
-                        <div className={`flex-1 p-4 rounded-2xl border transition-all ${
-                          isCurrent ? 'border-orange-200 bg-orange-50/10 shadow-sm' : isPast ? 'border-slate-100 bg-slate-50/30' : 'border-slate-100/50 bg-white opacity-40'
-                        }`}>
-                          <div className="flex justify-between items-center">
-                            <h3 className={`text-sm font-black ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>{meta.label}</h3>
-                            <span className="text-xl">{meta.icon}</span>
+        {!latest ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white border border-slate-100 rounded-3xl p-8 shadow-sm text-center">
+            <span className="text-6xl mb-4 select-none">📍</span>
+            <h3 className="text-base font-black text-slate-800">No active order</h3>
+            <p className="text-xs text-slate-400 font-medium max-w-xs mt-1">Scan QR code and place order to track statuses.</p>
+            <button onClick={() => setStage('menu')} className="mt-6 px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 text-xs uppercase tracking-wider">
+              Start Ordering
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Timeline on left (spans 2 cols) */}
+            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-6">
+              <div className="relative pl-6 border-l-2 border-slate-100 ml-3 space-y-6">
+                {['Pending', 'Preparing', 'Ready', 'Served'].map((status) => {
+                  const meta = STATUS_META[status];
+                  const isCurrent = latest.status === status;
+                  const isPast = meta.step < (STATUS_META[latest.status]?.step || 1);
+                  const isActive = isCurrent || isPast;
+                  
+                  return (
+                    <div key={status} className="relative flex gap-4 items-start">
+                      {/* Dot indicator */}
+                      <div className={`absolute -left-[35px] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all ${
+                        isCurrent 
+                          ? 'bg-orange-500 scale-110 shadow-orange-500/20 text-white' 
+                          : isPast 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-slate-200 text-slate-400'
+                      }`}>
+                        {isPast ? (
+                          <span className="text-xs font-black">✓</span>
+                        ) : (
+                          <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                        )}
+                      </div>
+
+                      {/* Card */}
+                      <div className={`flex-1 p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
+                        isCurrent 
+                          ? 'border-orange-200 bg-orange-50/10 shadow-sm' 
+                          : isPast 
+                            ? 'border-slate-100 bg-slate-50/30' 
+                            : 'border-slate-100/50 bg-white opacity-40'
+                      }`}>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className={`text-sm font-black ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>
+                              {meta.label}
+                            </h3>
+                            {isCurrent && (
+                              <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping" />
+                            )}
                           </div>
-                          <p className={`text-xs mt-1 ${isActive ? 'text-slate-500' : 'text-slate-400'}`}>
-                            {isCurrent ? meta.desc : isPast ? 'Completed' : 'Pending'}
+                          <p className={`text-[11px] mt-1 ${isActive ? 'text-slate-500' : 'text-slate-400'} font-semibold`}>
+                            {isCurrent ? meta.desc : isPast ? 'Completed successfully' : 'Pending status'}
                           </p>
                         </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{meta.icon}</span>
+                          {isPast && (
+                            <span className="text-[9px] bg-emerald-100 text-emerald-600 font-extrabold px-2.5 py-0.5 rounded-full">Completed</span>
+                          )}
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Order Summary</h3>
-                <div className="space-y-2 mb-3">
-                  {latest.items.map((item, i) => (
-                    <div key={i} className="flex justify-between text-xs">
-                      <span className="font-bold text-slate-700">{item.qty}x {item.name}</span>
-                      <span className="font-bold text-slate-500">₹{item.price * item.qty}</span>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right side Info Card */}
+            <div className="space-y-6 select-none">
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute top-1/2 -right-8 w-28 h-28 bg-orange-100/50 rounded-full blur-2xl pointer-events-none" />
+                
+                <div>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Order Summary</h3>
+                  <div className="space-y-3.5 max-h-48 overflow-y-auto pr-1">
+                    {latest.items.map((item, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span className="font-extrabold text-slate-700">{item.qty}x {item.name}</span>
+                        <span className="font-black text-slate-800">₹{item.price * item.qty}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
-                  <span className="text-sm font-black text-slate-800">Total</span>
-                  <span className="text-lg font-black text-orange-600">₹{latest.total}</span>
+
+                <div className="border-t border-slate-100 pt-4.5 mt-5 flex justify-between items-center">
+                  <div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Total Amount</p>
+                    <p className="text-xl font-black text-orange-600 mt-0.5">₹{latest.total}</p>
+                  </div>
+                  <div className="w-16 h-16 bg-[#FFF7ED] rounded-2xl flex items-center justify-center text-4xl shadow-inner">
+                    🛍️
+                  </div>
                 </div>
               </div>
 
+              {/* Alert Message */}
+              <div className="bg-blue-50 border border-blue-100 rounded-3xl p-4.5 flex gap-3 text-blue-800 shadow-inner">
+                <span className="text-xl shrink-0">🛡️</span>
+                <div>
+                  <h4 className="text-[11px] font-black uppercase tracking-wider mb-0.5">Your order is safe!</h4>
+                  <p className="text-[10px] text-blue-700 font-semibold leading-relaxed">We do not share your physical location and use high encryption protocols.</p>
+                </div>
+              </div>
+
+              {/* Buttons */}
               <div className="grid grid-cols-2 gap-3.5">
-                <button onClick={() => setStage('callWaiter')} className="py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-[0.97]">
-                  🙋 {t.callWaiter}
+                <button onClick={() => {
+                  const check = confirm('Cancel this order?');
+                  if (check) toast.success('Cancellation request sent');
+                }} className="py-3.5 border border-slate-200 hover:border-slate-350 text-slate-650 font-black rounded-2xl text-xs bg-white hover:bg-slate-50 transition-all cursor-pointer active:scale-95 shadow-sm">
+                  Cancel Order
                 </button>
-                <button onClick={() => setStage('bill')} className="py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-[0.97]">
-                  🧾 View Bill
+                <button onClick={() => {
+                  latest.items.forEach(i => {
+                    setCart(prev => {
+                      const existing = prev.find(ci => ci.id === i.id);
+                      if (existing) return prev.map(ci => ci.id === i.id ? { ...ci, qty: ci.qty + i.qty } : ci);
+                      return [...prev, { ...i, qty: i.qty, customizations: {}, specialNote: '' }];
+                    });
+                  });
+                  setStage('cart');
+                  toast.success('🛒 Items added back to cart for reorder!');
+                }} className="py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-orange-500/10">
+                  Reorder
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 pt-2">
+                <button onClick={() => setStage('bill')} className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-emerald-500/10">
+                  🧾 View Full Invoice
                 </button>
               </div>
             </div>
-          )}
-        </div>
-        <BottomNav />
-      </div>
+          </div>
+        )}
+      </AppShell>
     );
   };
 
@@ -1057,54 +1445,63 @@ const CustomerMenu = () => {
   const BillStage = () => {
     const order = selectedOrder || placedOrders[0];
     return (
-      <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-        <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setStage('tracking')} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center transition-all font-black text-white">←</button>
-            <h1 className="text-xl font-black tracking-tight">{t.billSummary}</h1>
+      <AppShell>
+        <div className="flex items-center gap-3.5 mb-6 select-none">
+          <button onClick={() => setStage('tracking')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
+            ←
+          </button>
+          <div>
+            <h2 className="text-base font-black text-slate-800 leading-tight">{t.billSummary}</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Review summary and cashier billing instructions</p>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-5 pb-24">
-          <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 relative overflow-hidden">
-            <div className="absolute top-1/2 -left-3 w-6 h-6 bg-slate-50 border border-slate-100 rounded-full z-10 shadow-inner" />
-            <div className="absolute top-1/2 -right-3 w-6 h-6 bg-slate-50 border border-slate-100 rounded-full z-10 shadow-inner" />
-            <div className="text-center mb-6 pb-5 border-b border-slate-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-slate-800 to-[#0f172a] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                <span className="text-3xl">🧾</span>
-              </div>
-              <h2 className="text-lg font-black text-slate-800">Bill Details</h2>
-              <p className="text-[10px] text-slate-400 font-extrabold uppercase mt-1">ID: {order?.orderId || order?.id}</p>
-              <p className="text-xs text-slate-400 font-bold mt-0.5">{order?.date} · {order?.timestamp}</p>
+
+        <div className="max-w-md mx-auto bg-white rounded-3xl p-6 shadow-xl border border-slate-100 relative overflow-hidden select-none mb-20">
+          <div className="absolute top-1/2 -left-3.5 w-7 h-7 bg-[#F8FAFC] border border-slate-100 rounded-full z-10 shadow-inner" />
+          <div className="absolute top-1/2 -right-3.5 w-7 h-7 bg-[#F8FAFC] border border-slate-100 rounded-full z-10 shadow-inner" />
+          
+          <div className="text-center mb-6 pb-5 border-b border-slate-100">
+            <div className="w-16 h-16 bg-[#FFF7ED] rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+              <span className="text-3xl">🧾</span>
             </div>
-            <div className="space-y-2 mb-4">
-              {order?.items.map((item, i) => (
-                <div key={i} className="flex justify-between text-xs">
-                  <span className="font-bold text-slate-700">{item.qty}x {item.name}</span>
-                  <span className="font-bold text-slate-600">₹{item.price * item.qty}</span>
-                </div>
-              ))}
-            </div>
-            <div className="border-t-2 border-dashed border-slate-200 my-4" />
-            <div className="space-y-1.5 mb-3 pb-1">
-              <div className="flex justify-between text-xs text-slate-500 font-bold"><span>{t.subtotal}</span><span>₹{order?.subtotal || cartSubtotal}</span></div>
-              <div className="flex justify-between text-xs text-slate-500 font-bold"><span>{t.gstLabel}</span><span>₹{order?.gst || finalGst}</span></div>
-              <div className="flex justify-between text-xs text-slate-500 font-bold"><span>{t.serviceChargeLabel}</span><span>₹{serviceCharge(order?.subtotal || finalSubtotal)}</span></div>
-            </div>
-            <div className="flex justify-between text-lg font-black text-slate-800 bg-orange-50/50 border border-orange-100 rounded-2xl p-4 mb-5">
-              <span>{t.total}</span><span className="text-orange-600">₹{order?.total || finalTotal}</span>
-            </div>
-            <div className="bg-[#0f172a] text-white rounded-2xl p-4 text-center shadow-lg">
-              <span className="text-3xl mb-2 block">💳</span>
-              <p className="text-xs font-black uppercase tracking-wider text-orange-400 mb-1">{t.payAtCashier}</p>
-              <p className="text-[11px] text-slate-300 font-medium">{t.thankYou}</p>
-            </div>
+            <h3 className="text-base font-black text-slate-800">Payment Invoice</h3>
+            <p className="text-[9px] text-slate-400 font-extrabold uppercase mt-1">ID: {order?.orderId || order?.id || '#ORD1234'}</p>
+            <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{order?.date || fmtDate()} · {order?.timestamp || fmtTime()}</p>
           </div>
-          <button onClick={() => setStage('feedback')} className="w-full mt-5 py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all active:scale-[0.98]">
-            ⭐ {t.submitFeedback}
+
+          <div className="space-y-2.5 mb-4">
+            {(order?.items || cart).map((item, i) => (
+              <div key={i} className="flex justify-between text-xs font-semibold text-slate-650">
+                <span>{item.qty}x {item.name}</span>
+                <span>₹{item.price * item.qty}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t-2 border-dashed border-slate-200 my-4" />
+          
+          <div className="space-y-1.5 mb-4 text-xs font-semibold text-slate-500">
+            <div className="flex justify-between"><span>{t.subtotal}</span><span>₹{order?.subtotal || cartSubtotal}</span></div>
+            <div className="flex justify-between"><span>{t.gstLabel}</span><span>₹{order?.gst || finalGst}</span></div>
+            <div className="flex justify-between"><span>{t.serviceChargeLabel}</span><span>₹{serviceCharge(order?.subtotal || finalSubtotal)}</span></div>
+          </div>
+
+          <div className="flex justify-between items-center text-sm font-black text-slate-800 bg-[#FFF7ED] border border-orange-100 rounded-2xl p-4 mb-5 shadow-sm">
+            <span>{t.total}</span>
+            <span className="text-orange-600 text-lg font-black">₹{order?.total || finalTotal}</span>
+          </div>
+
+          <div className="bg-[#0B0F19] text-white rounded-2.5rem p-5 text-center shadow-lg">
+            <span className="text-3xl mb-2.5 block select-none">💳</span>
+            <p className="text-[10px] font-black uppercase tracking-widest text-orange-400 mb-1">{t.payAtCashier}</p>
+            <p className="text-[10px] text-slate-400 font-medium">{t.thankYou}</p>
+          </div>
+
+          <button onClick={() => setStage('feedback')} className="w-full mt-5 py-4 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] cursor-pointer">
+            ⭐ SUBMIT FEEDBACK
           </button>
         </div>
-        <BottomNav />
-      </div>
+      </AppShell>
     );
   };
 
@@ -1112,133 +1509,197 @@ const CustomerMenu = () => {
   const CallWaiterStage = () => {
     const [requested, setRequested] = useState(false);
     const callWaiter = async () => {
-      try { await axios.post(`${API_URL}/orders/qr`, { type: 'Request', requestType: 'Call Waiter', table: tableInfo.name, items: [{ id: '0', name: 'Call Waiter', qty: 1, price: 0 }], subtotal: 0, gst: 0, total: 0, guestCount: 1 }); } catch {}
+      try { 
+        await axios.post(`${API_URL}/orders/qr`, { 
+          type: 'Request', 
+          requestType: 'Call Waiter', 
+          table: tableInfo.name, 
+          items: [{ id: '0', name: 'Call Waiter', qty: 1, price: 0 }], 
+          subtotal: 0, 
+          gst: 0, 
+          total: 0, 
+          guestCount: 1 
+        }); 
+      } catch {}
       setRequested(true);
       setTimeout(() => setStage('tracking'), 3000);
     };
+
     return (
-      <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-        <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setStage('tracking')} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center transition-all font-black text-white">←</button>
-            <h1 className="text-xl font-black tracking-tight">{t.callWaiter}</h1>
+      <AppShell>
+        <div className="flex items-center gap-3.5 mb-6 select-none">
+          <button onClick={() => setStage('tracking')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
+            ←
+          </button>
+          <div>
+            <h2 className="text-base font-black text-slate-800 leading-tight">{t.callWaiter}</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Summon help to your table</p>
           </div>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
+
+        <div className="flex flex-col items-center justify-center p-8 max-w-sm mx-auto select-none pt-12">
           {!requested ? (
-            <div className="text-center">
-              <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl relative">
-                <span className="text-6xl relative z-10">🙋</span>
-                <span className="absolute inset-0 rounded-full bg-blue-400/30 animate-ping" />
+            <div className="text-center space-y-6">
+              <div className="w-28 h-28 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 border-2 border-blue-100 rounded-full flex items-center justify-center mx-auto shadow-xl relative animate-pulse">
+                <span className="text-5xl relative z-10">🙋</span>
+                <span className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping" />
               </div>
-              <h2 className="text-2xl font-black text-slate-800 mb-2">{t.needAssistance}</h2>
-              <p className="text-xs text-slate-400 font-bold max-w-[240px] mx-auto mb-8 leading-relaxed">{t.waiterNote}</p>
-              <button onClick={callWaiter} className="px-12 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(59,130,246,0.3)] transition-all active:scale-95">{t.callWaiter}</button>
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-800">{t.needAssistance}</h3>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">{t.waiterNote}</p>
+              </div>
+              <button onClick={callWaiter} className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-650 hover:from-blue-600 hover:to-indigo-750 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-blue-500/15 transition-all active:scale-95 cursor-pointer uppercase tracking-wider">
+                Call Waiter Now
+              </button>
             </div>
           ) : (
-            <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            <div className="text-center space-y-6">
+              <div className="w-24 h-24 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-lg animate-bounce">
+                <span className="text-4xl text-emerald-600 font-bold">✓</span>
               </div>
-              <h2 className="text-2xl font-black text-emerald-600 mb-1">Waiter Called!</h2>
-              <p className="text-xs text-slate-400 font-bold">Our staff will assist you shortly</p>
+              <div className="space-y-1">
+                <h3 className="text-lg font-black text-emerald-600">Staff Summoned!</h3>
+                <p className="text-xs text-slate-400 font-semibold">Our floor waiter is heading to your table.</p>
+              </div>
             </div>
           )}
         </div>
-      </div>
+      </AppShell>
     );
   };
 
-  /* ── STAGE: OFFERS & COUPONS ── */
+  /* ── STAGE: OFFERS ── */
   const OffersStage = () => (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50">
-      <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setStage('menu')} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center transition-all font-black text-white">←</button>
-          <h1 className="text-xl font-black tracking-tight">{t.offersForYou}</h1>
+    <AppShell>
+      <div className="flex items-center gap-3.5 mb-6 select-none">
+        <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
+          ←
+        </button>
+        <div>
+          <h2 className="text-base font-black text-slate-800 leading-tight">{t.offersForYou}</h2>
+          <p className="text-[10px] text-slate-400 font-bold mt-0.5">Apply coupons for high savings</p>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-5 pb-28 space-y-5">
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-3xl p-5 shadow-lg border-2 border-dashed border-white/20 relative overflow-hidden">
-          <div className="absolute top-1/2 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-100 z-10" />
-          <div className="absolute top-1/2 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-100 z-10" />
-          <div className="flex items-start justify-between mb-4">
-            <div><span className="text-[10px] font-black bg-white/20 border border-white/10 px-3 py-1 rounded-full uppercase tracking-wider">FLAT10</span><h3 className="text-xl font-black mt-3">Get ₹100 OFF</h3><p className="text-xs text-white/80 font-bold mt-0.5">On orders above ₹500</p></div>
-            <span className="text-5xl">🎉</span>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 select-none pb-20">
+        {/* Card 1 */}
+        <div className="bg-gradient-to-br from-orange-500 to-amber-500 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between gap-6 border-2 border-dashed border-white/20">
+          <div className="absolute top-1/2 -left-3.5 w-7 h-7 bg-[#F8FAFC] rounded-full z-10" />
+          <div className="absolute top-1/2 -right-3.5 w-7 h-7 bg-[#F8FAFC] rounded-full z-10" />
+          
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="text-[9px] bg-white/25 border border-white/25 px-3 py-1 rounded-full uppercase tracking-widest font-black">FLAT10</span>
+              <h3 className="text-xl font-black mt-4">Get ₹100 OFF</h3>
+              <p className="text-xs text-white/95 font-bold mt-1">Valid on orders above ₹500</p>
+            </div>
+            <span className="text-5xl block animate-bounce">🎉</span>
           </div>
-          <button onClick={() => { setAppliedCoupon({ code: 'FLAT10', discount: 100 }); setStage('cart'); }} className="w-full py-3 bg-white hover:bg-white/95 text-orange-600 font-extrabold rounded-xl text-xs shadow-md transition-all active:scale-[0.98]">{t.apply}</button>
+          
+          <button onClick={() => { setAppliedCoupon({ code: 'FLAT10', discount: 100 }); setStage('cart'); toast.success('Coupon Applied: FLAT10'); }} 
+            className="w-full py-3 bg-white hover:bg-slate-50 text-orange-600 font-black rounded-2xl text-xs transition-all active:scale-[0.98] shadow-md uppercase tracking-wider cursor-pointer">
+            {t.apply}
+          </button>
         </div>
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-3xl p-5 shadow-lg border-2 border-dashed border-white/20 relative overflow-hidden">
-          <div className="absolute top-1/2 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-100 z-10" />
-          <div className="absolute top-1/2 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-100 z-10" />
-          <div className="flex items-start justify-between mb-4">
-            <div><span className="text-[10px] font-black bg-white/20 border border-white/10 px-3 py-1 rounded-full uppercase tracking-wider">WELCOME20</span><h3 className="text-xl font-black mt-3">Get 20% OFF</h3><p className="text-xs text-white/80 font-bold mt-0.5">Valid on your first order</p></div>
-            <span className="text-5xl">🎁</span>
+
+        {/* Card 2 */}
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between gap-6 border-2 border-dashed border-white/20">
+          <div className="absolute top-1/2 -left-3.5 w-7 h-7 bg-[#F8FAFC] rounded-full z-10" />
+          <div className="absolute top-1/2 -right-3.5 w-7 h-7 bg-[#F8FAFC] rounded-full z-10" />
+          
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="text-[9px] bg-white/25 border border-white/25 px-3 py-1 rounded-full uppercase tracking-widest font-black">WELCOME20</span>
+              <h3 className="text-xl font-black mt-4">Get 20% OFF</h3>
+              <p className="text-xs text-white/95 font-bold mt-1">Valid on your first order discount</p>
+            </div>
+            <span className="text-5xl block animate-bounce">🎁</span>
           </div>
-          <button onClick={() => { setAppliedCoupon({ code: 'WELCOME20', discount: Math.round(cartSubtotal * 0.2) }); setStage('cart'); }} className="w-full py-3 bg-white hover:bg-white/95 text-emerald-600 font-extrabold rounded-xl text-xs shadow-md transition-all active:scale-[0.98]">{t.apply}</button>
-        </div>
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-3xl">🧁</div>
-          <div><h3 className="text-sm font-extrabold text-slate-800">{t.todaysSpecial}</h3><p className="text-xs text-slate-400 font-bold mt-0.5">{t.freeItem}</p></div>
+          
+          <button onClick={() => { setAppliedCoupon({ code: 'WELCOME20', discount: Math.round(cartSubtotal * 0.2) }); setStage('cart'); toast.success('Coupon Applied: WELCOME20'); }} 
+            className="w-full py-3 bg-white hover:bg-slate-50 text-emerald-600 font-black rounded-2xl text-xs transition-all active:scale-[0.98] shadow-md uppercase tracking-wider cursor-pointer">
+            {t.apply}
+          </button>
         </div>
       </div>
-      <BottomNav />
-    </div>
+    </AppShell>
   );
 
   /* ── STAGE: FEEDBACK ── */
   const FeedbackStage = () => (
-    <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-slate-50 to-orange-50">
-      <div className="bg-[#0f172a] text-white px-4 pt-12 pb-5 sticky top-0 z-30 shadow-md rounded-b-[2rem]">
-        <h1 className="text-xl font-black tracking-tight">{t.feedback}</h1>
-      </div>
-      <div className="flex-1 overflow-y-auto p-5 pb-28">
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
-          <div className="text-center mb-4">
-            <span className="text-5xl block mb-2 animate-bounce">⭐</span>
-            <h2 className="text-lg font-black text-slate-800">{t.howWasExp}</h2>
-            <p className="text-xs text-slate-400 font-bold mt-0.5">{t.veryGood}</p>
-          </div>
-          <div className="space-y-5">
-            {[{ key: 'foodQuality', label: t.foodQuality, icon: '🍽️' }, { key: 'service', label: t.service, icon: '🙋' }, { key: 'ambience', label: t.ambience, icon: '✨' }].map(cat => (
-              <div key={cat.key} className="space-y-2">
-                <div className="flex items-center gap-2 pl-1"><span className="text-lg">{cat.icon}</span><p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{cat.label}</p></div>
-                <div className="flex justify-center gap-2 bg-slate-50 border border-slate-100/50 p-2.5 rounded-2xl">
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <button key={n} onClick={() => setRatings(p => ({ ...p, [cat.key]: n }))}
-                      className={`w-11 h-11 rounded-xl transition-all flex items-center justify-center shadow-sm text-lg active:scale-90 ${ratings[cat.key] >= n ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white scale-110' : 'bg-white text-slate-300 hover:text-slate-400 border border-slate-100'}`}>★</button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">{t.comments}</p>
-            <textarea value={feedbackText} onChange={e => setFeedbackText(e.target.value)} placeholder={t.commentsPlaceholder} className="w-full p-4 border border-slate-200 rounded-2xl text-xs focus:outline-none focus:border-orange-500/50 transition-all resize-none font-medium" rows="3"/>
-          </div>
-          <button onClick={submitFeedback} disabled={!ratings.foodQuality || !ratings.service || !ratings.ambience}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all">
-            {t.submitFeedback}
-          </button>
+    <AppShell>
+      <div className="flex items-center justify-between mb-6 select-none">
+        <div>
+          <h2 className="text-xl font-black text-slate-800">{t.feedback}</h2>
+          <p className="text-[10px] text-slate-400 font-bold mt-0.5">We highly value your restaurant suggestions</p>
         </div>
       </div>
-      <BottomNav />
-    </div>
+
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 max-w-xl mx-auto shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-6 select-none pb-20">
+        <div className="text-center">
+          <span className="text-5xl block mb-2 animate-bounce">⭐</span>
+          <h3 className="text-base font-black text-slate-800">{t.howWasExp}</h3>
+          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">{t.veryGood}</p>
+        </div>
+
+        <div className="space-y-5">
+          {[
+            { key: 'foodQuality', label: t.foodQuality, icon: '🍽' }, 
+            { key: 'service', label: t.service, icon: '🙋' }, 
+            { key: 'ambience', label: t.ambience, icon: '✨' }
+          ].map(cat => (
+            <div key={cat.key} className="space-y-2">
+              <div className="flex items-center gap-2 pl-1">
+                <span className="text-base">{cat.icon}</span>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{cat.label}</p>
+              </div>
+              <div className="flex justify-center gap-2 bg-slate-50 border border-slate-100 p-3 rounded-2xl">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} onClick={() => setRatings(p => ({ ...p, [cat.key]: n }))}
+                    className={`w-11 h-11 rounded-xl transition-all flex items-center justify-center shadow-sm text-lg active:scale-90 ${ratings[cat.key] >= n ? 'bg-orange-500 text-white scale-110' : 'bg-white text-slate-300 hover:text-slate-450 border border-slate-150'}`}>★</button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">{t.comments}</p>
+          <textarea 
+            value={feedbackText} 
+            onChange={e => setFeedbackText(e.target.value)} 
+            placeholder={t.commentsPlaceholder} 
+            className="w-full p-4 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-slate-50/20 transition-all resize-none" 
+            rows="3"
+          />
+        </div>
+
+        <button onClick={submitFeedback} disabled={!ratings.foodQuality || !ratings.service || !ratings.ambience}
+          className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold rounded-2xl text-xs transition-all uppercase tracking-widest cursor-pointer shadow-md shadow-orange-500/10 active:scale-95">
+          {t.submitFeedback}
+        </button>
+      </div>
+    </AppShell>
   );
 
   /* ── STAGE: THANK YOU ── */
   const ThankYouStage = () => (
-    <div className="flex flex-col h-screen overflow-y-auto bg-gradient-to-br from-emerald-50 to-white justify-center items-center p-8 relative">
+    <div className="flex flex-col h-screen overflow-y-auto bg-gradient-to-br from-emerald-50 to-white justify-center items-center p-8 relative select-none">
       <div className="absolute top-10 left-10 w-44 h-44 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="text-center z-10">
-        <div className="w-28 h-28 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl relative animate-bounce">
-          <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+      
+      <div className="text-center z-10 max-w-sm w-full space-y-6">
+        <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-lg animate-bounce relative">
+          <span className="text-4xl text-emerald-600 font-bold font-sans">✓</span>
           <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping opacity-60" />
         </div>
-        <h1 className="text-3xl font-black text-slate-800 mb-2">{t.thankYouTitle}</h1>
-        <p className="text-sm text-slate-500 font-bold max-w-xs mx-auto mb-8 leading-relaxed">{t.thankYouMsg}</p>
-        <div className="flex items-center justify-center gap-3.5 mb-10">
-          <span className="text-4xl animate-pulse">👥</span>
+        
+        <div className="space-y-2">
+          <h2 className="text-2xl font-black text-slate-800">{t.thankYouTitle}</h2>
+          <p className="text-xs text-slate-400 font-bold leading-relaxed">{t.thankYouMsg}</p>
+        </div>
+
+        <div className="flex items-center justify-center gap-3.5 py-4">
+          <span className="text-4xl animate-pulse">🍱</span>
           <div className="flex -space-x-2">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 border-2 border-white shadow" />
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 border-2 border-white shadow" />
@@ -1246,14 +1707,14 @@ const CustomerMenu = () => {
           </div>
           <span className="text-4xl animate-pulse">😊</span>
         </div>
-        <button onClick={() => setStage('menu')} className="px-12 py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-sm shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all active:scale-95">
+
+        <button onClick={() => setStage('menu')} className="w-full py-4.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all uppercase tracking-widest active:scale-95 cursor-pointer">
           {t.backToMenu}
         </button>
       </div>
     </div>
   );
 
-  // Main render
   return (
     <>
       {voiceOpen && <VoicePanel />}
