@@ -687,7 +687,7 @@ const CustomerMenu = () => {
         label: t.menu || 'Menu', 
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21h8.25M6 18h12M12 3c-4.97 0-9 2.686-9 6 0 1.574.92 3.012 2.454 4.093A3.75 3.75 0 004.5 15v3h15v-3a3.75 3.75 0 00-.954-1.907C20.08 12.012 21 10.574 21 9c0-3.314-4.03-6-9-6z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
         )
       },
@@ -717,39 +717,39 @@ const CustomerMenu = () => {
         badge: placedOrders.length,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           </svg>
         )
       },
       { 
-        id: 'favorites', 
-        label: 'Favorites', 
-        badge: favorites.length,
+        id: 'feedback', 
+        label: t.profile || 'Profile', 
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
         )
       },
     ];
 
     return (
-      <div className="fixed bottom-4 left-4 right-4 bg-[#181614] rounded-[2rem] px-4 py-2 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.3)] z-40 select-none border border-white/[0.03]">
+      <div className="fixed bottom-4 left-4 right-4 bg-white rounded-[2rem] px-5 py-2.5 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.06)] z-40 select-none border border-slate-100/80">
         {items.map(item => {
-          const isActive = (item.id === 'favorites')
-            ? (activeCategory === 'Favorites' && stage === 'menu')
-            : ((item.id === 'menu' && activeCategory !== 'Favorites') 
-                ? (stage === 'menu') 
-                : (stage === item.id || (item.id === 'tracking' && stage === 'tracking')));
-          
+          const isActive = (item.id === 'menu')
+            ? (stage === 'menu' && activeCategory !== 'Favorites')
+            : (stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback'));
+
           if (item.isCenter) {
             return (
               <button
                 key={item.id}
-                onClick={() => setStage('welcome')}
+                onClick={() => {
+                  setActiveCategory('All');
+                  setStage('welcome');
+                }}
                 className="flex flex-col items-center -mt-8 cursor-pointer select-none"
               >
-                <span className="h-15 w-15 rounded-full bg-gradient-to-br from-orange-500 to-orange-400 flex flex-col items-center justify-center ring-4 ring-[#181614] shadow-lg active:scale-95 transition-transform text-white gap-0.5">
+                <span className="h-15 w-15 rounded-full bg-gradient-to-br from-orange-500 to-orange-400 flex flex-col items-center justify-center ring-4 ring-white shadow-lg active:scale-95 transition-transform text-white gap-0.5">
                   {item.icon}
                   <span className="text-[7.5px] font-black tracking-wider uppercase text-white mt-0.5">{item.label}</span>
                 </span>
@@ -761,21 +761,19 @@ const CustomerMenu = () => {
             <button 
               key={item.id} 
               onClick={() => {
-                if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
-                else if (item.id === 'favorites') {
-                  setActiveCategory('Favorites');
+                if (item.id === 'menu') {
+                  setActiveCategory('All');
                   setStage('menu');
+                } else if (item.id === 'tracking' && placedOrders.length > 0) {
+                  setStage('tracking');
                 } else {
-                  if (item.id === 'menu' && activeCategory === 'Favorites') {
-                    setActiveCategory('All');
-                  }
                   setStage(item.id);
                 }
               }}
               className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all cursor-pointer relative ${
                 isActive 
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md' 
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-orange-50/50 text-orange-500 border border-orange-100/30 shadow-sm scale-105 font-black' 
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <div className="relative">
@@ -786,7 +784,7 @@ const CustomerMenu = () => {
                   </span>
                 )}
               </div>
-              <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-white' : 'text-gray-400'}`}>{item.label}</span>
+              <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-orange-500' : 'text-slate-400'}`}>{item.label}</span>
             </button>
           );
         })}
