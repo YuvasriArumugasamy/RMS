@@ -715,7 +715,73 @@ const CustomerMenu = () => {
                       <span>{item.label}</span>
                     </div>
                     {item.badge > 0 && (
-                      <span classN  /* ── STAGE: MENU ── */
+                      <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Bottom special item */}
+          <div className="relative bg-slate-900 rounded-3xl p-5 overflow-hidden border border-slate-800 shadow-2xl">
+            <div className="absolute inset-0 bg-black/60 z-10" />
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400')] bg-cover bg-center" />
+            <div className="relative z-20 space-y-3">
+              <span className="text-[8px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Today's Special</span>
+              <h3 className="text-xs font-black text-white leading-normal">Get 20% OFF on your first order!</h3>
+              <button onClick={() => setStage('offers')} className="w-full py-2 bg-white hover:bg-slate-100 text-[#0B0F19] font-black text-[9px] rounded-xl transition-all uppercase tracking-wider">Order Now</button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          <header className="flex items-center justify-between bg-white border-b border-slate-100 px-6 py-4.5 shrink-0 select-none">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 px-3.5 py-1.5 rounded-full text-orange-600 shadow-sm">
+                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping" />
+                <span className="text-[10px] font-black uppercase tracking-wider">{'Table ' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {voiceSupported && (
+                <button
+                  onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
+                  className="flex items-center gap-1.5 px-4.5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  🎤 <span>Voice</span>
+                </button>
+              )}
+              <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                <span className="text-lg">🔔</span>
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full" />
+              </button>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 border-2 border-white shadow-sm flex items-center justify-center text-white font-black text-xs">
+                👤
+              </div>
+            </div>
+          </header>
+
+          {/* Main content body */}
+          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 p-6">
+            {children}
+          </main>
+
+          {/* Mobile bottom nav */}
+          <div className="lg:hidden">
+            <BottomNav />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ── STAGE: MENU ── */
   const MenuStage = () => (
     <AppShell>
       {/* Hero Banner */}
