@@ -4,6 +4,7 @@ import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { SkeletonTableRow } from '../components/LoadingSkeleton';
 import { useVoiceOrder } from '../hooks/useVoiceOrder';
+import MenuItemImage from '../components/MenuItemImage';
 
 const OrderManagement = () => {
   const { on, connected } = useSocket();
@@ -443,7 +444,11 @@ const OrderManagement = () => {
                   {cart.map(item => (
                     <div key={item._id || item.id} className="flex justify-between items-center text-sm border-b border-slate-50 pb-3 last:border-0 last:pb-0">
                       <div className="w-1/2 flex items-center space-x-2">
-                        <span className="text-xl">{item.image}</span>
+                        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-slate-50 shrink-0">
+                          <MenuItemImage src={item.image} alt={item.name}
+                            imgClassName="w-8 h-8 object-cover"
+                            emojiClassName="text-xl" />
+                        </div>
                         <div>
                           <span className="font-bold text-slate-800 block text-xs truncate max-w-[120px]">{item.name}</span>
                           <span className="text-[10px] text-slate-400 font-semibold">₹{item.price}</span>
@@ -496,7 +501,11 @@ const OrderManagement = () => {
               {filteredItems.map(item => (
                 <div key={item.id} onClick={() => addToCart(item)}
                   className="bg-slate-50/50 hover:bg-white border border-slate-100 hover:border-indigo-500/50 rounded-3xl p-4 flex flex-col justify-between items-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer group">
-                  <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{item.image}</span>
+                  <div className="h-16 w-full flex items-center justify-center mb-3 overflow-hidden rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                    <MenuItemImage src={item.image} alt={item.name}
+                      imgClassName="h-16 w-full object-cover rounded-2xl"
+                      emojiClassName="text-4xl" />
+                  </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-slate-800 text-xs">{item.name}</h4>
                     <p className="text-[10px] text-slate-400 font-bold">₹{item.price}</p>

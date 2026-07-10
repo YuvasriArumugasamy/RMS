@@ -4,17 +4,7 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import QRCode from 'react-qr-code';
 import { toast } from 'react-toastify';
-
-// Image assets for menu items
-import imgSpringRoll from '../assets/ChatGPT Image Jul 10, 2026, 11_45_12 AM.png';
-import imgPaneerTikka from '../assets/Grilled paneer with chutney and veggies.png';
-import imgChicken65 from '../assets/ChatGPT Image Jul 10, 2026, 11_48_07 AM.png';
-import imgChickenWings from '../assets/ChatGPT Image Jul 10, 2026, 12_51_58 PM.png';
-import imgFishFinger from '../assets/ChatGPT Image Jul 10, 2026, 12_52_07 PM.png';
-import imgPizza from '../assets/ChatGPT Image Jul 10, 2026, 12_52_15 PM.png';
-import imgBeverages from '../assets/ChatGPT Image Jul 10, 2026, 12_52_19 PM.png';
-import imgWaffles from '../assets/ChatGPT Image Jul 10, 2026, 12_52_25 PM.png';
-import imgDesserts from '../assets/ChatGPT Image Jul 10, 2026, 12_52_51 PM.png';
+import MenuItemImage from '../components/MenuItemImage';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -33,479 +23,6 @@ const estimatedTime = (items) => {
   if (!items?.length) return 0;
   return Math.max(...items.map(i => PREP_TIMES[i.category] ?? PREP_TIMES.default));
 };
-
-const renderDishImage = (image, name, sizeClass = "text-6xl", imgClass = "h-20 w-20 object-cover rounded-2xl drop-shadow-sm") => {
-  if (image && (image.startsWith('http') || image.startsWith('data:') || image.startsWith('/') || image.includes('.png') || image.includes('.jpg') || image.includes('.jpeg'))) {
-    return <img src={image} alt={name} className={imgClass} />;
-  }
-  return <span className={`${sizeClass} drop-shadow-md select-none`}>{image || '🍛'}</span>;
-};
-
-const STATIC_MENU = [
-  // Starters
-  {
-    id: "v_spring_roll",
-    menuItemId: "v_spring_roll",
-    name: "Veg Spring Roll",
-    category: "Starters",
-    price: 149,
-    image: imgSpringRoll,
-    description: "Crispy fried rolls filled with fresh sautéed vegetables.",
-    available: true
-  },
-  {
-    id: "paneer_tikka",
-    menuItemId: "paneer_tikka",
-    name: "Paneer Tikka",
-    category: "Starters",
-    price: 199,
-    image: imgPaneerTikka,
-    description: "Spicy marinated paneer cubes grilled to perfection.",
-    available: true
-  },
-  {
-    id: "chicken_65",
-    menuItemId: "chicken_65",
-    name: "Chicken 65",
-    category: "Starters",
-    price: 199,
-    image: imgChicken65,
-    description: "Crispy, deep-fried chicken pieces marinated in local spices.",
-    available: true
-  },
-  {
-    id: "chicken_wings",
-    menuItemId: "chicken_wings",
-    name: "Chicken Wings",
-    category: "Starters",
-    price: 199,
-    image: imgChickenWings,
-    description: "Smoky and spicy chicken wings tossed in BBQ sauce.",
-    available: true
-  },
-  {
-    id: "fish_finger",
-    menuItemId: "fish_finger",
-    name: "Fish Finger",
-    category: "Starters",
-    price: 199,
-    image: imgFishFinger,
-    description: "Breaded crispy fish fingers served with tartar sauce.",
-    available: true
-  },
-  {
-    id: "french_fries",
-    menuItemId: "french_fries",
-    name: "French Fries",
-    category: "Starters",
-    price: 149,
-    image: imgSpringRoll,
-    description: "Golden and crispy fries seasoned with sea salt.",
-    available: true
-  },
-
-  // Main Course
-  {
-    id: "veg_biryani",
-    menuItemId: "veg_biryani",
-    name: "Veg Biryani",
-    category: "Main Course",
-    price: 249,
-    image: imgPaneerTikka,
-    description: "Aromatic basmati rice cooked with fresh seasonal vegetables and spices.",
-    available: true
-  },
-  {
-    id: "chicken_biryani",
-    menuItemId: "chicken_biryani",
-    name: "Chicken Biryani",
-    category: "Main Course",
-    price: 299,
-    image: imgChicken65,
-    description: "Classic rich layered chicken biryani cooked with basmati rice.",
-    available: true
-  },
-  {
-    id: "paneer_butter_masala",
-    menuItemId: "paneer_butter_masala",
-    name: "Paneer Butter Masala",
-    category: "Main Course",
-    price: 249,
-    image: imgPaneerTikka,
-    description: "Soft paneer cubes in a rich tomato and butter-based curry.",
-    available: true
-  },
-  {
-    id: "chicken_butter_masala",
-    menuItemId: "chicken_butter_masala",
-    name: "Chicken Butter Masala",
-    category: "Main Course",
-    price: 299,
-    image: imgChickenWings,
-    description: "Tender chicken cooked in a rich, creamy, buttery gravy.",
-    available: true
-  },
-  {
-    id: "veg_fried_rice",
-    menuItemId: "veg_fried_rice",
-    name: "Veg Fried Rice",
-    category: "Main Course",
-    price: 199,
-    image: imgSpringRoll,
-    description: "Fluffy rice wok-fried with crisp garden vegetables and soy sauce.",
-    available: true
-  },
-  {
-    id: "chicken_fried_rice",
-    menuItemId: "chicken_fried_rice",
-    name: "Chicken Fried Rice",
-    category: "Main Course",
-    price: 249,
-    image: imgChicken65,
-    description: "Wok-fried rice with egg, chicken bits, and green onions.",
-    available: true
-  },
-  {
-    id: "veg_noodles",
-    menuItemId: "veg_noodles",
-    name: "Veg Noodles",
-    category: "Main Course",
-    price: 199,
-    image: imgSpringRoll,
-    description: "Stir-fried noodles loaded with vegetables and savory seasonings.",
-    available: true
-  },
-  {
-    id: "chicken_noodles",
-    menuItemId: "chicken_noodles",
-    name: "Chicken Noodles",
-    category: "Main Course",
-    price: 249,
-    image: imgChicken65,
-    description: "Savory stir-fried noodles cooked with chicken pieces.",
-    available: true
-  },
-
-  // Bread
-  {
-    id: "tandoori_roti",
-    menuItemId: "tandoori_roti",
-    name: "Tandoori Roti",
-    category: "Bread",
-    price: 30,
-    image: "🫓",
-    description: "Plain whole wheat flatbread baked in a tandoor clay oven.",
-    available: true
-  },
-  {
-    id: "butter_roti",
-    menuItemId: "butter_roti",
-    name: "Butter Roti",
-    category: "Bread",
-    price: 40,
-    image: "🫓",
-    description: "Tandoori flatbread brushed with fresh melted butter.",
-    available: true
-  },
-  {
-    id: "naan",
-    menuItemId: "naan",
-    name: "Naan",
-    category: "Bread",
-    price: 60,
-    image: "🫓",
-    description: "Traditional soft leavened white flour flatbread.",
-    available: true
-  },
-  {
-    id: "butter_naan",
-    menuItemId: "butter_naan",
-    name: "Butter Naan",
-    category: "Bread",
-    price: 70,
-    image: "🫓",
-    description: "Soft white flour flatbread smothered in rich ghee/butter.",
-    available: true
-  },
-  {
-    id: "garlic_naan",
-    menuItemId: "garlic_naan",
-    name: "Garlic Naan",
-    category: "Bread",
-    price: 80,
-    image: "🫓",
-    description: "Leavened flatbread topped with minced garlic and herbs.",
-    available: true
-  },
-  {
-    id: "stuffed_paratha",
-    menuItemId: "stuffed_paratha",
-    name: "Stuffed Paratha",
-    category: "Bread",
-    price: 80,
-    image: "🫓",
-    description: "Flaky paratha stuffed with spiced potatoes and paneer.",
-    available: true
-  },
-
-  // Pizza
-  {
-    id: "margherita_pizza",
-    menuItemId: "margherita_pizza",
-    name: "Margherita Pizza",
-    category: "Pizza",
-    price: 249,
-    image: imgPizza,
-    description: "Simple classic pizza topped with mozzarella and tomato basil sauce.",
-    available: true
-  },
-  {
-    id: "veggie_pizza",
-    menuItemId: "veggie_pizza",
-    name: "Veggie Pizza",
-    category: "Pizza",
-    price: 299,
-    image: imgPizza,
-    description: "Loaded with capsicum, olives, onions, and golden corn.",
-    available: true
-  },
-  {
-    id: "paneer_pizza",
-    menuItemId: "paneer_pizza",
-    name: "Paneer Pizza",
-    category: "Pizza",
-    price: 349,
-    image: imgPizza,
-    description: "Topped with tikka marinated paneer chunks and capsicum.",
-    available: true
-  },
-  {
-    id: "farm_house_pizza",
-    menuItemId: "farm_house_pizza",
-    name: "Farm House Pizza",
-    category: "Pizza",
-    price: 349,
-    image: imgPizza,
-    description: "A rustic delight topped with onions, tomatoes, mushrooms and bell peppers.",
-    available: true
-  },
-  {
-    id: "chicken_tikka_pizza",
-    menuItemId: "chicken_tikka_pizza",
-    name: "Chicken Tikka Pizza",
-    category: "Pizza",
-    price: 399,
-    image: imgPizza,
-    description: "Topped with spicy chicken tikka cubes, red onions, and bell peppers.",
-    available: true
-  },
-  {
-    id: "bbq_chicken_pizza",
-    menuItemId: "bbq_chicken_pizza",
-    name: "BBQ Chicken Pizza",
-    category: "Pizza",
-    price: 399,
-    image: imgPizza,
-    description: "Juicy chicken bits drizzled with sweet smoky BBQ sauce.",
-    available: true
-  },
-
-  // Beverages
-  {
-    id: "fresh_lime_soda",
-    menuItemId: "fresh_lime_soda",
-    name: "Fresh Lime Soda",
-    category: "Beverages",
-    price: 69,
-    image: imgBeverages,
-    description: "Fizz with fresh lime juice, sweet or salted as you like it.",
-    available: true
-  },
-  {
-    id: "mint_mojito",
-    menuItemId: "mint_mojito",
-    name: "Mint Mojito",
-    category: "Beverages",
-    price: 99,
-    image: imgBeverages,
-    description: "Chilled mocktail with fresh mint leaves, lime and bubbly soda.",
-    available: true
-  },
-  {
-    id: "cold_coffee",
-    menuItemId: "cold_coffee",
-    name: "Cold Coffee",
-    category: "Beverages",
-    price: 129,
-    image: imgBeverages,
-    description: "Rich blended espresso milk drink topped with chocolate syrup.",
-    available: true
-  },
-  {
-    id: "milkshake",
-    menuItemId: "milkshake",
-    name: "Milkshake",
-    category: "Beverages",
-    price: 129,
-    image: imgBeverages,
-    description: "Thick vanilla/chocolate milkshake served chilled.",
-    available: true
-  },
-  {
-    id: "lassi",
-    menuItemId: "lassi",
-    name: "Lassi (Sweet / Salt)",
-    category: "Beverages",
-    price: 79,
-    image: imgBeverages,
-    description: "Creamy traditional Punjabi yogurt-based drink.",
-    available: true
-  },
-  {
-    id: "soft_drinks",
-    menuItemId: "soft_drinks",
-    name: "Soft Drinks",
-    category: "Beverages",
-    price: 49,
-    image: imgBeverages,
-    description: "Chilled carbonated soft drinks.",
-    available: true
-  },
-  {
-    id: "mineral_water",
-    menuItemId: "mineral_water",
-    name: "Mineral Water",
-    category: "Beverages",
-    price: 20,
-    image: imgBeverages,
-    description: "Packaged hygienic drinking water.",
-    available: true
-  },
-
-  // Desserts
-  {
-    id: "gulab_jamun",
-    menuItemId: "gulab_jamun",
-    name: "Gulab Jamun (2 Pcs)",
-    category: "Desserts",
-    price: 79,
-    image: imgDesserts,
-    description: "Soft milk solids balls deep fried and soaked in sweet rose cardamom syrup.",
-    available: true
-  },
-  {
-    id: "ice_cream",
-    menuItemId: "ice_cream",
-    name: "Ice Cream (2 Scoops)",
-    category: "Desserts",
-    price: 89,
-    image: imgDesserts,
-    description: "Two creamy scoops of your choice: Vanilla, Chocolate, or Strawberry.",
-    available: true
-  },
-  {
-    id: "chocolate_brownie",
-    menuItemId: "chocolate_brownie",
-    name: "Chocolate Brownie",
-    category: "Desserts",
-    price: 129,
-    image: imgDesserts,
-    description: "Fudgy warm chocolate brownie loaded with walnut bits.",
-    available: true
-  },
-  {
-    id: "fruit_salad_ice_cream",
-    menuItemId: "fruit_salad_ice_cream",
-    name: "Fruit Salad with Ice Cream",
-    category: "Desserts",
-    price: 129,
-    image: imgDesserts,
-    description: "Fresh sliced seasonal fruits served with a scoop of vanilla ice cream.",
-    available: true
-  },
-
-  // Waffles
-  {
-    id: "classic_belgian_waffle",
-    menuItemId: "classic_belgian_waffle",
-    name: "Classic Belgian Waffle",
-    category: "Waffles",
-    price: 199,
-    image: imgWaffles,
-    description: "Crispy freshly baked Belgian waffle dusted with powdered sugar.",
-    available: true
-  },
-  {
-    id: "strawberry_waffle",
-    menuItemId: "strawberry_waffle",
-    name: "Strawberry Waffle",
-    category: "Waffles",
-    price: 249,
-    image: imgWaffles,
-    description: "Warm waffle topped with fresh strawberries and sweet berry sauce.",
-    available: true
-  },
-  {
-    id: "blueberry_waffle",
-    menuItemId: "blueberry_waffle",
-    name: "Blueberry Waffle",
-    category: "Waffles",
-    price: 269,
-    image: imgWaffles,
-    description: "Baked waffle drizzled with organic wild blueberry compote.",
-    available: true
-  },
-  {
-    id: "red_velvet_waffle",
-    menuItemId: "red_velvet_waffle",
-    name: "Red Velvet Waffle",
-    category: "Waffles",
-    price: 299,
-    image: imgWaffles,
-    description: "Rich red velvet flavored waffle topped with vanilla cream cheese drizzle.",
-    available: true
-  },
-  {
-    id: "brownie_waffle",
-    menuItemId: "brownie_waffle",
-    name: "Brownie Waffle",
-    category: "Waffles",
-    price: 319,
-    image: imgWaffles,
-    description: "Fresh waffle loaded with crumbled chocolate brownies and hot fudge.",
-    available: true
-  },
-  {
-    id: "chocolate_overload_waffle",
-    menuItemId: "chocolate_overload_waffle",
-    name: "Chocolate Overload Waffle",
-    category: "Waffles",
-    price: 299,
-    image: imgWaffles,
-    description: "Drenched in dark chocolate, milk chocolate, and white chocolate curls.",
-    available: true
-  },
-  {
-    id: "caramel_banana_waffle",
-    menuItemId: "caramel_banana_waffle",
-    name: "Caramel Banana Waffle",
-    category: "Waffles",
-    price: 289,
-    image: imgWaffles,
-    description: "Slices of ripe sweet bananas drizzled with warm sea salt caramel sauce.",
-    available: true
-  },
-  {
-    id: "oreo_waffle",
-    menuItemId: "oreo_waffle",
-    name: "Oreo Waffle",
-    category: "Waffles",
-    price: 299,
-    image: imgWaffles,
-    description: "Topped with crushed Oreo cookies and sweet white chocolate sauce.",
-    available: true
-  }
-];
 
 const LANGS = {
   en: { title: 'Our Menu', welcome: 'Welcome!', subtitle: 'Thank you for choosing us',
@@ -815,23 +332,19 @@ const CustomerMenu = () => {
       try {
         const res = await axios.get(`${API_URL}/menu?available=true`);
         if (res.data.success && res.data.data.length > 0) {
-          const items = res.data.data.map(item => {
-            const matchedStatic = STATIC_MENU.find(sm => sm.name.toLowerCase() === item.name.toLowerCase());
-            return {
-              ...item,
-              id: item._id,
-              menuItemId: item._id,
-              image: matchedStatic ? matchedStatic.image : item.image,
-              description: matchedStatic ? matchedStatic.description : item.description,
-            };
-          });
+          const items = res.data.data.map(item => ({
+            ...item,
+            id: item._id,
+            menuItemId: item._id,
+          }));
           setMenu(items);
           setCategories(['All', ...new Set(items.map(i => i.category))]);
           return;
         }
       } catch {}
-      setMenu(STATIC_MENU);
-      setCategories(['All', ...new Set(STATIC_MENU.map(i => i.category))]);
+      const items = JSON.parse(localStorage.getItem('menuItems') || '[]').filter(m => m.available);
+      setMenu(items);
+      setCategories(['All', ...new Set(items.map(i => i.category))]);
     };
     fetchMenu();
   }, []);
@@ -1175,13 +688,55 @@ const CustomerMenu = () => {
             </div>
 
             {/* Navigation links */}
-            <nav className="space-y-1.5">
+            <nav className="space-y-1 select-none">
               {[
-                { id: 'menu', label: t.menu, icon: '🏠' },
-                { id: 'cart', label: t.cart, icon: '🛒', badge: cart.length },
-                { id: 'tracking', label: t.orders, icon: '📦', badge: placedOrders.length },
-                { id: 'feedback', label: t.profile, icon: '👤' },
-                { id: 'offers', label: t.offersForYou, icon: '🎁' },
+                { 
+                  id: 'menu', 
+                  label: t.menu || 'Menu', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                  ) 
+                },
+                { 
+                  id: 'cart', 
+                  label: t.cart || 'Cart', 
+                  badge: cart.length,
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                  ) 
+                },
+                { 
+                  id: 'tracking', 
+                  label: t.orders || 'Orders', 
+                  badge: placedOrders.length,
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  ) 
+                },
+                { 
+                  id: 'favorites', 
+                  label: 'Favorites', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                  ) 
+                },
+                { 
+                  id: 'feedback', 
+                  label: t.profile || 'Profile', 
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  ) 
+                },
               ].map(item => {
                 const isActive = stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback');
                 return (
@@ -1190,23 +745,68 @@ const CustomerMenu = () => {
                     onClick={() => {
                       if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
                       else if (item.id === 'feedback') setStage('feedback');
+                      else if (item.id === 'favorites') {} 
                       else setStage(item.id);
                     }}
-                    className={`w-full flex items-center justify-between px-4.5 py-3.5 rounded-2xl text-xs font-bold transition-all ${
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                       isActive 
-                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 scale-105' 
-                        : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                        ? 'bg-orange-500 text-white shadow-md scale-105' 
+                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <div className="flex items-center gap-3.5">
-                      <span className="text-base">{item.icon}</span>
+                    <div className="flex items-center gap-3">
+                      {item.icon}
                       <span>{item.label}</span>
                     </div>
                     {item.badge > 0 && (
-                      <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                      <span className="bg-[#f97316] text-white text-[10px] font-bold rounded-full h-5.5 w-5.5 flex items-center justify-center shadow-md animate-bounce">
                         {item.badge}
                       </span>
                     )}
+                  </button>
+                );
+              })}
+
+              <div className="h-px bg-white/10 my-4" />
+
+              {[
+                {
+                  id: 'offers',
+                  label: t.offersForYou || 'Offers',
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.43 1.43 0 002.022 0l4.318-4.318a1.43 1.43 0 000-2.022L10.16 3.659A2.25 2.25 0 009.568 3z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+                    </svg>
+                  )
+                },
+                {
+                  id: 'help',
+                  label: 'Help & Support',
+                  icon: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                  )
+                }
+              ].map(item => {
+                const isActive = stage === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.id === 'offers') setStage('offers');
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-orange-500 text-white shadow-md' 
+                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </div>
                   </button>
                 );
               })}
@@ -1214,13 +814,26 @@ const CustomerMenu = () => {
           </div>
 
           {/* Bottom special item */}
-          <div className="relative bg-slate-900 rounded-3xl p-5 overflow-hidden border border-slate-800 shadow-2xl">
-            <div className="absolute inset-0 bg-black/60 z-10" />
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400')] bg-cover bg-center" />
-            <div className="relative z-20 space-y-3">
-              <span className="text-[8px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Today's Special</span>
-              <h3 className="text-xs font-black text-white leading-normal">Get 20% OFF on your first order!</h3>
-              <button onClick={() => setStage('offers')} className="w-full py-2 bg-white hover:bg-slate-100 text-[#0B0F19] font-black text-[9px] rounded-xl transition-all uppercase tracking-wider">Order Now</button>
+          <div className="relative bg-slate-900/60 rounded-3xl p-4 overflow-hidden border border-slate-800/80 mt-auto select-none flex flex-col gap-2.5">
+            <div>
+              <p className="text-amber-500 font-black text-xs">Today's Special</p>
+              <p className="text-slate-305 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
+            </div>
+            
+            <div className="relative mt-1 h-24 rounded-2xl overflow-hidden group">
+              <img 
+                src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" 
+                alt="Special Dish" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+              
+              <button 
+                onClick={() => setStage('offers')} 
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-[9px] font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest cursor-pointer whitespace-nowrap"
+              >
+                ORDER NOW
+              </button>
             </div>
           </div>
         </aside>
@@ -1444,8 +1057,10 @@ const CustomerMenu = () => {
                 </div>
 
                 {/* Center Food Graphic */}
-                <div className="h-28 w-full flex items-center justify-center mb-4 group-hover:scale-105 transition-transform select-none overflow-hidden rounded-2xl">
-                  {renderDishImage(item.image, item.name, "text-6xl", "h-full w-full object-cover rounded-2xl")}
+                <div className="h-28 w-full flex items-center justify-center mb-4 group-hover:scale-105 transition-transform select-none">
+                  <MenuItemImage src={item.image} alt={item.name}
+                    imgClassName="h-28 w-full object-cover rounded-2xl"
+                    emojiClassName="text-6xl drop-shadow-md" />
                 </div>
 
                 {/* Details */}
@@ -1489,7 +1104,9 @@ const CustomerMenu = () => {
                 
                 {/* Food Graphic Left */}
                 <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
-                  {renderDishImage(item.image, item.name, "text-4xl", "w-full h-full object-cover rounded-2xl")}
+                  <MenuItemImage src={item.image} alt={item.name}
+                    imgClassName="w-20 h-20 object-cover"
+                    emojiClassName="text-4xl" />
                 </div>
                 
                 {/* Content Center */}
@@ -1597,9 +1214,9 @@ const CustomerMenu = () => {
           {/* Left: Food graphic details */}
           <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-center items-center p-8 h-80 relative select-none">
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/30 rounded-full blur-2xl pointer-events-none" />
-            <div className="h-60 w-60 flex items-center justify-center overflow-hidden rounded-3xl animate-bounce">
-              {renderDishImage(item.image, item.name, "text-9xl", "w-full h-full object-cover rounded-3xl shadow-md")}
-            </div>
+            <MenuItemImage src={item.image} alt={item.name}
+              imgClassName="w-full h-full object-cover absolute inset-0 rounded-[2rem]"
+              emojiClassName="text-9xl drop-shadow-2xl animate-bounce" />
           </div>
 
           {/* Right: Info and custom choices */}
@@ -1733,7 +1350,9 @@ const CustomerMenu = () => {
                 <div key={index} className="bg-white rounded-3xl p-4 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
-                      {renderDishImage(item.image, item.name, "text-4xl", "w-full h-full object-cover")}
+                      <MenuItemImage src={item.image} alt={item.name}
+                        imgClassName="w-16 h-16 object-cover"
+                        emojiClassName="text-4xl select-none" />
                     </div>
                     <div>
                       <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
