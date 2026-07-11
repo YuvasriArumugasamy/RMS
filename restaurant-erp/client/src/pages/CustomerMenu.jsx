@@ -217,14 +217,16 @@ const CustomerMenu = () => {
       'நாண்': 'naan', 'நான்': 'naan', 'பனீர்': 'paneer', 'பன்னீர்': 'paneer', 'டிக்கா': 'tikka',
       'சோடா': 'soda', 'லைம்': 'lime', 'ப்ரெஷ்': 'fresh', 'பிரெஷ்': 'fresh', 'மீன்': 'fish',
       'பிரைஸ்': 'fries', 'ஃப்ரெஞ்ச்': 'french', 'பெப்சி': 'pepsi', 'கோலா': 'cola', 'நூடுல்ஸ்': 'noodles',
-      'சட்னி': 'chutney', 'ரோட்டி': 'roti', 'தோசை': 'dosa', 'இட்லி': 'idli', 'வடை': 'vada', 'சாம்பார்': 'sambar'
+      'சட்னி': 'chutney', 'ரோட்டி': 'roti', 'தோசை': 'dosa', 'இட்லி': 'idli', 'வடை': 'vada', 'சாம்பார்': 'sambar',
+      'லஸ்ஸி': 'lassi', 'லசி': 'lassi', 'ஜூஸ்': 'juice'
     };
 
     const HINDI_MAP = {
       'बिरयानी': 'biryani', 'चिकन': 'chicken', 'बटर': 'butter', 'नान': 'naan', 'पनीर': 'paneer',
       'टिक्का': 'tikka', 'सोडा': 'soda', 'लाइम': 'lime', 'फ्रेश': 'fresh', 'फिश': 'fish',
       'फ्राई': 'fry', 'फ्राइज': 'fries', 'पेप्सी': 'pepsi', 'कोला': 'cola', 'नूडल्स': 'noodles',
-      'चटनी': 'chutney', 'रोटी': 'roti', 'डोसा': 'dosa', 'इडली': 'idli', 'वड़ा': 'vada', 'सांबर': 'sambar'
+      'चटनी': 'chutney', 'रोटी': 'roti', 'डोसा': 'dosa', 'इडली': 'idli', 'वड़ा': 'vada', 'सांबर': 'sambar',
+      'लस्सी': 'lassi', 'जूस': 'juice'
     };
 
     const numWords = { 
@@ -235,7 +237,7 @@ const CustomerMenu = () => {
     };
 
     // Preprocess transcript by replacing Tamil/Hindi words with English equivalent representations
-    let processedText = transcript;
+    let processedText = transcript.toLowerCase();
     
     // Replace Tamil keywords
     Object.entries(TAMIL_MAP).forEach(([tamilWord, englishWord]) => {
@@ -247,22 +249,26 @@ const CustomerMenu = () => {
       processedText = processedText.replace(new RegExp(hindiWord, 'g'), englishWord);
     });
 
+    const words = processedText.split(/\s+/);
     let matched = [];
 
-    // Parse preprocessed text against menu items
-    for (const item of menu) {
-      const name = item.name.toLowerCase();
-      if (processedText.includes(name)) {
-        const words = processedText.split(/\s+/);
-        const idx = words.findIndex(w => name.includes(w) || w.includes(name.split(' ')[0]));
+    // Parse preprocessed text against menu items via keyword lookup
+    words.forEach((word, idx) => {
+      if (numWords[word] || parseInt(word)) return;
+      if (word.length < 3) return;
+
+      const bestMatch = menu.find(item => item.name.toLowerCase().includes(word));
+      if (bestMatch) {
         let qty = 1;
         if (idx > 0) {
           const prev = words[idx - 1];
           qty = parseInt(prev) || numWords[prev] || 1;
         }
-        matched.push({ item, qty });
+        if (!matched.some(m => m.item.id === bestMatch.id)) {
+          matched.push({ item: bestMatch, qty });
+        }
       }
-    }
+    });
 
     if (matched.length > 0) {
       matched.forEach(({ item, qty }) => {
