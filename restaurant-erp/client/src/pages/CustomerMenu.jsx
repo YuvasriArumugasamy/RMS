@@ -771,11 +771,6 @@ const CustomerMenu = () => {
               </button>
             )}
 
-            <img 
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face"
-              alt="Profile"
-              className="h-9 w-9 rounded-full object-cover ring-2 ring-orange-400 shadow-sm select-none"
-            />
           </div>
         </div>
 
