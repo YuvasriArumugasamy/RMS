@@ -211,17 +211,49 @@ const CustomerMenu = () => {
   }, []);
 
   const parseVoiceOrder = useCallback((transcript) => {
-    const numWords = { one:1, a:1, an:1, two:2, three:3, four:4, five:5,
-                       six:6, seven:7, eight:8, nine:9, ten:10,
-                       oru:1, rendu:2, moonu:3, naangu:4, aindhu:5,
-                       ek:1, do:2, teen:3, char:4, paanch:5 };
+    // 1. Language transliteration dictionary maps
+    const TAMIL_MAP = {
+      'பிரியாணி': 'biryani', 'பிரியானி': 'biryani', 'சிக்கன்': 'chicken', 'பட்டர்': 'butter',
+      'நாண்': 'naan', 'நான்': 'naan', 'பனீர்': 'paneer', 'பன்னீர்': 'paneer', 'டிக்கா': 'tikka',
+      'சோடா': 'soda', 'லைம்': 'lime', 'ப்ரெஷ்': 'fresh', 'பிரெஷ்': 'fresh', 'மீன்': 'fish',
+      'பிரைஸ்': 'fries', 'ஃப்ரெஞ்ச்': 'french', 'பெப்சி': 'pepsi', 'கோலா': 'cola', 'நூடுல்ஸ்': 'noodles',
+      'சட்னி': 'chutney', 'ரோட்டி': 'roti', 'தோசை': 'dosa', 'இட்லி': 'idli', 'வடை': 'vada', 'சாம்பார்': 'sambar'
+    };
+
+    const HINDI_MAP = {
+      'बिरयानी': 'biryani', 'चिकन': 'chicken', 'बटर': 'butter', 'नान': 'naan', 'पनीर': 'paneer',
+      'टिक्का': 'tikka', 'सोडा': 'soda', 'लाइम': 'lime', 'फ्रेश': 'fresh', 'फिश': 'fish',
+      'फ्राई': 'fry', 'फ्राइज': 'fries', 'पेप्सी': 'pepsi', 'कोला': 'cola', 'नूडल्स': 'noodles',
+      'चटनी': 'chutney', 'रोटी': 'roti', 'डोसा': 'dosa', 'इडली': 'idli', 'वड़ा': 'vada', 'सांबर': 'sambar'
+    };
+
+    const numWords = { 
+      one:1, a:1, an:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
+      oru:1, rendu:2, moonu:3, naangu:4, aindhu:5, ek:1, do:2, teen:3, char:4, paanch:5,
+      'ஒரு': 1, 'ஒன்று': 1, 'ரெண்டு': 2, 'இரண்டு': 2, 'மூணு': 3, 'மூன்று': 3, 'நாலு': 4, 'நான்கு': 4, 'அஞ்சு': 5, 'ஐந்து': 5,
+      'एक': 1, 'दो': 2, 'तीन': 3, 'चार': 4, 'पाँच': 5
+    };
+
+    // Preprocess transcript by replacing Tamil/Hindi words with English equivalent representations
+    let processedText = transcript;
+    
+    // Replace Tamil keywords
+    Object.entries(TAMIL_MAP).forEach(([tamilWord, englishWord]) => {
+      processedText = processedText.replace(new RegExp(tamilWord, 'g'), englishWord);
+    });
+
+    // Replace Hindi keywords
+    Object.entries(HINDI_MAP).forEach(([hindiWord, englishWord]) => {
+      processedText = processedText.replace(new RegExp(hindiWord, 'g'), englishWord);
+    });
 
     let matched = [];
 
+    // Parse preprocessed text against menu items
     for (const item of menu) {
       const name = item.name.toLowerCase();
-      if (transcript.includes(name)) {
-        const words = transcript.split(/\s+/);
+      if (processedText.includes(name)) {
+        const words = processedText.split(/\s+/);
         const idx = words.findIndex(w => name.includes(w) || w.includes(name.split(' ')[0]));
         let qty = 1;
         if (idx > 0) {
