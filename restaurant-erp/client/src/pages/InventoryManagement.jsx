@@ -246,7 +246,8 @@ const InventoryManagement = () => {
               <span className="text-[10px] text-slate-400 font-bold">Adjust stock counts on hover</span>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
@@ -336,6 +337,91 @@ const InventoryManagement = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="sm:hidden space-y-4">
+              {ingredients.length === 0 ? (
+                <p className="text-center text-slate-400 font-bold text-xs py-16">
+                  No ingredients tracked yet. Click Add raw material to populate.
+                </p>
+              ) : (
+                ingredients.map((item) => {
+                  const id = item._id || item.id;
+                  const isLow = item.status === 'Low Stock';
+                  const stockVal = Number(item.stock) || 0;
+                  const limitVal = Number(item.threshold) || 5;
+                  const percent = Math.min(100, Math.max(5, (stockVal / (limitVal * 2)) * 100));
+
+                  return (
+                    <div key={id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4.5 space-y-3.5 relative shadow-sm hover:shadow-md transition-all">
+                      {/* Header with Emoji and Status */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="w-10 h-10 rounded-xl bg-white border border-slate-100/75 flex items-center justify-center text-xl shadow-sm">
+                            {getItemEmoji(item.name)}
+                          </span>
+                          <div>
+                            <h4 className="font-extrabold text-slate-850 text-sm leading-tight">{item.name}</h4>
+                            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Alert: {item.threshold} {item.unit}</p>
+                          </div>
+                        </div>
+                        
+                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider leading-none ${
+                          isLow ? 'bg-red-50 text-red-500 border border-red-150 animate-pulse' : 'bg-emerald-50 text-emerald-600 border border-emerald-150'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </div>
+
+                      {/* Stock Level Slider & Action Counter */}
+                      <div className="flex items-center justify-between gap-4 pt-1">
+                        <div className="flex-grow space-y-1.5 min-w-0">
+                          <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                            <span>Current Stock:</span>
+                            <span className="text-slate-700 font-black text-xs">{stockVal.toFixed(1)} {item.unit}</span>
+                          </div>
+                          
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${isLow ? 'bg-red-500' : 'bg-emerald-500'}`}
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Quick Adjust Buttons */}
+                        <div className="flex items-center bg-white border border-slate-150 rounded-xl p-0.5 shadow-sm shrink-0">
+                          <button 
+                            onClick={() => updateStock(id, -1)} 
+                            className="w-7.5 h-7.5 flex items-center justify-center text-slate-500 hover:text-red-500 active:scale-90 font-black cursor-pointer text-sm"
+                          >
+                            -
+                          </button>
+                          <span className="w-[1px] h-4 bg-slate-150" />
+                          <button 
+                            onClick={() => updateStock(id, 1)} 
+                            className="w-7.5 h-7.5 flex items-center justify-center text-slate-500 hover:text-emerald-500 active:scale-90 font-black cursor-pointer text-sm"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Bottom Actions */}
+                      <div className="flex justify-between items-center pt-2.5 border-t border-slate-100/70">
+                        <span className="text-[10px] text-slate-400 font-bold">Quick edit tools active</span>
+                        <button 
+                          onClick={() => deleteIngredient(id)} 
+                          className="text-red-500 hover:text-red-700 active:scale-95 font-bold text-xs cursor-pointer flex items-center gap-1"
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
