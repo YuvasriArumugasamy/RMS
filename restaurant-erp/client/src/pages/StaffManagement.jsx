@@ -6,6 +6,7 @@ import ConfirmModal from '../components/ConfirmModal';
 const StaffManagement = () => {
   const [staffList, setStaffList] = useState([]);
   const [activeTab, setActiveTab] = useState('directory'); // 'directory' | 'permissions'
+  const [showAddModal, setShowAddModal] = useState(false);
   
   // Attendance & Shift Form
   const [selectedStaffForShift, setSelectedStaffForShift] = useState('');
@@ -194,95 +195,72 @@ const StaffManagement = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out] pb-12">
+      
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-50 pb-5">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">HR & Staff Management</h2>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">HR & Staff Management</h2>
           <p className="text-xs text-slate-400 font-semibold mt-0.5">Manage shifts, attendance, and role-based access controls.</p>
         </div>
 
-        <div className="flex space-x-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
-          <button
-            onClick={() => setActiveTab('directory')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-              activeTab === 'directory' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            👥 Directory & Shifts
-          </button>
-          <button
-            onClick={() => setActiveTab('permissions')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-              activeTab === 'permissions' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            🔐 Access Control
-          </button>
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {/* Tab Selection */}
+          <div className="flex space-x-1.5 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
+            <button
+              onClick={() => setActiveTab('directory')}
+              className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                activeTab === 'directory' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              👥 Directory & Shifts
+            </button>
+            <button
+              onClick={() => setActiveTab('permissions')}
+              className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                activeTab === 'permissions' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              🔐 Access Control
+            </button>
+          </div>
+
+          {/* Add Staff Action (Modal trigger) */}
+          {activeTab === 'directory' && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold rounded-2xl text-xs shadow-md shadow-emerald-600/10 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <span className="text-sm font-black">+</span> Add Staff
+            </button>
+          )}
         </div>
       </div>
 
       {activeTab === 'directory' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-6">
-            {/* Add New Employee Form */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <span className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">+</span>
-                Add New Employee
-              </h3>
-              <form onSubmit={addStaff} className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Karthik Raja"
-                    className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none"
-                    value={newStaffName}
-                    onChange={(e) => setNewStaffName(e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Role</label>
-                    <select
-                      className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none"
-                      value={newStaffRole}
-                      onChange={(e) => setNewStaffRole(e.target.value)}
-                    >
-                      <option>Waiter</option>
-                      <option>Chef</option>
-                      <option>Cashier</option>
-                      <option>Manager</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Phone</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="98765xxxxx"
-                      className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none"
-                      value={newStaffPhone}
-                      onChange={(e) => setNewStaffPhone(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-600/10 text-xs"
-                >
-                  Add Employee
-                </button>
-              </form>
+            
+            {/* Quick Metrics Dashboard */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white p-4.5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Total Staff</span>
+                <span className="text-xl font-black text-[#0F286B] mt-1.5">{staffList.length}</span>
+              </div>
+              <div className="bg-white p-4.5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Scheduled Today</span>
+                <span className="text-xl font-black text-indigo-600 mt-1.5">
+                  {staffList.filter(s => s.shift && s.shift !== 'None').length}
+                </span>
+              </div>
             </div>
 
             {/* Shift Assignment Form */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
-              <h3 className="text-lg font-bold text-slate-800">Assign Shift</h3>
+              <h3 className="text-lg font-bold text-slate-800 tracking-tight">Assign Shift</h3>
               <form onSubmit={assignShift} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Select Staff</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Select Staff</label>
                   <select
                     required
                     className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none text-sm font-semibold"
@@ -297,7 +275,7 @@ const StaffManagement = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Start Time</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Start Time</label>
                     <input
                       type="time"
                       required
@@ -307,7 +285,7 @@ const StaffManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">End Time</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">End Time</label>
                     <input
                       type="time"
                       required
@@ -319,7 +297,7 @@ const StaffManagement = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-xs"
+                  className="w-full py-3.5 bg-indigo-600 hover:bg-[#0F286B] text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-xs cursor-pointer"
                 >
                   Save Shift Schedule
                 </button>
@@ -330,9 +308,9 @@ const StaffManagement = () => {
           {/* Directory & Attendance */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 lg:col-span-2 space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-lg font-bold text-slate-800">Employee List & Attendance</h3>
+              <h3 className="text-lg font-bold text-slate-800 tracking-tight">Employee List & Attendance</h3>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Date:</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Date:</span>
                 <input
                   type="date"
                   value={selectedDate}
@@ -341,7 +319,9 @@ const StaffManagement = () => {
                 />
               </div>
             </div>
-            <div className="overflow-x-auto">
+            
+            {/* Desktop Table View (hidden on mobile) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
@@ -359,10 +339,10 @@ const StaffManagement = () => {
                       <td className="py-4 font-semibold text-slate-500 text-xs">{staff.role}</td>
                       <td className="py-4 font-semibold text-slate-500 text-xs">{staff.shift}</td>
                       <td className="py-4 text-center">
-                         <div className="flex justify-center bg-slate-100 rounded-xl p-1 w-fit mx-auto">
+                         <div className="flex justify-center bg-slate-100 rounded-xl p-1 w-fit mx-auto select-none">
                             <button 
                               onClick={() => markAttendance(staff._id || staff.id, 'Present')}
-                              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                                 getAttendanceForDate(staff, selectedDate) === 'Present' 
                                   ? 'bg-green-500 text-white shadow-sm' 
                                   : 'text-slate-500 hover:bg-slate-200'
@@ -370,7 +350,7 @@ const StaffManagement = () => {
                             >Present</button>
                             <button 
                               onClick={() => markAttendance(staff._id || staff.id, 'Absent')}
-                              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                                 getAttendanceForDate(staff, selectedDate) === 'Absent' 
                                   ? 'bg-red-500 text-white shadow-sm' 
                                   : 'text-slate-500 hover:bg-slate-200'
@@ -382,7 +362,7 @@ const StaffManagement = () => {
                         <div className="flex justify-end gap-1.5">
                           <button
                             onClick={() => openEditModal(staff)}
-                            className="w-8 h-8 flex items-center justify-center text-amber-600 bg-amber-50 hover:bg-amber-500 hover:text-white border border-amber-100 rounded-lg transition-all"
+                            className="w-8 h-8 flex items-center justify-center text-amber-600 bg-amber-50 hover:bg-amber-500 hover:text-white border border-amber-100 rounded-lg transition-all cursor-pointer"
                             title="Edit Employee"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -392,7 +372,7 @@ const StaffManagement = () => {
                           </button>
                           <button
                             onClick={() => setSelectedStaffForHistory(staff)}
-                            className="w-8 h-8 flex items-center justify-center text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white border border-indigo-100 rounded-lg transition-all"
+                            className="w-8 h-8 flex items-center justify-center text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white border border-indigo-100 rounded-lg transition-all cursor-pointer"
                             title="View Attendance History"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -402,7 +382,7 @@ const StaffManagement = () => {
                           </button>
                           <button
                             onClick={() => deleteStaff(staff._id || staff.id)}
-                            className="w-8 h-8 flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-100 rounded-lg transition-all"
+                            className="w-8 h-8 flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-100 rounded-lg transition-all cursor-pointer"
                             title="Remove Employee"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -419,6 +399,107 @@ const StaffManagement = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View (hidden on desktop) */}
+            <div className="sm:hidden space-y-4">
+              {staffList.length === 0 ? (
+                <p className="text-center py-10 text-slate-400 font-medium text-sm">No staff records found.</p>
+              ) : (
+                staffList.map((staff) => {
+                  const id = staff._id || staff.id;
+                  const attendanceStatus = getAttendanceForDate(staff, selectedDate);
+                  const initials = staff.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase();
+
+                  const roleColors = {
+                    Waiter: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                    Chef: 'bg-blue-50 text-blue-700 border-blue-100',
+                    Cashier: 'bg-violet-50 text-violet-700 border-violet-100',
+                    Manager: 'bg-amber-50 text-amber-700 border-amber-100',
+                  };
+                  const roleStyle = roleColors[staff.role] || 'bg-slate-50 text-slate-700 border-slate-100';
+
+                  return (
+                    <div key={id} className="bg-slate-50/50 border border-slate-100 rounded-3xl p-5 space-y-4 relative shadow-sm hover:shadow-md transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 text-white font-extrabold flex items-center justify-center text-sm shadow-sm select-none">
+                            {initials}
+                          </span>
+                          <div>
+                            <h4 className="font-extrabold text-slate-800 text-sm leading-snug">{staff.name}</h4>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                              <span className={`px-2 py-0.5 rounded-md text-[8.5px] font-black uppercase tracking-wider border leading-none ${roleStyle}`}>
+                                {staff.role}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-bold">
+                                {staff.shift && staff.shift !== 'None' ? `⏰ ${staff.shift}` : 'No Shift'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider block">Mark Attendance</label>
+                        <div className="flex bg-white border border-slate-150 rounded-2xl p-1 w-full gap-1 shadow-sm select-none">
+                          <button 
+                            onClick={() => markAttendance(id, 'Present')}
+                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
+                              attendanceStatus === 'Present' 
+                                ? 'bg-emerald-500 text-white shadow-md' 
+                                : 'text-slate-500 hover:bg-slate-100'
+                            }`}
+                          >
+                            Present
+                          </button>
+                          <button 
+                            onClick={() => markAttendance(id, 'Absent')}
+                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
+                              attendanceStatus === 'Absent' 
+                                ? 'bg-red-500 text-white shadow-md' 
+                                : 'text-slate-500 hover:bg-slate-100'
+                            }`}
+                          >
+                            Absent
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100/70">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditModal(staff)}
+                            className="px-3.5 py-1.5 flex items-center justify-center gap-1 text-[10.5px] font-extrabold text-amber-650 bg-amber-50 hover:bg-amber-500 hover:text-white border border-amber-100 rounded-xl transition-all cursor-pointer"
+                            title="Edit Employee"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => setSelectedStaffForHistory(staff)}
+                            className="px-3.5 py-1.5 flex items-center justify-center gap-1 text-[10.5px] font-extrabold text-indigo-650 bg-indigo-50 hover:bg-indigo-650 hover:text-white border border-indigo-100 rounded-xl transition-all cursor-pointer"
+                            title="View History"
+                          >
+                            📊 History
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => deleteStaff(id)}
+                          className="w-8 h-8 flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-600 hover:text-white border border-red-100 rounded-xl transition-all cursor-pointer"
+                          title="Remove Employee"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
@@ -599,6 +680,85 @@ const StaffManagement = () => {
           </div>
         </div>
       )}
+      {/* ADD EMPLOYEE MODAL */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full relative z-10 p-6 space-y-4 animate-[scaleUp_0.2s_ease-out] border border-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+              <h3 className="text-base font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-black">+</span>
+                Add New Employee
+              </h3>
+              <button 
+                onClick={() => setShowAddModal(false)} 
+                className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 hover:text-slate-800 transition-all cursor-pointer text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={(e) => { addStaff(e); setShowAddModal(false); }} className="space-y-4.5">
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Karthik Raja"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
+                  value={newStaffName}
+                  onChange={(e) => setNewStaffName(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Role</label>
+                  <select
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
+                    value={newStaffRole}
+                    onChange={(e) => setNewStaffRole(e.target.value)}
+                  >
+                    <option>Waiter</option>
+                    <option>Chef</option>
+                    <option>Cashier</option>
+                    <option>Manager</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="98765xxxxx"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
+                    value={newStaffPhone}
+                    onChange={(e) => setNewStaffPhone(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-extrabold rounded-xl text-xs cursor-pointer transition-all border border-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-emerald-650 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-emerald-500/10 cursor-pointer transition-all"
+                >
+                  Add Employee
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Confirm Modal */}
       {confirmState && (
         <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
