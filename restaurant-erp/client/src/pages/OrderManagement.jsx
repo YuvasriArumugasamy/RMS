@@ -563,6 +563,21 @@ const OrderManagement = () => {
                         </td>
                         <td className="py-4">
                           <div className="flex gap-2">
+                            {/* ✅ Serve button — Ready only */}
+                            {o.status === 'Ready' && (
+                              <button onClick={async () => {
+                                try {
+                                  await api.put(`/orders/${id}/status`, { status: 'Served' });
+                                  setOrders(prev => prev.map(order => (order._id || order.id) === id ? { ...order, status: 'Served' } : order));
+                                  toast.success(`🍽️ Order marked as served!`);
+                                } catch {
+                                  toast.error("Failed to update status.");
+                                }
+                              }}
+                                className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 transition-all cursor-pointer">
+                                🛎️ Serve
+                              </button>
+                            )}
                             {/* ✅ Edit button — Pending only */}
                             {canEdit && (
                               <button onClick={() => openEditModal(o)}
@@ -578,7 +593,7 @@ const OrderManagement = () => {
                                 {cancellingId === id ? '...' : '🚫 Cancel'}
                               </button>
                             )}
-                            {!canEdit && !canCancel && (
+                            {!canEdit && !canCancel && o.status !== 'Ready' && (
                               <span className="text-[10px] text-slate-300 font-medium">—</span>
                             )}
                           </div>
