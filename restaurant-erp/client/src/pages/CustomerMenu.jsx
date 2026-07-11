@@ -1036,7 +1036,7 @@ const CustomerMenu = () => {
 
           {/* Mobile bottom nav */}
           <div className="lg:hidden">
-            {BottomNav()}
+            <BottomNav />
           </div>
         </div>
       </div>
@@ -2538,19 +2538,19 @@ const CustomerMenu = () => {
 
   return (
     <>
-      {voiceOpen && VoicePanel()}
-      {stage === 'welcome' && WelcomeStage()}
-      {stage === 'menu' && MenuStage()}
-      {stage === 'foodDetails' && FoodDetailsStage()}
-      {stage === 'cart' && CartStage()}
-      {stage === 'confirm' && ConfirmStage()}
-      {stage === 'tracking' && TrackingStage()}
-      {stage === 'bill' && BillStage()}
-      {stage === 'callWaiter' && CallWaiterStage()}
-      {stage === 'offers' && OffersStage()}
-      {stage === 'feedback' && FeedbackStage()}
-      {stage === 'thankYou' && ThankYouStage()}
-      {stage === 'support' && SupportStage()}
+      {voiceOpen && <VoicePanel />}
+      {stage === 'welcome' && <WelcomeStage />}
+      {stage === 'menu' && <MenuStage />}
+      {stage === 'foodDetails' && <FoodDetailsStage />}
+      {stage === 'cart' && <CartStage />}
+      {stage === 'confirm' && <ConfirmStage />}
+      {stage === 'tracking' && <TrackingStage />}
+      {stage === 'bill' && <BillStage />}
+      {stage === 'callWaiter' && <CallWaiterStage />}
+      {stage === 'offers' && <OffersStage />}
+      {stage === 'feedback' && <FeedbackStage />}
+      {stage === 'thankYou' && <ThankYouStage />}
+      {stage === 'support' && <SupportStage />}
 
       {/* Mobile Navigation Drawer Overlay */}
       {isDrawerOpen && (
