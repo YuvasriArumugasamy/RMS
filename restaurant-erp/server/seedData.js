@@ -57,3 +57,96 @@ const seedDatabase = async () => {
 
     // image path helper — served from public/menu/ (no hash)
     const m = (f) => `/menu/${f}`;
+
+    // ── Menu Items ─────────────────────────────────────────
+    await MenuItem.create([
+      // STARTERS
+      { name: 'Fish Finger',   category: 'Starters', price: 199, available: true, image: m('fish-finger.png'),   description: 'Crispy golden fish fingers with tartar sauce & lemon', recipe: [{ ingredientId: ing[2]._id, qty: 0.2 }] },
+      { name: 'Paneer Tikka',  category: 'Starters', price: 199, available: true, image: m('paneer-tikka.png'),  description: 'Grilled paneer with capsicum & onion, served with mint chutney', recipe: [{ ingredientId: ing[5]._id, qty: 0.2 }] },
+      { name: 'Chicken Wings', category: 'Starters', price: 199, available: true, image: '🍗', description: 'Crispy spiced chicken wings with dipping sauce', recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }] },
+
+      // BIRYANI & RICE
+      { name: 'Chicken Biryani', category: 'Biryani & Rice', price: 299, available: true, image: m('chicken-biryani.png'), description: 'Aromatic basmati rice layered with spiced chicken & caramelised onions', recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }, { ingredientId: ing[3]._id, qty: 0.2 }] },
+      { name: 'Veg Biryani',     category: 'Biryani & Rice', price: 249, available: true, image: m('veg-biryani.png'),     description: 'Fragrant basmati rice with fresh vegetables & whole spices',        recipe: [{ ingredientId: ing[3]._id, qty: 0.2  }, { ingredientId: ing[8]._id, qty: 0.1 }] },
+      { name: 'Mutton Biryani',  category: 'Biryani & Rice', price: 299, available: true, image: m('mutton-biryani.png'),  description: 'Slow-cooked mutton layered with saffron-infused basmati rice',      recipe: [{ ingredientId: ing[1]._id, qty: 0.25 }, { ingredientId: ing[3]._id, qty: 0.2 }] },
+
+      // MAIN COURSE
+      { name: 'Paneer Butter Masala',  category: 'Main Course', price: 249, available: true, image: m('paneer-butter-masala.png'),  description: 'Soft paneer cubes in rich, creamy tomato-butter gravy',          recipe: [{ ingredientId: ing[5]._id, qty: 0.2  }, { ingredientId: ing[6]._id, qty: 0.1 }] },
+      { name: 'Chicken Butter Masala', category: 'Main Course', price: 299, available: true, image: m('chicken-butter-masala.png'), description: 'Tender chicken in a velvety tomato-butter-cream sauce',           recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }, { ingredientId: ing[6]._id, qty: 0.1 }] },
+      { name: 'Dal',                   category: 'Main Course', price: 40,  available: true, image: '🫘',                          description: 'Home-style dal tadka — comforting and flavourful',               recipe: [] },
+
+      // BREAD
+      { name: 'Tandoori Roti',  category: 'Bread', price: 30, available: true, image: m('tandoori-roti.png'),  description: 'Whole wheat roti baked fresh in a tandoor',                          recipe: [{ ingredientId: ing[4]._id, qty: 0.05 }] },
+      { name: 'Butter Naan',    category: 'Bread', price: 70, available: true, image: m('butter-naan.png'),    description: 'Soft fluffy naan brushed with butter from the tandoor',              recipe: [{ ingredientId: ing[4]._id, qty: 0.08 }] },
+      { name: 'Stuffed Paratha',category: 'Bread', price: 80, available: true, image: m('stuffed-paratha.png'),description: 'Whole wheat paratha stuffed with spiced potato filling',             recipe: [{ ingredientId: ing[4]._id, qty: 0.08 }, { ingredientId: ing[8]._id, qty: 0.1 }] },
+
+      // PIZZA
+      { name: 'Margherita Pizza',    category: 'Pizza', price: 249, available: true, image: m('margherita-pizza.png'),    description: 'Classic tomato base, mozzarella & fresh basil',                   recipe: [{ ingredientId: ing[4]._id, qty: 0.15 }, { ingredientId: ing[11]._id, qty: 0.1 }] },
+      { name: 'Veggie Pizza',        category: 'Pizza', price: 299, available: true, image: m('veggie-pizza.png'),        description: 'Loaded with colourful veggies on a herbed tomato base',           recipe: [{ ingredientId: ing[4]._id, qty: 0.15 }, { ingredientId: ing[11]._id, qty: 0.1 }] },
+      { name: 'Farm House Pizza',    category: 'Pizza', price: 349, available: true, image: m('farm-house-pizza.png'),    description: 'Paneer, capsicum, corn & mushroom on a cheesy base',              recipe: [{ ingredientId: ing[4]._id, qty: 0.15 }, { ingredientId: ing[5]._id,  qty: 0.1 }, { ingredientId: ing[11]._id, qty: 0.1 }] },
+      { name: 'Chicken Tikka Pizza', category: 'Pizza', price: 399, available: true, image: m('chicken-tikka-pizza.png'), description: 'Tandoori chicken tikka on a spiced tomato base with cheese',       recipe: [{ ingredientId: ing[0]._id, qty: 0.15 }, { ingredientId: ing[4]._id,  qty: 0.15 }, { ingredientId: ing[11]._id, qty: 0.1 }] },
+
+      // BURGERS
+      { name: 'Veg Burger',          category: 'Burgers', price: 129, available: true, image: m('veg-burger.png'),           description: 'Crispy veggie patty with lettuce, tomato & special sauce',       recipe: [] },
+      { name: 'Cheese Burger',       category: 'Burgers', price: 159, available: true, image: m('cheese-burger.png'),        description: 'Juicy patty topped with melted cheddar cheese',                  recipe: [{ ingredientId: ing[11]._id, qty: 0.05 }] },
+      { name: 'Double Patty Burger', category: 'Burgers', price: 249, available: true, image: m('double-patty-burger.png'),  description: 'Two flame-grilled patties stacked high with all the fixings',    recipe: [] },
+      { name: 'Combo Burger',        category: 'Burgers', price: 299, available: true, image: m('combo-burger.png'),         description: 'Burger + Golden Fries + Soft Drink — the full meal deal',        isCombo: true, recipe: [] },
+
+      // SNACKS
+      { name: 'Golden Fries with Ketchup', category: 'Snacks', price: 90, available: true, image: m('golden-fries.png'), description: 'Crispy golden fries served with classic ketchup dip', recipe: [{ ingredientId: ing[8]._id, qty: 0.15 }] },
+
+      // BEVERAGES
+      { name: 'Fresh Orange Soda', category: 'Beverages', price: 69,  available: true, image: m('fresh-orange-soda.png'), description: 'Freshly squeezed orange with chilled soda',                      recipe: [] },
+      { name: 'Fresh Lime Soda',   category: 'Beverages', price: 69,  available: true, image: '🍋',                      description: 'Tangy fresh lime with sweet or salted soda',                    recipe: [] },
+      { name: 'Mint Mojito',       category: 'Beverages', price: 99,  available: true, image: m('mint-mojito.png'),       description: 'Refreshing mint, lime & crushed ice mocktail',                  recipe: [] },
+      { name: 'Cold Coffee',       category: 'Beverages', price: 129, available: true, image: m('cold-coffee.png'),       description: 'Rich blended cold coffee topped with whipped cream',            recipe: [{ ingredientId: ing[9]._id, qty: 0.2  }] },
+      { name: 'Milkshake',         category: 'Beverages', price: 129, available: true, image: m('milkshake.png'),         description: 'Thick & creamy milkshake — chocolate, vanilla or strawberry',   recipe: [{ ingredientId: ing[9]._id, qty: 0.25 }] },
+      { name: 'Soft Drinks',       category: 'Beverages', price: 49,  available: true, image: m('soft-drinks.png'),       description: 'Chilled Pepsi, Coke, Sprite or 7Up',                           recipe: [] },
+
+      // DESSERTS
+      { name: 'Gulab Jamun (2 Pcs)',      category: 'Desserts', price: 79,  available: true, image: m('gulab-jamun.png'),          description: 'Soft dumplings soaked in rose-flavoured sugar syrup',           recipe: [{ ingredientId: ing[9]._id,  qty: 0.05 }] },
+      { name: 'Ice Cream (3 Scoops)',     category: 'Desserts', price: 89,  available: true, image: m('ice-cream-3-scoops.png'),   description: 'Three generous scoops of your favourite flavour',               recipe: [{ ingredientId: ing[9]._id,  qty: 0.1  }] },
+      { name: 'Chocolate Ice Cream',      category: 'Desserts', price: 129, available: true, image: m('chocolate-ice-cream.png'),  description: 'Indulgent chocolate ice cream with chocolate drizzle',           recipe: [{ ingredientId: ing[9]._id,  qty: 0.15 }] },
+      { name: 'Brownie',                  category: 'Desserts', price: 129, available: true, image: m('brownie.png'),              description: 'Warm fudgy brownie with chocolate drizzle & walnuts',           recipe: [{ ingredientId: ing[10]._id, qty: 0.05 }] },
+      { name: 'Brownie with Ice Cream',   category: 'Desserts', price: 129, available: true, image: m('brownie-ice-cream.png'),    description: 'Warm brownie topped with a scoop of vanilla ice cream',         recipe: [{ ingredientId: ing[10]._id, qty: 0.05 }] },
+      { name: 'Fruit Salad with Ice Cream',category:'Desserts', price: 129, available: true, image: m('fruit-salad-ice-cream.png'),description: 'Fresh seasonal fruits topped with a scoop of vanilla ice cream', recipe: [] },
+
+      // WAFFLES
+      { name: 'Classic Belgian Waffle', category: 'Waffles', price: 199, available: true, image: '🧇',                         description: 'Light crispy Belgian waffle with maple syrup & butter',          recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }, { ingredientId: ing[10]._id, qty: 0.05 }] },
+      { name: 'Strawberry Waffle',      category: 'Waffles', price: 249, available: true, image: m('strawberry-waffle.png'),    description: 'Golden waffle topped with fresh strawberries & cream',           recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
+      { name: 'Blueberry Waffle',       category: 'Waffles', price: 269, available: true, image: m('blueberry-waffle.png'),     description: 'Crispy waffle loaded with fresh blueberries & whipped cream',    recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
+      { name: 'Red Velvet Waffle',      category: 'Waffles', price: 299, available: true, image: m('red-velvet-waffle.png'),    description: 'Red velvet waffle with cream cheese drizzle & strawberries',     recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
+      { name: 'Brownie Waffle',         category: 'Waffles', price: 319, available: true, image: m('brownie-waffle.png'),       description: 'Rich chocolate brownie waffle topped with vanilla ice cream',    recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
+      { name: 'Caramel Banana Waffle',  category: 'Waffles', price: 289, available: true, image: m('caramel-banana-waffle.png'),description: 'Golden waffle with caramel sauce, fresh banana & ice cream',     recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
+    ]);
+    console.log('✅ Created 37 menu items across 9 categories');
+
+    // ── Tables ─────────────────────────────────────────────
+    await Table.create([
+      { name: 'Table 01', capacity: 2,  status: 'Available' },
+      { name: 'Table 02', capacity: 4,  status: 'Available' },
+      { name: 'Table 03', capacity: 6,  status: 'Available' },
+      { name: 'Table 04', capacity: 8,  status: 'Available' },
+      { name: 'Table 05', capacity: 4,  status: 'Available' },
+      { name: 'Table 06', capacity: 2,  status: 'Available' },
+      { name: 'Table 07', capacity: 6,  status: 'Available' },
+      { name: 'Table 08', capacity: 10, status: 'Available' },
+    ]);
+    console.log('✅ Created 8 tables');
+
+    console.log('\n🎉 Database seeded successfully!');
+    console.log('📝 Login Credentials:');
+    console.log('   admin / Admin@123');
+    console.log('   manager / Manager@123');
+    console.log('   chef1 / Chef@123');
+    console.log('   waiter1 / Waiter@123');
+    console.log('   cashier1 / Cashier@123\n');
+
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ Seed Error:', err.message);
+    process.exit(1);
+  }
+};
+
+seedDatabase();
