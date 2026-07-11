@@ -1335,7 +1335,7 @@ const CustomerMenu = () => {
                 <div className="mb-3">
                   <div className="w-full h-32 flex items-center justify-center overflow-hidden relative rounded-2xl bg-slate-50 border border-slate-100/60 transition-all duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
-                      imgClassName="w-full h-full object-cover p-0 group-hover:scale-108 transition-transform duration-500"
+                      imgClassName="w-full h-full object-contain p-2 group-hover:scale-108 transition-transform duration-500"
                       emojiClassName="text-5xl" />
                     {/* Price badge overlay on image */}
                     <span className="absolute bottom-3 right-3 bg-[#0B0F19] text-white text-[10.5px] font-black px-3.5 py-1.5 rounded-full shadow-lg border border-white/10 select-none">
@@ -1419,7 +1419,7 @@ const CustomerMenu = () => {
                 {/* Food Graphic Left */}
                 <div className="w-24 h-24 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
                   <MenuItemImage src={item.image} alt={item.name}
-                    imgClassName="w-full h-full object-cover p-0"
+                    imgClassName="w-full h-full object-contain p-2"
                     emojiClassName="text-4xl" />
                 </div>
                 
