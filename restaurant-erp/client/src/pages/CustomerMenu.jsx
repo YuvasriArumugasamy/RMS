@@ -7,6 +7,9 @@ import { toast } from 'react-toastify';
 import MenuItemImage from '../components/MenuItemImage';
 import logoImage from '../assets/Screenshot 2026-07-02 173735.png';
 import bannerBgImage from '../assets/ChatGPT Image Jul 10, 2026, 06_08_46 PM.png';
+import scanStepImg from '../assets/Screenshot 2026-07-11 201657.png';
+import orderStepImg from '../assets/Screenshot 2026-07-11 201635.png';
+import enjoyStepImg from '../assets/Screenshot 2026-07-11 201920.png';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -673,41 +676,21 @@ const CustomerMenu = () => {
           {/* Scan -> Order -> Enjoy steps */}
           <div className="mt-5 flex items-center justify-center gap-4 select-none">
             <div className="flex flex-col items-center gap-1">
-              <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="6" height="6" rx="1" />
-                  <rect x="15" y="3" width="6" height="6" rx="1" />
-                  <rect x="3" y="15" width="6" height="6" rx="1" />
-                  <path d="M16 16h2v2h-2zm-3-3h3v3h-3zm3 0h2v2h-2zm0 5h2v2h-2zm-3 0h2v2h-2z" />
-                </svg>
-              </div>
+              <img src={scanStepImg} alt="Scan" className="w-10 h-10 object-contain" />
               <span className="text-[10px] text-gray-550 font-bold mt-1">Scan</span>
             </div>
             
             <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
 
             <div className="flex flex-col items-center gap-1">
-              <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M3 17h18a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2z" />
-                  <path d="M5 17a7 7 0 0 1 14 0" />
-                  <path d="M12 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                </svg>
-              </div>
+              <img src={orderStepImg} alt="Order" className="w-10 h-10 object-contain" />
               <span className="text-[10px] text-gray-550 font-bold mt-1">Order</span>
             </div>
 
             <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
 
             <div className="flex flex-col items-center gap-1">
-              <div className="text-orange-500">
-                <svg className="w-6.5 h-6.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M8 14c1.5 2 4.5 2 6 0" />
-                  <line x1="9" x2="9.01" y1="9" y2="9" strokeWidth="2.5" strokeLinecap="round" />
-                  <line x1="15" x2="15.01" y1="9" y2="9" strokeWidth="2.5" strokeLinecap="round" />
-                </svg>
-              </div>
+              <img src={enjoyStepImg} alt="Enjoy" className="w-10 h-10 object-contain" />
               <span className="text-[10px] text-gray-550 font-bold mt-1">Enjoy</span>
             </div>
           </div>
