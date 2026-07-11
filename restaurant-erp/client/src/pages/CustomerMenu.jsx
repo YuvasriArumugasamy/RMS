@@ -56,7 +56,7 @@ const LANGS = {
         customize: 'Customize (Optional)', extraCheese: 'Extra Cheese',
         noOnion: 'No Onion', spicy: 'Spicy', addNote: 'Add special note...',
         qty: 'Quantity', veryGood: 'Very Good' },
-  ta: { title: 'எங்கள் மெனு', welcome: 'வரவேற்கிறோம்! ', subtitle: 'எங்களை தேர்ந்தெடுத்தற்கு நன்றி',
+  ta: { title: 'எங்கள் மெனு', welcome: 'வரவேற்கிறோம்', subtitle: 'எங்களை தேர்ந்தெடுத்தற்கு நன்றி',
         tableLabel: 'மேசை எண்', scanSuccess: 'ஸ்கேன் வெற்றி',
         startOrdering: 'ஆர்டர் தொடங்கு', searchPlaceholder: 'உணவு தேடுங்கள்...',
         all: 'அனைத்தும்', addToCart: 'கார்ட்டில் சேர்', myCart: 'என் கார்ட்', edit: 'திருத்து',
@@ -648,7 +648,7 @@ const CustomerMenu = () => {
 
           {/* Heading */}
           <div className="text-center mt-4 px-2">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-b from-orange-500 to-amber-800 bg-clip-text text-transparent truncate-none leading-tight px-2 pb-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-orange-600 leading-tight">
               {t.welcome}
             </h1>
             <p className="mt-1.5 text-gray-500 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
