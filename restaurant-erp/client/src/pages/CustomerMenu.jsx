@@ -1348,18 +1348,21 @@ const CustomerMenu = () => {
                   </button>
                 </div>
 
-                {/* Content middle: Image on left, Details on right */}
-                <div className="flex gap-3 items-center mb-3">
-                  <div className="w-20 h-20 flex items-center justify-center shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform duration-300">
+                {/* Content middle: Image on top full width, price overlay */}
+                <div className="mb-3">
+                  <div className="w-full h-28 flex items-center justify-center overflow-hidden relative rounded-2xl bg-slate-50 group-hover:scale-[1.02] transition-transform duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
-                      imgClassName="w-20 h-20 object-cover rounded-2xl"
-                      emojiClassName="text-4xl" />
+                      imgClassName="w-full h-28 object-cover rounded-2xl"
+                      emojiClassName="text-5xl" />
+                    {/* Price badge overlay on image */}
+                    <span className="absolute bottom-2 right-2 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-xl shadow-lg">
+                      ₹{item.price}
+                    </span>
                   </div>
-                  
-                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+
+                  <div className="mt-2.5">
                     <h4 className="text-xs font-black text-slate-800 line-clamp-1 leading-tight">{item.name}</h4>
-                    <p className="text-[9.5px] text-slate-400 mt-1 leading-normal line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
-                    <span className="text-xs font-black text-orange-500 mt-1.5">₹{item.price}</span>
+                    <p className="text-[9.5px] text-slate-400 mt-0.5 leading-normal line-clamp-2">{item.description || 'Delicious dish cooked to perfection.'}</p>
                   </div>
                 </div>
 
