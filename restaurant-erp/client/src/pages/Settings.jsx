@@ -82,7 +82,11 @@ const Settings = () => {
     } else if (result === 'denied') {
       toast.error('🚫 Permission denied. Enable in browser settings.');
     } else if (result === 'unsupported') {
-      toast.warning('⚠️ Your browser does not support notific  const tabConfig = {
+      toast.warning('⚠️ Your browser does not support notifications.');
+    }
+  };
+
+  const tabConfig = {
     'General Settings': { label: 'General Settings', icon: '⚙️' },
     'Notifications':    { label: 'Notifications',    icon: '🔔' },
     'Business Settings':{ label: 'Business Settings', icon: '🏢' },
