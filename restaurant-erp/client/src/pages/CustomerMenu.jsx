@@ -557,7 +557,7 @@ const CustomerMenu = () => {
         {/* Dot grid decoration (top-right) */}
         <div className="pointer-events-none absolute top-8 right-8 grid grid-cols-5 gap-2">
           {Array.from({ length: 20 }).map((_, i) => (
-            <span key={i} className="h-1.5 w-1.5 rounded-full bg-orange-455/60" />
+            <span key={i} className="h-1.5 w-1.5 rounded-full bg-orange-400/60" />
           ))}
         </div>
 
@@ -1021,7 +1021,7 @@ const CustomerMenu = () => {
             {voiceSupported && (
               <button 
                 onClick={() => { setVoiceTranscript(''); setVoiceStatus(''); setVoiceOpen(true); }}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-450 text-white text-xs font-black rounded-full px-4 py-2 hover:from-orange-600 hover:to-orange-500 shadow-lg shadow-orange-500/10 transition-all active:scale-95 cursor-pointer select-none"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-400 text-white text-xs font-black rounded-full px-4 py-2 hover:from-orange-600 hover:to-orange-500 shadow-lg shadow-orange-500/10 transition-all active:scale-95 cursor-pointer select-none"
               >
                 🎤 Voice
               </button>
