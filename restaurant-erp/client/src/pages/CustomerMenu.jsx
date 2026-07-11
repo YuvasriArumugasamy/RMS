@@ -977,6 +977,7 @@ const CustomerMenu = () => {
                     key={item.id}
                     onClick={() => {
                       if (item.id === 'offers') setStage('offers');
+                      else if (item.id === 'help') setStage('support');
                     }}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                       isActive 
@@ -2178,6 +2179,176 @@ const CustomerMenu = () => {
     );
   };
 
+  /* ── STAGE: HELP & SUPPORT ── */
+  const SupportStage = () => {
+    const [faqSearch, setFaqSearch] = useState('');
+    const [activeIndex, setActiveIndex] = useState(null);
+    const [customMessage, setCustomMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const faqs = [
+      {
+        q: "How do I pay my bill?",
+        a: "You can click on the Cart icon, proceed to checkout, or request a physical bill using the 'Bill' tab or by calling a waiter."
+      },
+      {
+        q: "Is there a service charge?",
+        a: "Yes, a standard 2% service charge and 5% GST are calculated on the food items."
+      },
+      {
+        q: "Can I customize my order?",
+        a: "Yes! Click on any dish to view customization options such as spice levels or extra toppings."
+      },
+      {
+        q: "How long will my order take?",
+        a: "Starters take about 12 minutes, Main Courses 20 minutes, and Beverages 5 minutes. You can track live status under the 'Orders' tab."
+      },
+      {
+        q: "How do I call a waiter?",
+        a: "You can use the 'Summon Waiter' button below, or use the bottom navigation drawer to access the 'Call Waiter' page."
+      }
+    ];
+
+    const filteredFaqs = faqs.filter(faq => 
+      faq.q.toLowerCase().includes(faqSearch.toLowerCase()) || 
+      faq.a.toLowerCase().includes(faqSearch.toLowerCase())
+    );
+
+    const handleSendMessage = async (e) => {
+      e.preventDefault();
+      if (!customMessage.trim()) return;
+      setIsSubmitting(true);
+      try {
+        await axios.post(`${API_URL}/orders/qr`, { 
+          type: 'Request', 
+          requestType: `Message: ${customMessage}`, 
+          table: tableInfo.name, 
+          items: [{ id: 'msg', name: `Msg: ${customMessage.substring(0, 20)}...`, qty: 1, price: 0 }], 
+          subtotal: 0, 
+          gst: 0, 
+          total: 0, 
+          guestCount: 1 
+        }); 
+        toast.success("🚀 Request sent to kitchen & cashier!");
+        setCustomMessage('');
+      } catch {
+        toast.error("❌ Failed to send request. Please try again.");
+      }
+      setIsSubmitting(false);
+    };
+
+    return (
+      <AppShell>
+        <div className="flex items-center gap-3.5 mb-6 select-none">
+          <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
+            ←
+          </button>
+          <div>
+            <h2 className="text-base font-black text-slate-800 leading-tight">Help & Support</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Instant assistance and answers</p>
+          </div>
+        </div>
+
+        <div className="space-y-6 max-w-xl mx-auto pb-24 select-none">
+          {/* Quick Table Actions */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-3.5">
+              <button 
+                onClick={() => setStage('callWaiter')}
+                className="py-3.5 bg-gradient-to-r from-orange-500 to-orange-455 text-white text-xs font-black rounded-2xl shadow-md hover:opacity-95 transition-all active:scale-95 cursor-pointer text-center flex items-center justify-center gap-2"
+              >
+                <span>🙋</span> Summon Waiter
+              </button>
+              <button 
+                onClick={() => {
+                  toast.success("🛎️ Reception has been notified!");
+                }}
+                className="py-3.5 bg-slate-100 text-slate-700 text-xs font-black rounded-2xl hover:bg-slate-150 transition-all active:scale-95 cursor-pointer text-center flex items-center justify-center gap-2"
+              >
+                <span>📞</span> Call Support
+              </button>
+            </div>
+          </div>
+
+          {/* Send Message Form */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Request anything else?</h3>
+            <form onSubmit={handleSendMessage} className="space-y-3">
+              <textarea
+                value={customMessage}
+                onChange={e => setCustomMessage(e.target.value)}
+                placeholder="Need extra spoons, napkins, clean glasses, or hot water? Write here..."
+                rows="3"
+                className="w-full p-4 border border-slate-155 rounded-2xl text-xs font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 resize-none bg-slate-50/50"
+              />
+              <button 
+                type="submit" 
+                disabled={isSubmitting || !customMessage.trim()}
+                className="w-full py-3.5 bg-slate-900 hover:bg-slate-855 text-white font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 cursor-pointer uppercase tracking-wider"
+              >
+                {isSubmitting ? 'Sending...' : 'Send Request'}
+              </button>
+            </form>
+          </div>
+
+          {/* FAQ Accordion List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Frequently Asked Questions</h3>
+            </div>
+            
+            {/* Search FAQ */}
+            <div className="relative">
+              <input
+                type="text"
+                value={faqSearch}
+                onChange={e => setFaqSearch(e.target.value)}
+                placeholder="Search FAQs..."
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-slate-155 text-slate-700 placeholder-slate-400 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 shadow-sm transition-all"
+              />
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
+            </div>
+
+            <div className="space-y-2.5">
+              {filteredFaqs.length > 0 ? (
+                filteredFaqs.map((faq, index) => {
+                  const isOpen = activeIndex === index;
+                  return (
+                    <div 
+                      key={index} 
+                      className="bg-white rounded-2xl border border-slate-100/80 shadow-sm overflow-hidden transition-all duration-200"
+                    >
+                      <button 
+                        onClick={() => setActiveIndex(isOpen ? null : index)}
+                        className="w-full flex items-center justify-between p-4.5 text-left focus:outline-none cursor-pointer"
+                      >
+                        <span className="text-xs font-black text-slate-700 leading-snug">{faq.q}</span>
+                        <span className={`text-slate-400 font-bold transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
+                          ➔
+                        </span>
+                      </button>
+                      
+                      {isOpen && (
+                        <div className="px-4.5 pb-4.5 pt-0 text-slate-400 text-xs font-medium leading-relaxed border-t border-slate-50/50">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 bg-white border border-dashed border-slate-155 rounded-2xl text-slate-400 text-xs font-bold">
+                  No matching FAQs found.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  };
+
   /* ── STAGE: OFFERS ── */
   const OffersStage = () => (
     <AppShell>
@@ -2339,6 +2510,7 @@ const CustomerMenu = () => {
       {stage === 'offers' && <OffersStage />}
       {stage === 'feedback' && <FeedbackStage />}
       {stage === 'thankYou' && <ThankYouStage />}
+      {stage === 'support' && <SupportStage />}
 
       {/* Mobile Navigation Drawer Overlay */}
       {isDrawerOpen && (
@@ -2494,6 +2666,7 @@ const CustomerMenu = () => {
                   onClick={() => {
                     setIsDrawerOpen(false);
                     if (item.id === 'offers') setStage('offers');
+                    else if (item.id === 'support') setStage('support');
                     else toast.info(`ℹ️ ${item.label} section is coming soon!`);
                   }}
                   className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-xs font-semibold text-gray-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer"
