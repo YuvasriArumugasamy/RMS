@@ -823,21 +823,21 @@ const CustomerMenu = () => {
                   setStage(item.id);
                 }
               }}
-              className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all cursor-pointer relative ${
+              className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all duration-300 cursor-pointer relative ${
                 isActive 
-                  ? 'bg-orange-50/50 text-orange-500 border border-orange-100/30 shadow-sm scale-105 font-black' 
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 scale-105 font-black' 
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'
               }`}
             >
               <div className="relative">
                 {item.icon}
                 {item.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-[#f97316] text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-md animate-bounce">
+                  <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-md animate-bounce">
                     {item.badge}
                   </span>
                 )}
               </div>
-              <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-orange-500' : 'text-slate-400'}`}>{item.label}</span>
+              <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-white' : 'text-slate-400'}`}>{item.label}</span>
             </button>
           );
         })}
@@ -1170,12 +1170,12 @@ const CustomerMenu = () => {
           const isActive = activeCategory === c;
           return (
             <button key={c} onClick={() => setActiveCategory(c)}
-              className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black transition-all border ${
+              className={`flex-shrink-0 flex items-center gap-2 px-5.5 py-3 rounded-2xl text-[11px] font-black transition-all duration-300 transform select-none border-2 ${
                 isActive 
-                  ? 'bg-orange-100 text-orange-650 border-orange-300 shadow-sm scale-105' 
-                  : 'bg-white text-gray-700 border-gray-100 hover:bg-slate-50 active:scale-95'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-[0_8px_20px_rgba(249,115,22,0.25)] scale-105' 
+                  : 'bg-white text-slate-650 border-slate-100 hover:border-slate-300 hover:bg-slate-50/50 active:scale-95'
               }`}>
-              <span className={isActive ? 'text-orange-600' : 'text-gray-500'}>
+              <span className={isActive ? 'text-white' : 'text-gray-500'}>
                 {categorySvgIcons[c] || (
                   <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" />
@@ -1294,33 +1294,33 @@ const CustomerMenu = () => {
             return viewMode === 'grid' ? (
               /* Grid Layout Card */
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
-                className="bg-white rounded-3xl border border-slate-100/70 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex flex-col justify-between relative group select-none">
+                className="bg-white rounded-[2.2rem] border-2 border-slate-100/80 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.012)] hover:shadow-[0_20px_50px_rgba(249,115,22,0.08)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between relative group select-none overflow-hidden">
                 
                 {/* Top Badge and Fav */}
-                <div className="flex justify-between items-center select-none mb-3">
+                <div className="flex justify-between items-center select-none mb-3.5">
                   {item.category === 'Desserts' ? (
-                    <span className="text-[8.5px] bg-orange-50 text-orange-700 font-extrabold px-2 py-0.8 rounded-lg uppercase tracking-wider border border-orange-100 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500" /> Bestseller
+                    <span className="text-[8.5px] bg-orange-50 text-orange-700 font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider border border-orange-100 flex items-center gap-1.5 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" /> Bestseller
                     </span>
                   ) : isNonVeg ? (
-                    <span className="text-[8.5px] bg-red-50 text-red-700 font-extrabold px-2 py-0.8 rounded-lg uppercase tracking-wider border border-red-100 flex items-center gap-1">
+                    <span className="text-[8.5px] bg-red-50/60 text-red-700 font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider border border-red-100/60 flex items-center gap-1.5 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Spicy
                     </span>
                   ) : (
-                    <span className="text-[8.5px] bg-emerald-50 text-emerald-700 font-extrabold px-2 py-0.8 rounded-lg uppercase tracking-wider border border-emerald-100 flex items-center gap-1">
+                    <span className="text-[8.5px] bg-emerald-50/60 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider border border-emerald-100/60 flex items-center gap-1.5 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Veg
                     </span>
                   )}
                   
                   <button 
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id || item._id); }} 
-                    className="transition-all p-1 bg-slate-50/70 hover:bg-slate-100 rounded-full active:scale-90 flex items-center justify-center"
+                    className="transition-all p-1.5 bg-slate-50/80 hover:bg-red-50 hover:text-red-500 text-slate-400 rounded-full active:scale-90 flex items-center justify-center border border-slate-100 shadow-sm"
                   >
                     <svg 
                       className={`w-3.5 h-3.5 transition-colors ${
                         favorites.includes(item.id || item._id) 
                           ? 'text-red-500 fill-red-500' 
-                          : 'text-slate-400 hover:text-red-500'
+                          : 'currentColor'
                       }`} 
                       stroke="currentColor" 
                       strokeWidth="2.5" 
@@ -1333,26 +1333,26 @@ const CustomerMenu = () => {
 
                 {/* Content middle: Image on top full width, price overlay */}
                 <div className="mb-3">
-                  <div className="w-full h-28 flex items-center justify-center overflow-hidden relative rounded-2xl bg-white border border-slate-100/50 group-hover:scale-[1.02] transition-transform duration-300">
+                  <div className="w-full h-32 flex items-center justify-center overflow-hidden relative rounded-2xl bg-slate-50 border border-slate-100/60 transition-all duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
-                      imgClassName="w-full h-28 object-contain rounded-2xl p-1 bg-white"
+                      imgClassName="w-full h-full object-cover p-0 group-hover:scale-108 transition-transform duration-500"
                       emojiClassName="text-5xl" />
                     {/* Price badge overlay on image */}
-                    <span className="absolute bottom-2 right-2 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-xl shadow-lg">
+                    <span className="absolute bottom-3 right-3 bg-[#0B0F19] text-white text-[10.5px] font-black px-3.5 py-1.5 rounded-full shadow-lg border border-white/10 select-none">
                       ₹{item.price}
                     </span>
                   </div>
 
-                  <div className="mt-2.5">
-                    <h4 className="text-xs font-black text-slate-800 line-clamp-1 leading-tight">{item.name}</h4>
-                    <p className="text-[9.5px] text-slate-400 mt-0.5 leading-normal line-clamp-2">{item.description || 'Delicious dish cooked to perfection.'}</p>
+                  <div className="mt-3">
+                    <h4 className="text-[13px] font-black text-slate-800 line-clamp-1 leading-tight group-hover:text-orange-500 transition-colors duration-200">{item.name}</h4>
+                    <p className="text-[10px] text-slate-400 mt-1.5 leading-normal line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
                   </div>
                 </div>
 
                 {/* Bottom Row Actions */}
-                <div className="flex items-center justify-between border-t border-slate-50 pt-2.5" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between border-t border-slate-50 pt-3" onClick={e => e.stopPropagation()}>
                   {/* Counter Selector */}
-                  <div className="flex items-center gap-1.5 bg-[#FFF8F2] border border-[#FFEADA] rounded-xl p-0.5 shadow-inner">
+                  <div className="flex items-center gap-1.5 bg-slate-50/60 border border-slate-150/60 rounded-xl p-0.5 shadow-inner">
                     <button 
                       onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
@@ -1361,14 +1361,14 @@ const CustomerMenu = () => {
                           else updateQty(idx, -1);
                         }
                       }} 
-                      className={`w-6.5 h-6.5 rounded-full bg-white shadow-sm font-extrabold flex items-center justify-center transition-colors active:scale-95 ${
-                        qtyInCart > 0 ? 'text-orange-500 hover:bg-slate-50' : 'text-slate-200 cursor-not-allowed'
+                      className={`w-7 h-7 rounded-xl bg-white shadow-sm font-extrabold flex items-center justify-center transition-all active:scale-95 ${
+                        qtyInCart > 0 ? 'text-orange-500 hover:bg-slate-50' : 'text-slate-300 cursor-not-allowed'
                       }`}
                       disabled={qtyInCart === 0}
                     >
                       -
                     </button>
-                    <span className="text-[10px] font-black text-slate-800 px-1 w-4 text-center select-none">
+                    <span className="text-[11px] font-black text-slate-800 px-1 w-6 text-center select-none">
                       {qtyInCart > 0 ? qtyInCart : 1}
                     </span>
                     <button 
@@ -1381,7 +1381,7 @@ const CustomerMenu = () => {
                           toast.success(`🛒 Added ${item.name}!`);
                         }
                       }} 
-                      className="w-6.5 h-6.5 rounded-full bg-white shadow-sm font-extrabold text-orange-500 hover:bg-slate-50 flex items-center justify-center transition-colors active:scale-95"
+                      className="w-7 h-7 rounded-xl bg-white shadow-sm font-extrabold text-orange-500 hover:bg-slate-50 flex items-center justify-center transition-all active:scale-95"
                     >
                       +
                     </button>
@@ -1397,13 +1397,13 @@ const CustomerMenu = () => {
                         setStage('cart');
                       }
                     }}
-                    className={`px-4 py-2 flex items-center gap-1.5 text-[9px] font-black rounded-xl cursor-pointer transition-all active:scale-95 shadow-sm ${
+                    className={`px-4.5 py-2.5 flex items-center gap-1.5 text-[9.5px] font-black rounded-2xl cursor-pointer transition-all active:scale-95 shadow-sm uppercase tracking-wider ${
                       qtyInCart > 0 
-                        ? 'bg-emerald-500 text-white shadow-sm'
-                        : 'bg-orange-500 text-white hover:bg-orange-655'
+                        ? 'bg-emerald-650 text-white shadow-emerald-600/10'
+                        : 'bg-[#0B0F19] text-white hover:bg-orange-500 hover:shadow-orange-500/10 border border-transparent'
                     }`}
                   >
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                     </svg>
                     <span>{qtyInCart > 0 ? 'ADDED' : 'ADD'}</span>
@@ -1414,12 +1414,12 @@ const CustomerMenu = () => {
             ) : (
               /* List Layout Card */
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
-                className="bg-white rounded-[1.5rem] border border-slate-100 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex gap-5 items-center relative select-none">
+                className="bg-white rounded-[2rem] border-2 border-slate-100/80 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex gap-5 items-center relative select-none">
                 
                 {/* Food Graphic Left */}
-                <div className="w-20 h-20 bg-white border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+                <div className="w-24 h-24 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
                   <MenuItemImage src={item.image} alt={item.name}
-                    imgClassName="w-20 h-20 object-contain p-1"
+                    imgClassName="w-full h-full object-cover p-0"
                     emojiClassName="text-4xl" />
                 </div>
                 
