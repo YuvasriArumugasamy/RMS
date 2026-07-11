@@ -604,7 +604,7 @@ const CustomerMenu = () => {
 
         {/* Card */}
         <div
-          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/70 backdrop-blur-sm shadow-xl shadow-orange-100 px-5 pt-12 pb-5 transition-all duration-700 ease-out ${
+          className={`relative z-10 w-full max-w-sm rounded-[2.2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_24px_60px_rgba(255,122,0,0.15)] px-6 pt-14 pb-6 transition-all duration-700 ease-out ${
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -707,10 +707,10 @@ const CustomerMenu = () => {
               <button
                 key={code}
                 onClick={() => handleLanguageSelect(code)}
-                className={`rounded-full px-4.5 py-2 text-[10px] font-black border transition-all cursor-pointer ${
+                className={`rounded-full px-5 py-2.5 text-[10.5px] font-extrabold border transition-all cursor-pointer select-none ${
                   lang === code
-                    ? "bg-orange-500 text-white border-orange-500 shadow-md scale-105"
-                    : "bg-white text-orange-650 border-orange-200 hover:bg-slate-50 active:scale-95"
+                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-lg shadow-orange-500/20 scale-105 active:scale-95"
+                    : "bg-white/80 backdrop-blur-sm text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/10 active:scale-95"
                 }`}
               >
                 {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
@@ -1516,16 +1516,26 @@ const CustomerMenu = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
           {/* Left: Food graphic details */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-center items-center p-8 h-80 relative select-none">
+          <div className="bg-white rounded-[2.2rem] border border-slate-100 overflow-hidden shadow-md flex flex-col justify-center items-center p-8 h-80 relative select-none">
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/30 rounded-full blur-2xl pointer-events-none" />
             <MenuItemImage src={item.image} alt={item.name}
-              imgClassName="w-full h-full object-cover absolute inset-0 rounded-[2rem]"
+              imgClassName="w-full h-full object-cover absolute inset-0 rounded-[2.2rem]"
               emojiClassName="text-9xl drop-shadow-2xl animate-bounce" />
+            
+            {/* Floating Badges */}
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10 select-none">
+              <span className="bg-slate-900/90 backdrop-blur-sm text-white text-xs font-black tracking-wider shadow-lg px-4 py-2 rounded-2xl border border-white/10">
+                ₹{item.price}
+              </span>
+              <span className="bg-orange-500 text-white text-[10px] font-black tracking-wider shadow-lg px-4 py-2 rounded-2xl flex items-center gap-1">
+                ⭐ 4.5
+              </span>
+            </div>
           </div>
 
           {/* Right: Info and custom choices */}
           <div className="space-y-6">
-            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm space-y-4">
+            <div className="bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm space-y-4">
               <div className="flex justify-between items-start">
                 <h3 className="text-lg font-black text-slate-800 leading-snug">{item.name}</h3>
                 <span className="text-xl font-black text-orange-600">₹{item.price}</span>
@@ -1540,31 +1550,37 @@ const CustomerMenu = () => {
             </div>
 
             {/* Custom Choices */}
-            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm space-y-4">
+            {/* Custom Choices */}
+            <div className="bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm space-y-4">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.customize}</h4>
               <div className="space-y-2.5">
                 {[
-                  { key: 'extraCheese', label: t.extraCheese, price: '₹50' },
-                  { key: 'noOnion', label: t.noOnion, price: '₹0' },
-                  { key: 'spicy', label: t.spicy, price: '₹0' },
+                  { key: 'extraCheese', label: t.extraCheese, price: '₹50', icon: '🧀' },
+                  { key: 'noOnion', label: t.noOnion, price: '₹0', icon: '🧅' },
+                  { key: 'spicy', label: t.spicy, price: '₹0', icon: '🌶️' },
                 ].map(opt => {
                   const isChecked = localCustom[opt.key];
                   return (
                     <div key={opt.key} onClick={() => setLocalCustom(p => ({ ...p, [opt.key]: !p[opt.key] }))}
-                      className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                      className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.98] select-none ${
                         isChecked 
-                          ? 'border-orange-500 bg-orange-50/20' 
-                          : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
+                          ? 'border-orange-500 bg-orange-50/20 shadow-sm' 
+                          : 'border-slate-150 bg-slate-50/30 hover:bg-slate-50/70'
                       }`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                      <div className="flex items-center gap-3.5">
+                        <span className="text-base">{opt.icon}</span>
+                        <span className={`text-xs font-bold transition-colors ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{opt.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {opt.price !== '₹0' && (
+                          <span className="text-[10px] font-black text-slate-400 bg-slate-100/50 border border-slate-200 px-2 py-0.5 rounded-lg">{opt.price}</span>
+                        )}
+                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
                           isChecked ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-white'
                         }`}>
                           {isChecked && <span className="text-[9px] font-black">✓</span>}
                         </div>
-                        <span className={`text-xs font-bold transition-colors ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{opt.label}</span>
                       </div>
-                      <span className="text-[10px] font-black text-slate-400 bg-white border border-slate-100 px-2 py-0.5 rounded-lg">{opt.price}</span>
                     </div>
                   );
                 })}
@@ -1660,8 +1676,18 @@ const CustomerMenu = () => {
                     </div>
                     <div>
                       <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
-                      <p className="text-[9px] bg-slate-50 border border-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-md mt-1 w-max uppercase tracking-wider">{item.category}</p>
-                      <p className="text-xs text-orange-600 font-black mt-1">₹{item.price}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        <span className="text-[8.5px] bg-slate-100 text-slate-500 font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">{item.category}</span>
+                        {Object.entries(item.customizations || {}).filter(([_, v]) => v).map(([k]) => {
+                          const labels = { extraCheese: '🧀 Cheese', noOnion: '🧅 No Onion', spicy: '🌶️ Spicy' };
+                          return (
+                            <span key={k} className="text-[8.5px] bg-amber-50 text-amber-700 font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">
+                              {labels[k] || k}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-orange-600 font-black mt-1.5">₹{item.price}</p>
                     </div>
                   </div>
                   
@@ -1686,13 +1712,14 @@ const CustomerMenu = () => {
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Coupon Panel */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)]">
+                {/* Coupon Panel */}
+                <div className="bg-white rounded-[2.2rem] p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] relative overflow-hidden">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Have a coupon?</h4>
                   <div className="flex gap-2">
                     <input 
                       type="text" 
                       placeholder="Enter coupon code (FLAT10 / WELCOME20)" 
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-white transition-all uppercase"
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-white transition-all uppercase placeholder-slate-400"
                       id="couponCodeInput"
                     />
                     <button onClick={() => {
@@ -1706,8 +1733,15 @@ const CustomerMenu = () => {
                       } else {
                         toast.error('Invalid coupon code');
                       }
-                    }} className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl transition-all shadow-md shadow-orange-500/10 cursor-pointer">Apply</button>
+                    }} className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl transition-all shadow-md shadow-orange-500/10 cursor-pointer select-none">Apply</button>
                   </div>
+                  {appliedCoupon && (
+                    <div className="mt-3.5 bg-emerald-50/50 border border-dashed border-emerald-300 text-emerald-600 p-3 rounded-2xl text-[9.5px] font-black text-center uppercase tracking-wider relative">
+                      <div className="absolute top-1/2 -left-1.5 w-3 h-3 bg-[#F8FAFC] border-r border-slate-100 rounded-full -translate-y-1/2" />
+                      <div className="absolute top-1/2 -right-1.5 w-3 h-3 bg-[#F8FAFC] border-l border-slate-100 rounded-full -translate-y-1/2" />
+                      🎉 Applied: {appliedCoupon.code} (Saved ₹{discount})
+                    </div>
+                  )}
                 </div>
 
                 {/* Trust Badges */}
@@ -1924,13 +1958,16 @@ const CustomerMenu = () => {
                   return (
                     <div key={status} className="relative flex gap-4 items-start">
                       {/* Dot indicator */}
-                      <div className={`absolute -left-[35px] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all ${
+                      <div className={`absolute -left-[35px] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all z-10 ${
                         isCurrent 
                           ? 'bg-orange-500 scale-110 shadow-orange-500/20 text-white' 
                           : isPast 
                             ? 'bg-emerald-500 text-white' 
                             : 'bg-slate-200 text-slate-400'
                       }`}>
+                        {isCurrent && (
+                          <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping scale-125 pointer-events-none" />
+                        )}
                         {isPast ? (
                           <span className="text-xs font-black">✓</span>
                         ) : (
