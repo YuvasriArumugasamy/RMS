@@ -1,0 +1,18 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   restaurant-erp/client/src/components/MenuItemImage.jsx
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	restaurant-erp/check_db_menu.js
+	restaurant-erp/check_git_status.js
+	restaurant-erp/find_layout.js
+	restaurant-erp/search_code.js
+	restaurant-erp/server/test_db.js
+	restaurant-erp/test_login.js
+
+no changes added to commit (use "git add" and/or "git commit -a")
