@@ -334,21 +334,7 @@ const CustomerMenu = () => {
           </p>
         )}
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-3">Example Commands</p>
-          <div className="space-y-2">
-            {[
-              ['English', '"2 biryani and 1 lassi"'],
-              ['தமிழ்', '"ரெண்டு பிரியாணி ஒரு லஸ்ஸி"'],
-              ['हिंदी', '"दो बिरयानी एक लस्सी"'],
-            ].map(([l, ex]) => (
-              <div key={l} className="flex items-center gap-3">
-                <span className="text-[10px] text-slate-500 font-bold w-14">{l}</span>
-                <span className="text-[11px] text-orange-300 font-mono">{ex}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {cart.length > 0 && (
           <button
