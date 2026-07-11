@@ -7,7 +7,7 @@ import ConfirmModal from '../components/ConfirmModal';
 const STATUS_COLORS = {
   Available:   { dot:'bg-emerald-500', badge:'bg-emerald-50 text-emerald-700 border-emerald-150',  card:'border-emerald-150 bg-white hover:border-emerald-300', icon:'text-emerald-600', text: 'text-emerald-600' },
   Reserved:    { dot:'bg-amber-400',   badge:'bg-amber-50  text-amber-700   border-amber-150',    card:'border-amber-150  bg-white hover:border-amber-300',   icon:'text-amber-600',   text: 'text-amber-600'   },
-  Maintenance: { dot:'bg-slate-400',   badge:'bg-slate-50  text-slate-600   border-slate-150',    card:'border-slate-150  bg-white hover:border-slate-300',   icon:'text-slate-500',   text: 'text-slate-500'   },
+  Maintenance: { dot:'bg-slate-400',   badge:'bg-slate-50  text-slate-650   border-slate-150',    card:'border-slate-150  bg-white hover:border-slate-300',   icon:'text-slate-500',   text: 'text-slate-500'   },
   Occupied:    { dot:'bg-red-500',     badge:'bg-red-50    text-red-700     border-red-150',      card:'border-red-150    bg-white hover:border-red-300',     icon:'text-red-500',     text: 'text-red-500'     },
 };
 
@@ -382,7 +382,7 @@ const TableManagement = () => {
                   <div key={status} className="flex items-center justify-between border-b border-slate-50 pb-2 last:border-0 last:pb-0">
                     <div className="flex items-center gap-2.5">
                       <span className={`w-2.5 h-2.5 rounded-full shadow-sm ${sc.dot}`}/>
-                      <span className="text-xs text-slate-600 font-bold">{status}</span>
+                      <span className="text-xs text-slate-650 font-bold">{status}</span>
                     </div>
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${sc.badge}`}>
                       {tables.filter(t => t.status === status).length}
@@ -399,115 +399,102 @@ const TableManagement = () => {
             </div>
           </div>
 
-          {/* Table Map Visual blueprint canvas (Right column) */}
+          {/* Table Map Grid (Right column) */}
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 p-6 flex flex-col min-h-[500px]">
             <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-150">
               <h3 className="text-base font-bold text-slate-800 tracking-tight">Interactive Floor Plan Map</h3>
               <span className="text-[10px] text-slate-400 font-bold">Select table to edit or book</span>
             </div>
 
-            {/* Blueprint radial-dotted design canvas */}
-            <div 
-              className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-y-12 gap-x-6 p-8 rounded-2xl bg-slate-50/20 border border-slate-100/50 relative overflow-hidden"
-              style={{
-                backgroundImage: 'radial-gradient(circle, #e2e8f0 1.5px, transparent 1.5px)',
-                backgroundSize: '16px 16px',
-              }}
-            >
+            {/* Premium, clean list grid of dining table cards (Never overlaps adjacent items!) */}
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 p-4.5 bg-slate-50/30 border border-slate-100/50 rounded-2xl">
               {tables.map(table => {
                 const sc = STATUS_COLORS[table.status] || STATUS_COLORS.Available;
                 const capacity = Number(table.capacity) || 4;
 
-                // Function to render seats visually around table
-                const renderChairs = () => {
-                  const chairs = [];
-                  const totalChairs = Math.min(10, capacity);
-                  for (let i = 0; i < totalChairs; i++) {
-                    const angle = (i * 360) / totalChairs;
-                    const radius = 54; // distance from center of table
-                    const x = 50 + radius * Math.cos((angle * Math.PI) / 180);
-                    const y = 50 + radius * Math.sin((angle * Math.PI) / 180);
-                    
-                    chairs.push(
-                      <div 
-                        key={i} 
-                        className={`absolute w-3 h-3 rounded-full border border-white shadow-sm transition-all duration-300 ${sc.dot}`}
-                        style={{
-                          left: `${x}%`,
-                          top: `${y}%`,
-                          transform: 'translate(-50%, -50%)',
-                        }}
-                      />
-                    );
-                  }
-                  return chairs;
-                };
-
-                const isRound = capacity <= 3 || capacity === 5;
-
                 return (
-                  <div key={table.id} className="relative flex flex-col items-center justify-center p-2 select-none">
+                  <div 
+                    key={table.id}
+                    className={`bg-white rounded-2xl border-2 p-4.5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[160px] relative ${
+                      table.status === 'Available' ? 'border-slate-100' : 
+                      table.status === 'Occupied' ? 'border-red-100 bg-red-50/5' :
+                      table.status === 'Reserved' ? 'border-amber-100 bg-amber-50/5' :
+                      'border-slate-200 bg-slate-50/10'
+                    }`}
+                  >
                     
-                    {/* Visual seats wrapper */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      {renderChairs()}
-                    </div>
-
-                    {/* Table Solid Body Container */}
-                    <div 
-                      onClick={() => table.status === 'Available' && openResModal(table)}
-                      className={`relative w-28 h-28 flex flex-col items-center justify-center border-2.5 transition-all shadow-sm ${
-                        isRound ? 'rounded-full' : 'rounded-[28px]'
-                      } ${sc.card} ${
-                        table.status === 'Available' ? 'cursor-pointer hover:shadow-md active:scale-95' : 'cursor-default'
-                      }`}
-                    >
-                      {/* Floating edit pencils */}
-                      <div className="absolute -top-1 -right-1 flex gap-1 z-10">
+                    {/* Header: Table ID & Actions */}
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${sc.badge}`}>
+                          {table.status}
+                        </span>
+                        <h4 className="text-sm font-extrabold text-slate-800 mt-2">{table.name}</h4>
+                      </div>
+                      
+                      {/* Action buttons */}
+                      <div className="flex gap-1">
                         <button 
-                          onClick={(e) => { e.stopPropagation(); setEditTable(table); }} 
-                          className="w-5.5 h-5.5 bg-white hover:bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-full text-[9px] font-bold shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer transition-all" 
-                          title="Edit"
+                          onClick={() => setEditTable(table)} 
+                          className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-indigo-650 transition-all flex items-center justify-center border border-slate-100 cursor-pointer"
+                          title="Edit Status"
                         >
-                          ✏
+                          ✏️
                         </button>
                         {table.status === 'Available' && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); openResModal(table); }} 
-                            className="w-5.5 h-5.5 bg-white hover:bg-amber-50 text-slate-400 hover:text-amber-600 rounded-full text-[9px] font-bold shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer transition-all" 
-                            title="Reserve"
+                            onClick={() => openResModal(table)} 
+                            className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-all flex items-center justify-center border border-slate-100 cursor-pointer"
+                            title="Add Reservation"
                           >
                             📅
                           </button>
                         )}
                       </div>
+                    </div>
 
-                      {/* Info inside table shape */}
-                      <span className="text-[9px] font-black text-slate-400 tracking-wider uppercase leading-none">{table.name}</span>
-                      <span className="text-[14px] font-black text-slate-800 my-0.5">👤 {table.capacity}</span>
+                    {/* Middle: Capacity and Seats layout (Clean inline representation) */}
+                    <div className="my-3 space-y-2">
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-450 font-bold">
+                        <span>👥 Capacity:</span>
+                        <span className="font-extrabold text-slate-700">{capacity} Guests</span>
+                      </div>
                       
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[7.5px] font-black uppercase border leading-none scale-90 ${sc.badge}`}>
-                        {table.status}
-                      </span>
+                      {/* Interactive visual seats (drawn inside the card borders!) */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {[...Array(capacity)].map((_, i) => (
+                          <div 
+                            key={i} 
+                            title={`Seat ${i+1}`}
+                            className={`w-3.5 h-3.5 rounded-full border border-white shadow-sm transition-all duration-300 ${sc.dot}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
 
-                      {/* Direct Free Button inside busy tables */}
-                      {(table.status === 'Occupied' || table.status === 'Maintenance') && (
+                    {/* Bottom: reservation details or Free table button */}
+                    <div className="pt-2.5 border-t border-slate-50 flex items-center justify-between min-h-[38px]">
+                      {table.reservation ? (
+                        <div className="text-[10px] text-slate-500 font-semibold leading-normal truncate max-w-[65%]">
+                          <span className="text-amber-700 font-bold">👤 {table.reservation.name}</span>
+                          <span className="text-slate-400 block">🕐 {table.reservation.time}</span>
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-slate-400 font-semibold">
+                          No active booking
+                        </div>
+                      )}
+
+                      {(table.status === 'Occupied' || table.status === 'Maintenance' || table.status === 'Reserved') && (
                         <button 
-                          onClick={(e) => { e.stopPropagation(); freeTable(table._id || table.id); }}
-                          className="absolute -bottom-2 py-0.5 px-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-[8px] font-black text-slate-600 hover:text-emerald-700 hover:border-emerald-300 shadow-sm transition-all cursor-pointer"
+                          onClick={() => freeTable(table._id || table.id)}
+                          className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-[9px] font-black uppercase rounded-lg shadow-sm transition-all cursor-pointer"
                         >
-                          FREE
+                          Free Table
                         </button>
                       )}
                     </div>
 
-                    {/* Show linked reservation text popover */}
-                    {table.reservation && (
-                      <div className="mt-3.5 bg-amber-50 border border-amber-100 rounded-xl p-2 text-[8.5px] text-amber-800 text-center shadow-sm space-y-0.5 max-w-[110px] animate-[fadeIn_0.15s_ease-out]">
-                        <p className="font-extrabold truncate">👤 {table.reservation.name}</p>
-                        <p className="font-bold text-slate-400">🕐 {table.reservation.time}</p>
-                      </div>
-                    )}
                   </div>
                 );
               })}
