@@ -297,6 +297,16 @@ const CustomerMenu = () => {
       <div className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl p-6 pb-10 z-10 shadow-2xl">
         <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5"/>
 
+        {/* Close Button */}
+        <button 
+          onClick={() => setVoiceOpen(false)}
+          className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer shadow-md"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
         <h3 className="text-white font-black text-lg text-center mb-1">🎤 Voice Order</h3>
         <p className="text-slate-400 text-xs text-center mb-6">
           {lang === 'ta' ? 'உணவு பேர் சொல்லுங்க' : lang === 'hi' ? 'खाने का नाम बोलें' : 'Say the food name to add to cart'}
