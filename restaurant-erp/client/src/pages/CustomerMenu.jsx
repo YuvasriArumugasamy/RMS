@@ -1338,7 +1338,7 @@ const CustomerMenu = () => {
                       imgClassName="w-full h-full object-contain p-2 group-hover:scale-108 transition-transform duration-500"
                       emojiClassName="text-5xl" />
                     {/* Price badge overlay on image */}
-                    <span className="absolute bottom-3 right-3 bg-[#0B0F19] text-white text-[10.5px] font-black px-3.5 py-1.5 rounded-full shadow-lg border border-white/10 select-none">
+                    <span className="absolute bottom-3 right-3 bg-orange-500 text-white text-[10.5px] font-black px-3.5 py-1.5 rounded-full shadow-md select-none">
                       ₹{item.price}
                     </span>
                   </div>
@@ -1400,7 +1400,7 @@ const CustomerMenu = () => {
                     className={`px-4.5 py-2.5 flex items-center gap-1.5 text-[9.5px] font-black rounded-2xl cursor-pointer transition-all active:scale-95 shadow-sm uppercase tracking-wider ${
                       qtyInCart > 0 
                         ? 'bg-emerald-650 text-white shadow-emerald-600/10'
-                        : 'bg-[#0B0F19] text-white hover:bg-orange-500 hover:shadow-orange-500/10 border border-transparent'
+                        : 'bg-orange-500 text-white hover:bg-orange-600'
                     }`}
                   >
                     <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -1466,7 +1466,7 @@ const CustomerMenu = () => {
                     </div>
                   ) : (
                     <button onClick={(e) => { e.stopPropagation(); addToCart(item); toast.success(`🛒 Added ${item.name}!`); }}
-                      className="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-500 border border-orange-200/50 hover:border-orange-500 text-orange-600 hover:text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
+                      className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black rounded-xl transition-all active:scale-95 flex items-center gap-1">
                       <span>ADD</span>
                     </button>
                   )}
