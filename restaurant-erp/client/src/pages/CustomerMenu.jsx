@@ -650,7 +650,7 @@ const CustomerMenu = () => {
 
         <div
           className={`relative z-10 w-full max-w-sm rounded-[2.2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_24px_60px_rgba(255,122,0,0.15)] px-6 pt-14 pb-6 transition-all duration-700 ease-out ${
-            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            showWelcomeContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
           <div className="absolute -top-14 left-1/2 -translate-x-1/2">
@@ -1227,9 +1227,9 @@ const CustomerMenu = () => {
                   { key: 'noOnion', label: t.noOnion, price: '₹0', icon: '🧅' },
                   { key: 'spicy', label: t.spicy, price: '₹0', icon: '🌶️' },
                 ].map(opt => {
-                  const isChecked = localCustom[opt.key];
+                  const isChecked = detailsCustom[opt.key];
                   return (
-                    <div key={opt.key} onClick={() => setLocalCustom(p => ({ ...p, [opt.key]: !p[opt.key] }))}
+                    <div key={opt.key} onClick={() => setDetailsCustom(p => ({ ...p, [opt.key]: !p[opt.key] }))}
                       className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.98] select-none ${
                         isChecked 
                           ? 'border-orange-500 bg-orange-50/20 shadow-sm' 
@@ -1260,10 +1260,10 @@ const CustomerMenu = () => {
               <div className="flex items-center gap-3">
                 <span className="text-xs font-black text-slate-500 uppercase tracking-wider">{t.qty}</span>
                 <div className="flex items-center gap-3 bg-slate-100/75 rounded-2xl px-2.5 py-1">
-                  <button onClick={() => setLocalQty(p => Math.max(1, p - 1))}
+                  <button onClick={() => setDetailsQty(p => Math.max(1, p - 1))}
                     className="w-7.5 h-7.5 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-extrabold flex items-center justify-center transition-all cursor-pointer">-</button>
-                  <span className="text-sm font-black text-slate-800 w-5 text-center">{localQty}</span>
-                  <button onClick={() => setLocalQty(p => p + 1)}
+                  <span className="text-sm font-black text-slate-800 w-5 text-center">{detailsQty}</span>
+                  <button onClick={() => setDetailsQty(p => p + 1)}
                     className="w-7.5 h-7.5 rounded-xl bg-orange-500 text-white shadow-md font-extrabold flex items-center justify-center transition-all cursor-pointer">+</button>
                 </div>
               </div>
@@ -1272,7 +1272,7 @@ const CustomerMenu = () => {
                 className="w-full sm:w-auto px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all uppercase tracking-widest active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
                 <span>{t.addToCart}</span>
                 <span>|</span>
-                <span>₹{item.price * localQty}</span>
+                <span>₹{item.price * detailsQty}</span>
               </button>
             </div>
 
