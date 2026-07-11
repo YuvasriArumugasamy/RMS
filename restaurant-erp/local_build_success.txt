@@ -1,0 +1,20 @@
+
+> client@0.0.0 build
+> vite build
+
+[36mvite v8.1.2 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 346 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                       0.66 kB │ gzip:   0.40 kB
+dist/assets/Screenshot 2026-07-02 173735-BS8z2mkD.png                66.48 kB
+dist/assets/ChatGPT Image Jul 2_ 2026_ 02_19_30 PM-C1Kx5aMu.png   1,237.28 kB
+dist/assets/ChatGPT Image Jul 10_ 2026_ 06_08_46 PM-Edxig2yY.png  1,676.66 kB
+dist/assets/ChatGPT Image Jul 2_ 2026_ 12_34_37 PM-DmNX0kNs.png   1,885.08 kB
+dist/assets/index-Fw2ZU5Hd.css                                      126.72 kB │ gzip:  19.17 kB
+dist/assets/purify.es-Bu4Grnl0.js                                    26.10 kB │ gzip:  10.27 kB
+dist/assets/index.es-DABlWC2M.js                                    151.38 kB │ gzip:  48.88 kB
+dist/assets/html2canvas-xtiTBeFK.js                                 199.56 kB │ gzip:  46.78 kB
+dist/assets/index-DRDT9FST.js                                     1,479.40 kB │ gzip: 426.64 kB
+
+[32m✓ built in 1.68s[39m

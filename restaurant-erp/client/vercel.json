@@ -2,28 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "routes": [
-    {
-      "src": "/assets/(.*)",
-      "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/favicon\\.(png|svg|ico)",
-      "dest": "/$0"
-    },
-    {
-      "src": "/(.*)\\.js",
-      "dest": "/$1.js"
-    },
-    {
-      "src": "/(.*)\\.css",
-      "dest": "/$1.css"
-    },
-    {
-      "src": "/(.*)",
-      "headers": { "Cache-Control": "no-store, must-revalidate" },
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+
