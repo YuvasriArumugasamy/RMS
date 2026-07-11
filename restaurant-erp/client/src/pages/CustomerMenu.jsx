@@ -27,7 +27,7 @@ const estimatedTime = (items) => {
 };
 
 const LANGS = {
-  en: { title: 'Our Menu', welcome: 'Welcome!', subtitle: 'Thank you for choosing us',
+  en: { title: 'Our Menu', welcome: 'Welcome! ', subtitle: 'Thank you for choosing us',
         tableLabel: 'Table Number', scanSuccess: 'Scan successful',
         startOrdering: 'START ORDERING', searchPlaceholder: 'Search for dishes...',
         all: 'All', addToCart: 'ADD TO CART', myCart: 'My Cart', edit: 'Edit',
@@ -53,7 +53,7 @@ const LANGS = {
         customize: 'Customize (Optional)', extraCheese: 'Extra Cheese',
         noOnion: 'No Onion', spicy: 'Spicy', addNote: 'Add special note...',
         qty: 'Quantity', veryGood: 'Very Good' },
-  ta: { title: 'எங்கள் மெனு', welcome: 'வரவேற்கிறோம்!', subtitle: 'எங்களை தேர்ந்தெடுத்தற்கு நன்றி',
+  ta: { title: 'எங்கள் மெனு', welcome: 'வரவேற்கிறோம்! ', subtitle: 'எங்களை தேர்ந்தெடுத்தற்கு நன்றி',
         tableLabel: 'மேசை எண்', scanSuccess: 'ஸ்கேன் வெற்றி',
         startOrdering: 'ஆர்டர் தொடங்கு', searchPlaceholder: 'உணவு தேடுங்கள்...',
         all: 'அனைத்தும்', addToCart: 'கார்ட்டில் சேர்', myCart: 'என் கார்ட்', edit: 'திருத்து',
@@ -79,7 +79,7 @@ const LANGS = {
         customize: 'தனிப்பயனாக்கு', extraCheese: 'கூடுதல் சீஸ்',
         noOnion: 'வெங்காயம் வேண்டாம்', spicy: 'காரம்', addNote: 'சிறப்பு குறிப்பு...',
         qty: 'அளவு', veryGood: 'மிகவும் நல்லது' },
-  hi: { title: 'हमारा मेनू', welcome: 'स्वागत है!', subtitle: 'हमें चुनने के लिए धन्यवाद',
+  hi: { title: 'हमारा मेनू', welcome: 'स्वागत है! ', subtitle: 'हमें चुनने के लिए धन्यवाद',
         tableLabel: 'टेबल नंबर', scanSuccess: 'स्कैन सफल',
         startOrdering: 'ऑर्डर शुरू करें', searchPlaceholder: 'व्यंजन खोजें...',
         all: 'सभी', addToCart: 'कार्ट में डालें', myCart: 'मेरा कार्ट', edit: 'संपादित',
@@ -645,7 +645,7 @@ const CustomerMenu = () => {
 
           {/* Heading */}
           <div className="text-center mt-4 px-2">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-b from-orange-500 to-amber-800 bg-clip-text text-transparent truncate-none leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-b from-orange-500 to-amber-800 bg-clip-text text-transparent truncate-none leading-tight px-2 pb-1">
               {t.welcome}
             </h1>
             <p className="mt-1.5 text-gray-500 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
