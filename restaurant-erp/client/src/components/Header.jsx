@@ -84,11 +84,12 @@ const Header = ({ onOpenMobileSidebar }) => {
   return (
     <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 shadow-sm flex-shrink-0">
 
-      {/* Left: Page title with Hamburger menu on Mobile */}
+      {/* Left: Page title (Desktop) or Logo (Mobile) with Hamburger */}
       <div className="flex items-center gap-3.5 min-w-0">
+        {/* Mobile Hamburger menu */}
         <button 
           onClick={onOpenMobileSidebar}
-          className="md:hidden p-1.5 rounded-xl border border-slate-100 hover:bg-slate-50 transition-all active:scale-95 text-slate-600 cursor-pointer flex-shrink-0"
+          className="md:hidden p-1 rounded-lg border border-slate-150 hover:bg-slate-50 transition-all active:scale-95 text-slate-600 cursor-pointer flex-shrink-0"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -96,14 +97,21 @@ const Header = ({ onOpenMobileSidebar }) => {
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <div className="min-w-0">
+
+        {/* Mobile RMS Logo */}
+        <div className="md:hidden flex items-center select-none">
+          <span className="text-xl font-black tracking-tight"><span className="text-[#f97316]">R</span><span className="text-[#1E3A8A]">MS</span></span>
+        </div>
+
+        {/* Desktop Page Title */}
+        <div className="hidden md:block min-w-0">
           <h2 className="text-base font-extrabold text-slate-800 truncate leading-tight">{meta.title}</h2>
           <p className="text-[10px] text-slate-400 font-semibold truncate">{meta.sub}</p>
         </div>
       </div>
 
       {/* Right: actions */}
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3.5 flex-shrink-0">
 
         {/* Clock */}
         <div className="hidden sm:flex items-center gap-1.5 text-slate-500 text-xs font-bold">
@@ -136,8 +144,18 @@ const Header = ({ onOpenMobileSidebar }) => {
 
         <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
+        {/* Notification Bell with Badge Count - Mobile Only */}
+        <button className="md:hidden relative p-1.5 text-slate-600 hover:text-slate-800 transition-colors flex items-center justify-center cursor-pointer select-none">
+          <svg className="w-5.5 h-5.5 text-slate-650" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a9.04 9.04 0 01-1.201 1.492M14.857 17.082a9.04 9.04 0 01-1.201-1.492m0 0a8.96 8.96 0 01-3.204 0m3.204 0V14.3a3 3 0 00-3-3m3 3a3 3 0 003-3v-1.302M12 9V3M3.105 13H5m14 0h1.895M6.208 6.208L7.62 7.62m8.76-8.76L17.79 7.62M3.105 13a9.006 9.006 0 0017.79 0" />
+          </svg>
+          <span className="absolute top-0.5 right-0.5 bg-[#f97316] text-white text-[7.5px] font-black rounded-full h-3.5 w-3.5 flex items-center justify-center shadow">
+            {pendingCount || 3}
+          </span>
+        </button>
+
         {/* User role badge - compact on mobile */}
-        <div className={`flex items-center gap-2 px-2.5 py-1.5 sm:px-3 rounded-xl border text-[11px] font-bold ${roleBadge}`}>
+        <div className={`flex items-center gap-2 px-2 py-2 sm:px-3 sm:py-1.5 rounded-full border text-[11px] font-bold ${roleBadge} flex-shrink-0`}>
           <div className="w-5 h-5 rounded-full bg-current/10 flex items-center justify-center text-[9px] font-black opacity-80">
             {user?.username?.slice(0, 2).toUpperCase() || 'US'}
           </div>
