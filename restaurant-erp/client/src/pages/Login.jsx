@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -632,7 +632,7 @@ const Login = () => {
   );
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#f97316]">
+    <div className="fixed inset-0 md:overflow-hidden overflow-y-auto bg-[#f97316]">
 
       {/* â•â• DESKTOP â•â• */}
       <div className="hidden md:flex h-full w-full">
@@ -680,7 +680,7 @@ const Login = () => {
       </div>
 
       {/* â•â• MOBILE â•â• */}
-      <div className="md:hidden flex flex-col h-full w-full bg-[#f97316]">
+      <div className="md:hidden flex flex-col min-h-screen w-full bg-[#f97316] pb-8">
         {/* Orange top */}
         <div className="relative flex-shrink-0" style={{height:'32%'}}>
           <div className="absolute right-0 top-0 bottom-0 w-[55%] overflow-hidden rounded-bl-[70px]">
@@ -702,7 +702,7 @@ const Login = () => {
         </div>
 
         {/* White card */}
-        <div className="flex-1 bg-white rounded-t-[28px] -mt-10 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-white rounded-t-[28px] -mt-10 flex flex-col">
           {view === 'qr' ? (
             <QRViewContent onBack={()=>setView('login')}/>
           ) : view === 'staffid' ? (

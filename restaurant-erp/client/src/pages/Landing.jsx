@@ -11,7 +11,7 @@ const Landing = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ background: '#FF7518', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="fixed inset-0 md:overflow-hidden overflow-y-auto flex flex-col justify-between" style={{ background: '#FF7518', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       
       {/* ===== INLINE STYLES FOR ANIMATIONS ===== */}
       <style>{`
@@ -272,9 +272,12 @@ const Landing = () => {
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 'clamp(16px, 4vw, 60px)',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: 'clamp(16px, 4vw, 40px)',
             animationDelay: '0.5s',
             opacity: mounted ? undefined : 0,
+            paddingBottom: '20px'
           }}
         >
           {/* Manage Smarter */}

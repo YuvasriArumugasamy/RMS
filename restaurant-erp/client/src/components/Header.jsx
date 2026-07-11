@@ -26,7 +26,7 @@ const roleColors = {
   Cashier: 'bg-violet-500/10 text-violet-500 border-violet-500/20',
 };
 
-const Header = () => {
+const Header = ({ onOpenMobileSidebar }) => {
   const { user } = useAuth();
   const { on } = useSocket();
   const location = useLocation();
@@ -84,10 +84,22 @@ const Header = () => {
   return (
     <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 shadow-sm flex-shrink-0">
 
-      {/* Left: Page title */}
-      <div className="min-w-0">
-        <h2 className="text-base font-extrabold text-slate-800 truncate leading-tight">{meta.title}</h2>
-        <p className="text-[10px] text-slate-400 font-semibold truncate">{meta.sub}</p>
+      {/* Left: Page title with Hamburger menu on Mobile */}
+      <div className="flex items-center gap-3.5 min-w-0">
+        <button 
+          onClick={onOpenMobileSidebar}
+          className="md:hidden p-1.5 rounded-xl border border-slate-100 hover:bg-slate-50 transition-all active:scale-95 text-slate-600 cursor-pointer flex-shrink-0"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div className="min-w-0">
+          <h2 className="text-base font-extrabold text-slate-800 truncate leading-tight">{meta.title}</h2>
+          <p className="text-[10px] text-slate-400 font-semibold truncate">{meta.sub}</p>
+        </div>
       </div>
 
       {/* Right: actions */}
