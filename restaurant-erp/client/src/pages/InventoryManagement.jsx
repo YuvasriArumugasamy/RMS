@@ -37,16 +37,6 @@ const InventoryManagement = () => {
     fetchData();
   }, []);
 
-  const saveIngredients = (updated) => {
-    setIngredients(updated);
-    localStorage.setItem('ingredients', JSON.stringify(updated));
-  };
-
-  const saveSuppliers = (updated) => {
-    setSuppliers(updated);
-    localStorage.setItem('suppliers', JSON.stringify(updated));
-  };
-
   const handleAddIngredient = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -122,32 +112,56 @@ const InventoryManagement = () => {
     }
   };
 
+  // Dynamic emoji selection helper
+  const getItemEmoji = (name) => {
+    const lowercase = name.toLowerCase();
+    if (lowercase.includes('tomato')) return '🍅';
+    if (lowercase.includes('cheese')) return '🧀';
+    if (lowercase.includes('milk') || lowercase.includes('cream') || lowercase.includes('dairy') || lowercase.includes('butter')) return '🥛';
+    if (lowercase.includes('onion')) return '🧅';
+    if (lowercase.includes('potato')) return '🥔';
+    if (lowercase.includes('bread') || lowercase.includes('bun') || lowercase.includes('naan') || lowercase.includes('flour')) return '🍞';
+    if (lowercase.includes('chicken') || lowercase.includes('meat') || lowercase.includes('beef') || lowercase.includes('mutton') || lowercase.includes('fish')) return '🥩';
+    if (lowercase.includes('egg')) return '🥚';
+    if (lowercase.includes('rice') || lowercase.includes('grain')) return '🌾';
+    if (lowercase.includes('sugar') || lowercase.includes('salt') || lowercase.includes('spice') || lowercase.includes('masala')) return '🧂';
+    if (lowercase.includes('coffee') || lowercase.includes('tea') || lowercase.includes('drink') || lowercase.includes('mojito') || lowercase.includes('water')) return '🥤';
+    return '📦';
+  };
+
   const lowStockCount = ingredients.filter(i => i.status === 'Low Stock').length;
 
   if (pageLoading) return <PageLoader message="Loading Inventory..." />;
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out] font-sans pb-12">
+      
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 font-sans">Inventory & Supply Chain</h2>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Inventory & Supply Chain</h2>
           <p className="text-xs text-slate-400 font-semibold mt-0.5">Manage raw materials, low stock alerts, and vendor contacts.</p>
         </div>
 
-        {/* Tab Buttons */}
-        <div className="flex space-x-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
+        {/* Tab Buttons (mockup layout style) */}
+        <div className="flex space-x-1.5 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
           <button
             onClick={() => setActiveTab('stock')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-              activeTab === 'stock' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
+            className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer relative ${
+              activeTab === 'stock' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
             }`}
           >
-            📦 Stock Status {lowStockCount > 0 && <span className="ml-1 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[10px] animate-pulse">{lowStockCount}</span>}
+            📦 Stock Status 
+            {lowStockCount > 0 && (
+              <span className="bg-red-500 text-white rounded-full h-4 w-4 text-[8px] font-black flex items-center justify-center animate-pulse">
+                {lowStockCount}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('suppliers')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-              activeTab === 'suppliers' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
+            className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === 'suppliers' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
             }`}
           >
             🚚 Suppliers
@@ -155,39 +169,44 @@ const InventoryManagement = () => {
         </div>
       </div>
 
+      {/* TAB: STOCK STATUS */}
       {activeTab === 'stock' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Add Ingredient Form */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
-            <h3 className="text-lg font-bold text-slate-800">Add Raw Material</h3>
-            <form onSubmit={handleAddIngredient} className="space-y-4">
+          
+          {/* Add Ingredient Card Form */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 h-fit space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 tracking-tight">Add Raw Material</h3>
+            
+            <form onSubmit={handleAddIngredient} className="space-y-4 pt-1">
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Item Name</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Item Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Tomatoes"
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none text-sm font-semibold"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                   value={newIngredient.name}
                   onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Initial Stock</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Initial Stock</label>
                   <input
                     type="number"
                     required
                     step="0.1"
-                    className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500"
+                    placeholder="10.0"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                     value={newIngredient.stock}
                     onChange={(e) => setNewIngredient({ ...newIngredient, stock: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Unit</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Unit</label>
                   <select
-                    className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                     value={newIngredient.unit}
                     onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
                   >
@@ -198,71 +217,122 @@ const InventoryManagement = () => {
                   </select>
                 </div>
               </div>
+
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Low Stock Alert Threshold</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Low Stock Alert Threshold</label>
                 <input
                   type="number"
                   required
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none text-sm font-semibold"
+                  placeholder="5"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                   value={newIngredient.threshold}
                   onChange={(e) => setNewIngredient({ ...newIngredient, threshold: Number(e.target.value) })}
                 />
               </div>
+
               <button
                 type="submit"
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-xs"
+                className="w-full py-3.5 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-500/10 cursor-pointer transition-all"
               >
                 Add Inventory Item
               </button>
             </form>
           </div>
 
-          {/* List */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 lg:col-span-2 space-y-4">
-            <h3 className="text-lg font-bold text-slate-800">Live Stock Monitor</h3>
+          {/* Stock monitor table list */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 lg:col-span-2 space-y-4 shadow-sm">
+            <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+              <h3 className="text-lg font-bold text-slate-800 tracking-tight">Live Stock Monitor</h3>
+              <span className="text-[10px] text-slate-400 font-bold">Adjust stock counts on hover</span>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
-                    <th className="pb-3">Ingredient Name</th>
-                    <th className="pb-3">Current Stock</th>
-                    <th className="pb-3">Alert At</th>
-                    <th className="pb-3">Status</th>
-                    <th className="pb-3 text-right">Actions</th>
+                    <th className="pb-3.5">Ingredient</th>
+                    <th className="pb-3.5">Current Stock</th>
+                    <th className="pb-3.5">Alert Level</th>
+                    <th className="pb-3.5">Status</th>
+                    <th className="pb-3.5 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {ingredients.map((item) => (
-                    <tr key={item._id || item.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/30 transition-colors group">
-                      <td className="py-4 font-bold text-slate-800">{item.name}</td>
-                      <td className="py-4 font-black text-slate-800">
-                         <div className="flex items-center space-x-2">
-                           <span>{Number(item.stock).toFixed(2)} {item.unit}</span>
-                           <div className="flex bg-slate-100 rounded-lg p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button onClick={() => updateStock(item._id || item.id, -1)} className="px-2 text-slate-500 hover:text-red-500 font-bold">-</button>
-                             <button onClick={() => updateStock(item._id || item.id, 1)} className="px-2 text-slate-500 hover:text-green-500 font-bold">+</button>
-                           </div>
-                         </div>
-                      </td>
-                      <td className="py-4 font-semibold text-slate-500">{item.threshold} {item.unit}</td>
-                      <td className="py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            item.status === 'In Stock'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                              : 'bg-red-50 text-red-700 border border-red-100 animate-pulse'
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right space-x-3 font-semibold text-xs">
-                        <button onClick={() => deleteIngredient(item._id || item.id)} className="text-red-500 hover:underline">Delete</button>
+                  {ingredients.map((item) => {
+                    const id = item._id || item.id;
+                    const isLow = item.status === 'Low Stock';
+                    const stockVal = Number(item.stock) || 0;
+                    const limitVal = Number(item.threshold) || 5;
+                    const percent = Math.min(100, Math.max(5, (stockVal / (limitVal * 2)) * 100));
+
+                    return (
+                      <tr key={id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/20 transition-colors group">
+                        <td className="py-4 flex items-center space-x-3.5">
+                          <span className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100/50 flex items-center justify-center text-lg shadow-sm">
+                            {getItemEmoji(item.name)}
+                          </span>
+                          <span className="font-extrabold text-slate-800">{item.name}</span>
+                        </td>
+                        <td className="py-4">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center space-x-3">
+                              <span className="font-black text-slate-800">{stockVal.toFixed(1)} {item.unit}</span>
+                              
+                              {/* Stock modifier quick adjust buttons */}
+                              <div className="flex bg-slate-100 rounded-lg p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button 
+                                  onClick={() => updateStock(id, -1)} 
+                                  className="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-red-500 font-black cursor-pointer text-xs"
+                                >
+                                  -
+                                </button>
+                                <button 
+                                  onClick={() => updateStock(id, 1)} 
+                                  className="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-emerald-500 font-black cursor-pointer text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            
+                            {/* Stock status progress bar indicator */}
+                            <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 ${isLow ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 font-bold text-slate-500">{item.threshold} {item.unit}</td>
+                        <td className="py-4">
+                          <span
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider leading-none ${
+                              isLow
+                                ? 'bg-red-50 text-red-500 border border-red-150 animate-pulse'
+                                : 'bg-emerald-50 text-emerald-600 border border-emerald-150'
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="py-4 text-right">
+                          <button 
+                            onClick={() => deleteIngredient(id)} 
+                            className="text-red-500 hover:text-red-700 font-bold text-xs cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {ingredients.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="text-center py-16 text-slate-400 font-bold text-xs">
+                        No ingredients tracked yet. Click Add raw material to populate.
                       </td>
                     </tr>
-                  ))}
-                  {ingredients.length === 0 && (
-                    <tr><td colSpan="5" className="text-center py-10 text-slate-400 font-medium text-sm">No ingredients tracked yet.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -271,78 +341,101 @@ const InventoryManagement = () => {
         </div>
       )}
 
+      {/* TAB: SUPPLIERS */}
       {activeTab === 'suppliers' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
           {/* Add Supplier Form */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
-            <h3 className="text-lg font-bold text-slate-800">Register Supplier</h3>
-            <form onSubmit={handleAddSupplier} className="space-y-4">
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 h-fit space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 tracking-tight">Register Supplier</h3>
+            
+            <form onSubmit={handleAddSupplier} className="space-y-4 pt-1">
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Company / Name</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Company / Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. FreshFarm Co."
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none text-sm font-semibold"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                   value={newSupplier.name}
                   onChange={(e) => setNewSupplier({ ...newSupplier, name: e.target.value })}
                 />
               </div>
+              
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Contact No. / Email</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Contact No. / Email</label>
                 <input
                   type="text"
                   required
                   placeholder="+91 9988776655"
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none text-sm font-semibold"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                   value={newSupplier.contact}
                   onChange={(e) => setNewSupplier({ ...newSupplier, contact: e.target.value })}
                 />
               </div>
+              
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Provides (Items)</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Provides (Items)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Veggies, Dairy"
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:outline-none text-sm font-semibold"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                   value={newSupplier.items}
                   onChange={(e) => setNewSupplier({ ...newSupplier, items: e.target.value })}
                 />
               </div>
+              
               <button
                 type="submit"
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 text-xs"
+                className="w-full py-3.5 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-500/10 cursor-pointer transition-all"
               >
                 Add Supplier
               </button>
             </form>
           </div>
 
-          {/* Suppliers List */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 lg:col-span-2 space-y-4">
-            <h3 className="text-lg font-bold text-slate-800">Supplier Directory</h3>
+          {/* Suppliers List directory grid */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 lg:col-span-2 space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 tracking-tight border-b border-slate-50 pb-3">Supplier Directory</h3>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-               {suppliers.length === 0 && (
-                 <p className="col-span-2 text-center text-slate-400 text-sm py-10 font-medium">No suppliers registered.</p>
-               )}
-               {suppliers.map(s => (
-                  <div key={s._id || s.id} className="p-5 border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:border-indigo-100 transition-all group relative">
-                     <button onClick={() => deleteSupplier(s._id || s.id)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
-                     <h4 className="font-extrabold text-slate-800 text-sm mb-1">{s.name}</h4>
-                     <p className="text-xs font-semibold text-slate-500 mb-3">{s.items}</p>
-                     <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
-                        <span className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-xl font-bold text-xs w-full text-center truncate">
-                          📞 {s.contact}
-                        </span>
-                     </div>
+              {suppliers.length === 0 ? (
+                <p className="col-span-2 text-center text-slate-400 text-xs py-16 font-bold">No suppliers registered.</p>
+              ) : (
+                suppliers.map(s => (
+                  <div 
+                    key={s._id || s.id} 
+                    className="p-5 border border-slate-100 rounded-2xl bg-slate-50/50 hover:bg-white hover:border-indigo-150 transition-all duration-300 group relative shadow-sm"
+                  >
+                    <button 
+                      onClick={() => deleteSupplier(s._id || s.id)} 
+                      className="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-extrabold opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                    
+                    <span className="w-8 h-8 rounded-lg bg-[#0F286B]/10 text-[#0F286B] flex items-center justify-center text-xs font-black mb-3">
+                      🏢
+                    </span>
+                    
+                    <h4 className="font-extrabold text-slate-850 text-sm mb-1">{s.name}</h4>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{s.items}</p>
+                    
+                    <div className="flex items-center gap-2 mt-4 pt-3.5 border-t border-slate-100/70">
+                      <span className="bg-indigo-50/80 text-indigo-700 px-3 py-2 rounded-xl font-bold text-[10.5px] w-full text-center truncate shadow-sm">
+                        📞 {s.contact}
+                      </span>
+                    </div>
                   </div>
-               ))}
+                ))
+              )}
             </div>
           </div>
         </div>
       )}
 
+      {/* CONFIRM MODAL */}
       {confirmState && (
         <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
       )}
