@@ -444,9 +444,9 @@ const OrderManagement = () => {
                   {cart.map(item => (
                     <div key={item._id || item.id} className="flex justify-between items-center text-sm border-b border-slate-50 pb-3 last:border-0 last:pb-0">
                       <div className="w-1/2 flex items-center space-x-2">
-                        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-slate-50 shrink-0">
+                        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white border border-slate-100 shrink-0">
                           <MenuItemImage src={item.image} alt={item.name}
-                            imgClassName="w-8 h-8 object-cover"
+                            imgClassName="w-8 h-8 object-contain p-0.5"
                             emojiClassName="text-xl" />
                         </div>
                         <div>
@@ -501,9 +501,9 @@ const OrderManagement = () => {
               {filteredItems.map(item => (
                 <div key={item.id} onClick={() => addToCart(item)}
                   className="bg-slate-50/50 hover:bg-white border border-slate-100 hover:border-indigo-500/50 rounded-3xl p-4 flex flex-col justify-between items-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer group">
-                  <div className="h-16 w-full flex items-center justify-center mb-3 overflow-hidden rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <div className="h-16 w-full flex items-center justify-center mb-3 overflow-hidden rounded-2xl bg-white border border-slate-100/50 group-hover:scale-110 transition-transform duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
-                      imgClassName="h-16 w-full object-cover rounded-2xl"
+                      imgClassName="h-16 w-full object-contain rounded-2xl p-0.5 bg-white"
                       emojiClassName="text-4xl" />
                   </div>
                   <div className="space-y-1">

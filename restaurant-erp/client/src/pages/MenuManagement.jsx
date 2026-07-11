@@ -446,8 +446,8 @@ const MenuManagement = () => {
 
                       <div className="space-y-4">
                         {/* Image Bubble */}
-                        <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100/50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
-                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-16 h-16 object-cover" emojiClassName="text-3xl" />
+                        <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100/50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-16 h-16 object-contain p-1 bg-white" emojiClassName="text-3xl" />
                         </div>
                         
                         <div>
@@ -478,8 +478,8 @@ const MenuManagement = () => {
                       
                       <div className="flex items-center gap-4 min-w-0">
                         {/* Round circular image bubble */}
-                        <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100/50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
-                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-16 h-16 object-cover" emojiClassName="text-3xl" />
+                        <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100/50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-16 h-16 object-contain p-1 bg-white" emojiClassName="text-3xl" />
                         </div>
                         
                         <div className="min-w-0 space-y-1">

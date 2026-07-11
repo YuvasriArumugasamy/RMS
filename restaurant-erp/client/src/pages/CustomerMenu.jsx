@@ -1350,9 +1350,9 @@ const CustomerMenu = () => {
 
                 {/* Content middle: Image on top full width, price overlay */}
                 <div className="mb-3">
-                  <div className="w-full h-28 flex items-center justify-center overflow-hidden relative rounded-2xl bg-slate-50 group-hover:scale-[1.02] transition-transform duration-300">
+                  <div className="w-full h-28 flex items-center justify-center overflow-hidden relative rounded-2xl bg-white border border-slate-100/50 group-hover:scale-[1.02] transition-transform duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
-                      imgClassName="w-full h-28 object-cover rounded-2xl"
+                      imgClassName="w-full h-28 object-contain rounded-2xl p-1 bg-white"
                       emojiClassName="text-5xl" />
                     {/* Price badge overlay on image */}
                     <span className="absolute bottom-2 right-2 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-xl shadow-lg">
@@ -1434,9 +1434,9 @@ const CustomerMenu = () => {
                 className="bg-white rounded-[1.5rem] border border-slate-100 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex gap-5 items-center relative select-none">
                 
                 {/* Food Graphic Left */}
-                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+                <div className="w-20 h-20 bg-white border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
                   <MenuItemImage src={item.image} alt={item.name}
-                    imgClassName="w-20 h-20 object-cover"
+                    imgClassName="w-20 h-20 object-contain p-1"
                     emojiClassName="text-4xl" />
                 </div>
                 
@@ -1546,7 +1546,7 @@ const CustomerMenu = () => {
           <div className="bg-white rounded-[2.2rem] border border-slate-100 overflow-hidden shadow-md flex flex-col justify-center items-center p-8 h-80 relative select-none">
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/30 rounded-full blur-2xl pointer-events-none" />
             <MenuItemImage src={item.image} alt={item.name}
-              imgClassName="w-full h-full object-cover absolute inset-0 rounded-[2.2rem]"
+              imgClassName="w-full h-full object-contain p-4 rounded-[2.2rem]"
               emojiClassName="text-9xl drop-shadow-2xl animate-bounce" />
             
             {/* Floating Badges */}
@@ -1696,9 +1696,9 @@ const CustomerMenu = () => {
               {cart.map((item, index) => (
                 <div key={index} className="bg-white rounded-3xl p-4 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-16 h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
                       <MenuItemImage src={item.image} alt={item.name}
-                        imgClassName="w-16 h-16 object-cover"
+                        imgClassName="w-16 h-16 object-contain p-1"
                         emojiClassName="text-4xl select-none" />
                     </div>
                     <div>
