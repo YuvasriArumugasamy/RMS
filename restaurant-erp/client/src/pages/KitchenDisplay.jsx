@@ -310,9 +310,20 @@ const KitchenDisplay = () => {
                       </div>
                     ))}
                   </div>
-                  <div className="text-center py-2.5 bg-emerald-50 text-emerald-700 text-[10px] uppercase tracking-wider font-bold rounded-xl border border-emerald-100 shadow-inner">
-                    🛎️ Awaiting Delivery / Pickup
-                  </div>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        await api.put(`/orders/${id}/status`, { status: 'Served' });
+                        setOrders(prev => prev.filter(order => (order._id || order.id) !== id));
+                        toast.success(`🍽️ Order ${(o.orderId || id).substring(0, 12)} marked as served!`);
+                      } catch {
+                        toast.error("Failed to update status.");
+                      }
+                    }}
+                    className="w-full text-center py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] uppercase tracking-wider font-black rounded-xl border border-emerald-200 shadow-sm active:scale-[0.98] transition-all cursor-pointer select-none"
+                  >
+                    🛎️ Mark as Served
+                  </button>
                 </div>
               );
             })}
