@@ -29,7 +29,7 @@ const Layout = () => {
           
           {/* Drawer Panel */}
           <div 
-            className="relative flex-1 flex flex-col max-w-[280px] w-full bg-[#0B0F19] text-white shadow-2xl transition-transform duration-300 transform translate-x-0 h-full"
+            className="relative flex-1 flex flex-col max-w-[256px] w-full bg-[#1e3a8a] text-white shadow-2xl transition-transform duration-300 transform translate-x-0 h-full"
             onClick={e => e.stopPropagation()}
           >
 
