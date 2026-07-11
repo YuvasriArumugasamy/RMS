@@ -129,7 +129,18 @@ const CustomerCRM = () => {
   // ── Tier badge ──────────────────────────────────────────────
   const getTier = (points) => {
     if (points >= 500) return { label:'Platinum', color:'bg-slate-100 text-slate-700', icon:'💎' };
-    if (points >= 200) return   return (
+    if (points >= 200) return { label:'Gold',     color:'bg-amber-50 text-amber-800',  icon:'🥇' };
+    if (points >= 100) return { label:'Silver',   color:'bg-slate-50 text-slate-650',  icon:'🥈' };
+    return { label:'Bronze', color:'bg-orange-50 text-orange-700', icon:'🥉' };
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"/>
+    </div>
+  );
+
+  return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out] pb-12">
 
       {/* Header */}

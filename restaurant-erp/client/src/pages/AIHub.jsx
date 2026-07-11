@@ -147,36 +147,38 @@ const AIHub = () => {
   const handleSubmit = (e) => { e.preventDefault(); askAI(input); };
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-5">
+    <div className="max-w-[1600px] mx-auto space-y-6 pb-12 animate-[fadeIn_0.3s_ease-out]">
 
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-50 pb-5">
         <div>
-          <h2 className="text-lg font-extrabold text-slate-800">AI Operations Hub</h2>
-          <p className="text-[11px] text-slate-400 font-medium">AI Restaurant Manager · Theft & Wastage Detection · Smart Analytics</p>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">AI Operations Hub</h2>
+          <p className="text-xs text-slate-400 font-semibold mt-0.5">AI Restaurant Manager · Theft & Wastage Detection · Smart Analytics</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-[#1e3a8a] bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a8a] animate-pulse"/>AI Engine Active
+          <span className="text-[10px] font-black text-indigo-750 bg-indigo-50 border border-indigo-200 px-3.5 py-2.5 rounded-2xl flex items-center gap-1.5 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"/>AI Engine Active
           </span>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-200 overflow-x-auto">
+      {/* Tabs Selector */}
+      <div className="flex gap-2 pb-2.5 overflow-x-auto scrollbar-none snap-x snap-mandatory select-none">
         {[
           { id:'ai',      label:'🤖 AI Manager' },
           { id:'theft',   label:'🚨 Theft & Wastage' },
           { id:'profit',  label:'📈 Profit Analyzer' },
           { id:'staff',   label:'🥇 Staff Performance' },
-          { id:'waste',   label:'♻️ Zero-Waste Flash Sale' },
+          { id:'waste',   label:'♻️ Flash Promotion' },
           { id:'weather', label:'🌦️ Weather Menu' },
         ].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
+            className={`px-4.5 py-3 text-xs font-black rounded-2xl transition-all whitespace-nowrap snap-align-start cursor-pointer border ${
               activeTab === tab.id
-                ? 'border-[#f97316] text-[#f97316]'
-                : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                ? 'bg-[#0F286B] text-white border-[#0F286B] shadow-md shadow-indigo-900/10'
+                : 'bg-white text-slate-500 border-slate-100/80 hover:bg-slate-50 hover:text-slate-850 hover:border-slate-200'
+            }`}
+          >
             {tab.label}
           </button>
         ))}
@@ -184,16 +186,19 @@ const AIHub = () => {
 
       {/* ── AI MANAGER TAB ── */}
       {activeTab === 'ai' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Left: Quick questions */}
-          <div className="space-y-4">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-              <h3 className="text-sm font-bold text-slate-800 mb-3">Quick Questions</h3>
+          <div className="space-y-6">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 space-y-4">
+              <h3 className="text-base font-extrabold text-slate-800 tracking-tight">Quick Questions</h3>
               <div className="space-y-2">
                 {QUICK_QUESTIONS.map(q => (
-                  <button key={q} onClick={() => askAI(q)}
-                    className="w-full text-left px-3 py-2.5 text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-[#f97316]/5 hover:text-[#f97316] border border-slate-200 hover:border-[#f97316]/30 rounded-xl transition-all">
+                  <button 
+                    key={q} 
+                    onClick={() => askAI(q)}
+                    className="w-full text-left px-4 py-3 text-xs font-black text-slate-600 bg-white hover:bg-slate-50 border border-slate-150/70 hover:border-indigo-400 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:scale-[1.01] transition-all cursor-pointer"
+                  >
                     {q}
                   </button>
                 ))}
@@ -205,29 +210,29 @@ const AIHub = () => {
           </div>
 
           {/* Right: Chat */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col" style={{height:'580px'}}>
+          <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col overflow-hidden" style={{height:'580px'}}>
             {/* Chat header */}
-            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-slate-100 bg-gradient-to-r from-[#1e3a8a] to-blue-700 rounded-t-2xl">
-              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-black text-sm">AI</div>
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-[#0F286B] to-[#1E3A8A] text-white">
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center font-black text-xs shadow-sm">AI</div>
               <div>
-                <p className="text-sm font-bold text-white">RMS AI Manager</p>
-                <p className="text-[10px] text-blue-200 font-medium flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"/>Online · Real-time data
+                <p className="text-xs font-black tracking-wide">RMS AI Manager</p>
+                <p className="text-[10px] text-blue-200 font-bold flex items-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"/>Online · Real-time data
                 </p>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-slate-50/30">
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 bg-slate-50/30">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.sender === 'User' ? 'justify-end' : 'justify-start'}`}>
                   {msg.sender === 'AI' && (
-                    <div className="w-7 h-7 rounded-full bg-[#1e3a8a] flex items-center justify-center text-white text-[9px] font-black flex-shrink-0 mr-2 mt-0.5">AI</div>
+                    <div className="w-7 h-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white text-[9.5px] font-black flex-shrink-0 mr-2 mt-0.5">AI</div>
                   )}
-                  <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${
+                  <div className={`max-w-[80%] p-3.5 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.015)] ${
                     msg.sender === 'User'
-                      ? 'bg-[#f97316] text-white rounded-br-sm text-xs font-medium'
-                      : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm'
+                      ? 'bg-gradient-to-tr from-orange-500 to-orange-600 text-white rounded-br-sm text-xs font-bold'
+                      : 'bg-white border border-slate-100 text-slate-800 rounded-bl-sm font-semibold'
                   }`}>
                     {msg.sender === 'AI' ? <FormatMsg text={msg.text}/> : <p className="text-xs">{msg.text}</p>}
                   </div>
@@ -235,9 +240,9 @@ const AIHub = () => {
               ))}
               {thinking && (
                 <div className="flex justify-start">
-                  <div className="w-7 h-7 rounded-full bg-[#1e3a8a] flex items-center justify-center text-white text-[9px] font-black flex-shrink-0 mr-2">AI</div>
-                  <div className="bg-white border border-slate-100 px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
-                    <div className="flex gap-1">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white text-[9.5px] font-black flex-shrink-0 mr-2">AI</div>
+                  <div className="bg-white border border-slate-100 px-4 py-3.5 rounded-2xl rounded-bl-sm shadow-[0_8px_30px_rgba(0,0,0,0.01)]">
+                    <div className="flex gap-1.5 select-none">
                       {[0,1,2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{animationDelay:`${i*150}ms`}}/>)}
                     </div>
                   </div>
@@ -247,14 +252,14 @@ const AIHub = () => {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-slate-100 bg-white rounded-b-2xl">
+            <div className="p-4 border-t border-slate-100 bg-white rounded-b-3xl">
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <input type="text" value={input} onChange={e=>setInput(e.target.value)}
                   placeholder="Ask about sales, stock, orders, staff..."
-                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-orange-400/20 transition"/>
+                  className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200/60 focus:bg-white rounded-2xl text-xs font-bold focus:outline-none focus:border-orange-500 transition-all"/>
                 <button type="submit" disabled={!input.trim() || thinking}
-                  className="px-4 py-2.5 bg-[#f97316] disabled:bg-slate-200 disabled:text-slate-400 hover:bg-orange-600 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-orange-400/20 flex items-center gap-1.5">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  className="px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-650 hover:from-orange-600 hover:to-orange-700 disabled:opacity-60 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-orange-400/20 flex items-center gap-1.5 cursor-pointer">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                   Send
                 </button>
               </form>
@@ -292,8 +297,8 @@ const LiveStatsCard = () => {
   const pending   = orders.filter(o => o.status === 'Pending').length;
 
   return (
-    <div className="bg-gradient-to-br from-[#1e3a8a] to-blue-700 rounded-2xl p-5 text-white">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-blue-200 mb-3">Live Snapshot</p>
+    <div className="bg-gradient-to-br from-[#0c1b40] to-[#12285a] rounded-3xl p-5.5 text-white border border-indigo-900/40 shadow-xl">
+      <p className="text-[10px] font-black uppercase tracking-wider text-indigo-200 mb-3.5">Live Data Snapshot</p>
       <div className="space-y-3">
         {[
           { label:'Revenue', value:`₹${revenue}`, sub:'completed orders' },
@@ -301,12 +306,12 @@ const LiveStatsCard = () => {
           { label:'Low Stock Alerts', value:lowStock, sub:'items need reorder' },
           { label:'Completed Orders', value:completed.length, sub:'today' },
         ].map(({label,value,sub}) => (
-          <div key={label} className="flex items-center justify-between bg-white/10 rounded-xl px-3 py-2">
+          <div key={label} className="flex items-center justify-between bg-white/5 border border-white/5 rounded-2xl px-4 py-3 hover:bg-white/10 transition-all">
             <div>
-              <p className="text-[10px] text-blue-200 font-medium">{label}</p>
-              <p className="text-xs text-white/60">{sub}</p>
+              <p className="text-[9.5px] font-black text-indigo-200 uppercase tracking-wider">{label}</p>
+              <p className="text-[10.5px] text-white/55 font-semibold mt-0.5">{sub}</p>
             </div>
-            <p className="text-xl font-extrabold text-white">{value}</p>
+            <p className="text-xl font-black text-white tracking-tight">{value}</p>
           </div>
         ))}
       </div>
@@ -346,28 +351,28 @@ const TheftWastagePanel = () => {
   const alerts = analysis.filter(a => a.isAlert);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Alert banner */}
       {alerts.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <h3 className="text-sm font-bold text-red-700">⚠️ High Stock Variance Alerts ({alerts.length})</h3>
+        <div className="bg-red-50/50 border border-red-200 rounded-3xl p-5 space-y-3.5">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-red-650" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <h3 className="text-sm font-extrabold text-red-800 tracking-tight">High Stock Variance Alerts ({alerts.length})</h3>
           </div>
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {alerts.map(a => (
-              <div key={a.id} className="flex items-center justify-between bg-white border border-red-100 rounded-xl px-4 py-2.5">
+              <div key={a.id} className="flex items-center justify-between bg-white border border-red-100/60 rounded-2xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.01)]">
                 <div>
-                  <p className="text-xs font-bold text-slate-800">{a.name}</p>
-                  <p className="text-[10px] text-slate-500">Expected: {a.expectedUsage} {a.unit} · Actual: {a.actualUsage} {a.unit}</p>
+                  <p className="text-xs font-black text-slate-800">{a.name}</p>
+                  <p className="text-[10px] text-slate-400 font-bold mt-0.5">Expected: {a.expectedUsage} {a.unit} · Actual: {a.actualUsage} {a.unit}</p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm font-extrabold ${a.variance > 0 ? 'text-red-600' : 'text-amber-600'}`}>
+                  <p className={`text-xs font-black ${a.variance > 0 ? 'text-red-600' : 'text-amber-600'}`}>
                     {a.variance > 0 ? '+' : ''}{a.variance} {a.unit}
                   </p>
-                  <p className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${a.variance > 0 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {a.variancePct > 0 ? '🚨 Possible Theft/Waste' : '📉 Under Usage'}
-                  </p>
+                  <span className={`inline-block text-[8.5px] font-black px-1.5 py-0.5 rounded-md mt-1 border uppercase tracking-wider ${a.variance > 0 ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                    {a.variancePct > 0 ? '🚨 Theft/Waste' : 'Under Use'}
+                  </span>
                 </div>
               </div>
             ))}
@@ -376,9 +381,11 @@ const TheftWastagePanel = () => {
       )}
 
       {/* Full table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <h3 className="text-sm font-bold text-slate-800 mb-4">Inventory Variance Analysis</h3>
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 space-y-4">
+        <h3 className="text-base font-extrabold text-slate-800 tracking-tight">Inventory Variance Analysis</h3>
+        
+        {/* Desktop View */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -392,16 +399,16 @@ const TheftWastagePanel = () => {
             </thead>
             <tbody>
               {analysis.map(item => (
-                <tr key={item.id} className={`border-b border-slate-50 last:border-0 text-xs ${item.isAlert ? 'bg-red-50/30' : ''}`}>
-                  <td className="py-3 font-bold text-slate-800">{item.name}</td>
-                  <td className="py-3 text-slate-600">{item.stock} {item.unit}</td>
-                  <td className="py-3 text-slate-600">{item.expectedUsage} {item.unit}</td>
-                  <td className="py-3 text-slate-600">{item.actualUsage} {item.unit}</td>
-                  <td className={`py-3 font-bold ${item.variance > 0 ? 'text-red-600' : item.variance < -0.1 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                <tr key={item.id} className={`border-b border-slate-50 last:border-0 text-xs ${item.isAlert ? 'bg-red-50/10' : ''}`}>
+                  <td className="py-3.5 font-bold text-slate-800">{item.name}</td>
+                  <td className="py-3.5 text-slate-500 font-semibold">{item.stock} {item.unit}</td>
+                  <td className="py-3.5 text-slate-500 font-semibold">{item.expectedUsage} {item.unit}</td>
+                  <td className="py-3.5 text-slate-500 font-semibold">{item.actualUsage} {item.unit}</td>
+                  <td className={`py-3.5 font-black ${item.variance > 0 ? 'text-red-650' : item.variance < -0.1 ? 'text-amber-605' : 'text-emerald-650'}`}>
                     {item.variance > 0 ? '+' : ''}{item.variance} {item.unit}
                   </td>
-                  <td className="py-3">
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                  <td className="py-3.5">
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider ${
                       item.isAlert && item.variance > 0 ? 'bg-red-50 text-red-700 border-red-200' :
                       item.isAlert ? 'bg-amber-50 text-amber-700 border-amber-200' :
                       'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
@@ -413,7 +420,45 @@ const TheftWastagePanel = () => {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-[10px] text-slate-400 font-medium">* Variance &gt; 15% triggers an alert. Data based on completed orders vs actual stock usage.</p>
+
+        {/* Mobile View */}
+        <div className="sm:hidden space-y-3">
+          {analysis.map(item => (
+            <div key={item.id} className={`p-4 rounded-2xl border ${item.isAlert ? 'bg-red-50/10 border-red-200' : 'bg-slate-50/40 border-slate-100'} space-y-2.5`}>
+              <div className="flex justify-between items-center">
+                <h4 className="font-extrabold text-xs text-slate-800">{item.name}</h4>
+                <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-md border uppercase tracking-wider ${
+                  item.isAlert && item.variance > 0 ? 'bg-red-50 text-red-750 border-red-200' :
+                  item.isAlert ? 'bg-amber-50 text-amber-750 border-amber-200' :
+                  'bg-emerald-50 text-emerald-750 border-emerald-200'}`}>
+                  {item.isAlert && item.variance > 0 ? 'High Variance' : item.isAlert ? 'Low Usage' : 'Normal'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-400 font-bold border-b border-slate-100 pb-2">
+                <div>
+                  <p className="uppercase text-[8px] text-slate-400 font-black">Stock</p>
+                  <p className="text-slate-700 mt-0.5">{item.stock} {item.unit}</p>
+                </div>
+                <div>
+                  <p className="uppercase text-[8px] text-slate-400 font-black">Expected</p>
+                  <p className="text-slate-700 mt-0.5">{item.expectedUsage} {item.unit}</p>
+                </div>
+                <div>
+                  <p className="uppercase text-[8px] text-slate-400 font-black">Actual</p>
+                  <p className="text-slate-700 mt-0.5">{item.actualUsage} {item.unit}</p>
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-[10px] text-slate-400 font-bold">Variance</span>
+                <span className={`font-black ${item.variance > 0 ? 'text-red-600' : item.variance < -0.1 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                  {item.variance > 0 ? '+' : ''}{item.variance} {item.unit}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <p className="text-[9px] text-slate-400 font-bold mt-1">* Variance &gt; 15% triggers an alert. Expected vs actual stock usage variance analysis.</p>
       </div>
     </div>
   );
