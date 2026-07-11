@@ -1097,7 +1097,7 @@ const CustomerMenu = () => {
                     }}
                     className={`px-4.5 py-2.5 flex items-center gap-1.5 text-[9.5px] font-black rounded-2xl cursor-pointer transition-all active:scale-95 shadow-sm uppercase tracking-wider ${
                       qtyInCart > 0 
-                        ? 'bg-emerald-650 text-white shadow-emerald-600/10'
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/10'
                         : 'bg-orange-500 text-white hover:bg-orange-600'
                     }`}
                   >
