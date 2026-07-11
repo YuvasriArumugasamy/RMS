@@ -74,3 +74,63 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #D1D5DB;
 }
+
+/* Custom Animated Uiverse Bell Notification Button */
+.uiverse-bell-btn {
+  width: 36px;
+  height: 36px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0F286B; /* Theme matching blue/navy background */
+  border-radius: 50%;
+  cursor: pointer;
+  transition-duration: .3s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.uiverse-bell-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.uiverse-bell-icon path {
+  fill: white;
+}
+
+.uiverse-bell-btn:hover {
+  background-color: #1e3a8a;
+  transform: scale(1.05);
+}
+
+.uiverse-bell-btn:hover .uiverse-bell-icon {
+  animation: bellRing 0.9s both;
+}
+
+@keyframes bellRing {
+  0%, 100% {
+    transform-origin: top;
+    transform: rotateZ(0deg);
+  }
+  15% {
+    transform: rotateZ(10deg);
+  }
+  30% {
+    transform: rotateZ(-10deg);
+  }
+  45% {
+    transform: rotateZ(5deg);
+  }
+  60% {
+    transform: rotateZ(-5deg);
+  }
+  75% {
+    transform: rotateZ(2deg);
+  }
+}
+
+.uiverse-bell-btn:active {
+  transform: scale(0.9);
+}
