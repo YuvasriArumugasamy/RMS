@@ -1318,7 +1318,7 @@ const CustomerMenu = () => {
 
           </div>
         </div>
-      </AppShell>
+      </>
     );
   };
 
