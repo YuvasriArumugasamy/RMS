@@ -179,6 +179,25 @@ const CustomerMenu = () => {
   const [voiceStatus, setVoiceStatus] = useState('');
   const voiceRecogRef = useRef(null);
 
+  // ── Lifted Stage States to prevent focus loss ─────────────
+  const [showWelcomeContent, setShowWelcomeContent] = useState(false);
+  const [detailsQty, setDetailsQty] = useState(1);
+  const [detailsCustom, setDetailsCustom] = useState({ extraCheese: false, noOnion: false, spicy: false });
+  const [waiterRequested, setWaiterRequested] = useState(false);
+  const [faqSearch, setFaqSearch] = useState('');
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [customMessage, setCustomMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (stage === 'welcome') {
+      const timer = setTimeout(() => setShowWelcomeContent(true), 80);
+      return () => clearTimeout(timer);
+    } else {
+      setShowWelcomeContent(false);
+    }
+  }, [stage]);
+
   const voiceSupported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
@@ -592,21 +611,13 @@ const CustomerMenu = () => {
   });
 
   /* ── STAGE: WELCOME ── */
-  const WelcomeStage = () => {
-    const [showContent, setShowContent] = useState(false);
-
-    useEffect(() => {
-      const t = setTimeout(() => setShowContent(true), 80);
-      return () => clearTimeout(t);
-    }, []);
-
+  const renderWelcomeStage = () => {
     const handleLanguageSelect = (code) => {
       setLang(code);
     };
 
     return (
       <div className="relative h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 select-none">
-        {/* Style block for blob floating animations */}
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes floatBlob1 {
             0% { transform: translate(0px, 0px) scale(1); }
@@ -626,26 +637,22 @@ const CustomerMenu = () => {
           }
         `}} />
 
-        {/* Decorative animated gradient blobs */}
         <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0 animate-blob1" />
         <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90 animate-blob2" />
         <div className="pointer-events-none absolute top-1/3 right-6 h-24 w-24 rounded-full bg-orange-100 opacity-40 blur-xl animate-blob1" />
         <div className="pointer-events-none absolute bottom-1/4 left-4 h-16 w-16 rounded-full bg-[#FFE7D6] opacity-40 blur-lg animate-blob2" />
 
-        {/* Dot grid decoration (top-right) */}
         <div className="pointer-events-none absolute top-8 right-8 grid grid-cols-5 gap-2">
           {Array.from({ length: 20 }).map((_, i) => (
             <span key={i} className="h-1.5 w-1.5 rounded-full bg-orange-400/60" />
           ))}
         </div>
 
-        {/* Card */}
         <div
           className={`relative z-10 w-full max-w-sm rounded-[2.2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_24px_60px_rgba(255,122,0,0.15)] px-6 pt-14 pb-6 transition-all duration-700 ease-out ${
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          {/* Logo medallion */}
           <div className="absolute -top-14 left-1/2 -translate-x-1/2">
             <div className="rounded-full bg-white p-1.5 shadow-lg shadow-orange-200 ring-4 ring-white flex items-center justify-center">
               <img 
@@ -656,7 +663,6 @@ const CustomerMenu = () => {
             </div>
           </div>
 
-          {/* Heading */}
           <div className="text-center mt-4 px-2">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-orange-600 leading-tight">
               {t.welcome}
@@ -664,7 +670,6 @@ const CustomerMenu = () => {
             <p className="mt-1.5 text-gray-500 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
           </div>
 
-          {/* Table number panel */}
           <div className="mt-5 rounded-2xl bg-white shadow-sm border border-orange-50 py-4.5 px-4 text-center">
             <p className="text-orange-500 font-bold tracking-wide text-[10px] mb-1.5">
               {t.tableLabel}
@@ -683,7 +688,6 @@ const CustomerMenu = () => {
             </div>
           </div>
 
-          {/* Scan -> Order -> Enjoy steps */}
           <div className="mt-5 flex items-center justify-center gap-4 select-none">
             <div className="flex flex-col items-center gap-1">
               <img src={scanStepImg} alt="Scan" className="w-10 h-10 object-contain" />
@@ -705,7 +709,6 @@ const CustomerMenu = () => {
             </div>
           </div>
 
-          {/* CTA Button */}
           <button
             onClick={() => setStage('menu')}
             className="mt-5 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-5.5 py-3 text-white font-extrabold text-xs shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
@@ -718,7 +721,6 @@ const CustomerMenu = () => {
             </span>
           </button>
 
-          {/* Language Switcher */}
           <div className="mt-4 flex items-center justify-center gap-3">
             {Object.keys(LANGS).map((code) => (
               <button
@@ -739,19 +741,14 @@ const CustomerMenu = () => {
     );
   };
 
-
-
-  /* ── STAGE: MENU ── */
-  const MenuStage = () => (
+  const renderMenuStage = () => (
     <>
-      {/* Hero Banner */}
       <div 
         className="relative -mx-6 sm:mx-0 rounded-none rounded-b-[2.2rem] sm:rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-0 sm:mt-6 bg-cover bg-center select-none"
         style={{ backgroundImage: `url(${bannerBgImage})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-0" />
         
-        {/* Table, Voice, Notification inside Hero Header */}
         <div className="flex items-center justify-between mb-6 select-none relative z-10">
           <div className="flex items-center gap-3">
             <button 
@@ -790,7 +787,6 @@ const CustomerMenu = () => {
             </h2>
             <p className="text-[11px] text-slate-400 font-medium">Explore our delicious menu and place your order</p>
             
-            {/* Search Input nested in hero */}
             <div className="flex gap-2 w-full mt-2">
               <div className="relative flex-1">
                 <input 
@@ -809,12 +805,9 @@ const CustomerMenu = () => {
               </button>
             </div>
           </div>
-
-
         </div>
       </div>
 
-      {/* Categories Horizontal Scroll */}
       <div className="sticky top-0 z-30 bg-[#F8FAFC] pt-3 pb-3 -mx-6 px-6 flex gap-2 overflow-x-auto scrollbar-none mb-6 select-none border-b border-slate-100/50">
         {categories.map(c => {
           const categorySvgIcons = {
@@ -886,7 +879,6 @@ const CustomerMenu = () => {
         })}
       </div>
 
-      {/* Popular dishes header */}
       <div className="space-y-4">
         <div className="flex justify-between items-center select-none flex-wrap gap-3">
           <h3 className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase tracking-wider">
@@ -905,10 +897,7 @@ const CustomerMenu = () => {
 
             {isSortDropdownOpen && (
               <>
-                {/* Click outside backdrop to close */}
                 <div className="fixed inset-0 z-30" onClick={() => setIsSortDropdownOpen(false)} />
-                
-                {/* Dropdown Menu */}
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-3xl shadow-xl border border-slate-100/60 py-3.5 z-40 flex flex-col gap-0.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                   {[
                     { label: 'Popular', icon: '⭐' },
@@ -949,7 +938,6 @@ const CustomerMenu = () => {
               </>
             )}
             
-            {/* View Mode Buttons */}
             <button
               onClick={() => setViewMode("grid")}
               className={`rounded-full p-2.5 transition-colors cursor-pointer shadow-sm ${
@@ -958,7 +946,6 @@ const CustomerMenu = () => {
                   : "bg-gray-100 text-gray-500"
               }`}
             >
-              {/* Grid icon */}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
               </svg>
@@ -971,7 +958,6 @@ const CustomerMenu = () => {
                   : "bg-gray-100 text-gray-500"
               }`}
             >
-              {/* List icon */}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
               </svg>
@@ -979,7 +965,6 @@ const CustomerMenu = () => {
           </div>
         </div>
 
-        {/* Dish cards mapping */}
         <div className={`grid gap-5 ${
           viewMode === "grid"
             ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -990,11 +975,9 @@ const CustomerMenu = () => {
             const qtyInCart = cart.find(ci => ci.id === item.id)?.qty || 0;
             
             return viewMode === 'grid' ? (
-              /* Grid Layout Card */
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
                 className="bg-white rounded-[2.2rem] border-2 border-slate-100/80 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.012)] hover:shadow-[0_20px_50px_rgba(249,115,22,0.08)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between relative group select-none overflow-hidden">
                 
-                {/* Top Badge and Fav */}
                 <div className="flex justify-between items-center select-none mb-3.5">
                   {item.category === 'Desserts' ? (
                     <span className="text-[8.5px] bg-orange-50 text-orange-700 font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider border border-orange-100 flex items-center gap-1.5 shadow-sm">
@@ -1029,13 +1012,11 @@ const CustomerMenu = () => {
                   </button>
                 </div>
 
-                {/* Content middle: Image on top full width, price overlay */}
                 <div className="mb-3">
                   <div className="w-full h-32 flex items-center justify-center overflow-hidden relative rounded-2xl bg-slate-50 border border-slate-100/60 transition-all duration-300">
                     <MenuItemImage src={item.image} alt={item.name}
                       imgClassName="w-full h-full object-contain p-2 group-hover:scale-108 transition-transform duration-500"
                       emojiClassName="text-5xl" />
-                    {/* Price badge overlay on image */}
                     <span className="absolute bottom-3 right-3 bg-orange-500 text-white text-[10.5px] font-black px-3.5 py-1.5 rounded-full shadow-md select-none">
                       ₹{item.price}
                     </span>
@@ -1047,9 +1028,7 @@ const CustomerMenu = () => {
                   </div>
                 </div>
 
-                {/* Bottom Row Actions */}
                 <div className="flex items-center justify-between border-t border-slate-50 pt-3" onClick={e => e.stopPropagation()}>
-                  {/* Counter Selector */}
                   <div className="flex items-center gap-1.5 bg-slate-50/60 border border-slate-150/60 rounded-xl p-0.5 shadow-inner">
                     <button 
                       onClick={() => {
@@ -1085,7 +1064,6 @@ const CustomerMenu = () => {
                     </button>
                   </div>
 
-                  {/* Add Button */}
                   <button 
                     onClick={() => {
                       if (qtyInCart === 0) {
@@ -1110,18 +1088,15 @@ const CustomerMenu = () => {
 
               </div>
             ) : (
-              /* List Layout Card */
               <div key={item.id} onClick={() => { setSelectedFood(item); setStage('foodDetails'); }}
                 className="bg-white rounded-[2rem] border-2 border-slate-100/80 p-4.5 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.035)] transition-all cursor-pointer flex gap-5 items-center relative select-none">
                 
-                {/* Food Graphic Left */}
                 <div className="w-24 h-24 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
                   <MenuItemImage src={item.image} alt={item.name}
                     imgClassName="w-full h-full object-contain p-2"
                     emojiClassName="text-4xl" />
                 </div>
                 
-                {/* Content Center */}
                 <div className="flex-grow min-w-0">
                   <div className="flex items-center gap-2 mb-1.5 select-none">
                     <div className="bg-white p-0.5 rounded border border-slate-100 shadow-sm flex items-center justify-center w-5 h-5">
@@ -1143,7 +1118,6 @@ const CustomerMenu = () => {
                   <p className="text-[10px] text-slate-400 mt-1 leading-relaxed line-clamp-2">{item.description || 'Delicious dish cooked to absolute perfection.'}</p>
                 </div>
                 
-                {/* Actions Right */}
                 <div className="flex flex-col items-end gap-3.5 shrink-0 select-none">
                   <span className="text-xs font-black text-orange-600">₹{item.price}</span>
                   
@@ -1174,7 +1148,6 @@ const CustomerMenu = () => {
             );
           })}
         </div>
-        {/* Combo Offer Banner */}
         <div className="bg-[#FFF7ED] rounded-3xl p-5 border border-orange-100 flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 select-none shadow-sm">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🎁</span>
@@ -1189,25 +1162,22 @@ const CustomerMenu = () => {
     </>
   );
 
-  /* ── STAGE: FOOD DETAILS ── */
-  const FoodDetailsStage = () => {
-    const [localQty, setLocalQty] = useState(1);
-    const [localCustom, setLocalCustom] = useState({ extraCheese: false, noOnion: false, spicy: false });
+  const renderFoodDetailsStage = () => {
     const item = selectedFood;
     if (!item) return null;
 
     const handleAddToCart = () => {
-      for (let i = 0; i < localQty; i++) {
+      for (let i = 0; i < detailsQty; i++) {
         setCart(prev => {
           const existing = prev.find(ci => ci.id === item.id);
           if (existing) {
-            return prev.map(ci => ci.id === item.id ? { ...ci, qty: ci.qty + 1, customizations: localCustom } : ci);
+            return prev.map(ci => ci.id === item.id ? { ...ci, qty: ci.qty + 1, customizations: detailsCustom } : ci);
           }
-          return [...prev, { ...item, qty: 1, customizations: localCustom, specialNote: '' }];
+          return [...prev, { ...item, qty: 1, customizations: detailsCustom, specialNote: '' }];
         });
       }
       setStage('menu');
-      toast.success(`🛒 Added ${localQty}x ${item.name} to cart!`);
+      toast.success(`🛒 Added ${detailsQty}x ${item.name} to cart!`);
     };
 
     return (
@@ -1223,14 +1193,12 @@ const CustomerMenu = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-          {/* Left: Food graphic details */}
           <div className="bg-white rounded-[2.2rem] border border-slate-100 overflow-hidden shadow-md flex flex-col justify-center items-center p-8 h-80 relative select-none">
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/30 rounded-full blur-2xl pointer-events-none" />
             <MenuItemImage src={item.image} alt={item.name}
               imgClassName="w-full h-full object-contain p-4 rounded-[2.2rem]"
               emojiClassName="text-9xl drop-shadow-2xl animate-bounce" />
             
-            {/* Floating Badges */}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10 select-none">
               <span className="bg-slate-900/90 backdrop-blur-sm text-white text-xs font-black tracking-wider shadow-lg px-4 py-2 rounded-2xl border border-white/10">
                 ₹{item.price}
@@ -1241,7 +1209,6 @@ const CustomerMenu = () => {
             </div>
           </div>
 
-          {/* Right: Info and custom choices */}
           <div className="space-y-6">
             <div className="bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm space-y-4">
               <div className="flex justify-between items-start">
@@ -1257,8 +1224,6 @@ const CustomerMenu = () => {
               </p>
             </div>
 
-            {/* Custom Choices */}
-            {/* Custom Choices */}
             <div className="bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm space-y-4">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.customize}</h4>
               <div className="space-y-2.5">
@@ -1856,7 +1821,6 @@ const CustomerMenu = () => {
 
   /* ── STAGE: CALL WAITER ── */
   const CallWaiterStage = () => {
-    const [requested, setRequested] = useState(false);
     const callWaiter = async () => {
       try { 
         await axios.post(`${API_URL}/orders/qr`, { 
@@ -1870,8 +1834,8 @@ const CustomerMenu = () => {
           guestCount: 1 
         }); 
       } catch {}
-      setRequested(true);
-      setTimeout(() => setStage('tracking'), 3000);
+      setWaiterRequested(true);
+      setTimeout(() => { setWaiterRequested(false); setStage('tracking'); }, 3000);
     };
 
     return (
@@ -1887,7 +1851,7 @@ const CustomerMenu = () => {
         </div>
 
         <div className="flex flex-col items-center justify-center p-8 max-w-sm mx-auto select-none pt-12">
-          {!requested ? (
+          {!waiterRequested ? (
             <div className="text-center space-y-6">
               <div className="w-28 h-28 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 border-2 border-blue-100 rounded-full flex items-center justify-center mx-auto shadow-xl relative animate-pulse">
                 <span className="text-5xl relative z-10">🙋</span>
@@ -1919,11 +1883,6 @@ const CustomerMenu = () => {
 
   /* ── STAGE: HELP & SUPPORT ── */
   const SupportStage = () => {
-    const [faqSearch, setFaqSearch] = useState('');
-    const [activeIndex, setActiveIndex] = useState(null);
-    const [customMessage, setCustomMessage] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
     const faqs = [
       {
         q: "How do I pay my bill?",
@@ -2238,9 +2197,9 @@ const CustomerMenu = () => {
     <>
       {voiceOpen && <VoicePanel />}
       {stage === 'welcome' ? (
-        <WelcomeStage />
+        renderWelcomeStage()
       ) : stage === 'thankYou' ? (
-        <ThankYouStage />
+        ThankYouStage()
       ) : (
         <AppShell 
           t={t}
@@ -2256,16 +2215,16 @@ const CustomerMenu = () => {
           logoImage={logoImage}
           bannerBgImage={bannerBgImage}
         >
-          {stage === 'menu' && <MenuStage />}
-          {stage === 'foodDetails' && <FoodDetailsStage />}
-          {stage === 'cart' && <CartStage />}
-          {stage === 'confirm' && <ConfirmStage />}
-          {stage === 'tracking' && <TrackingStage />}
-          {stage === 'bill' && <BillStage />}
-          {stage === 'callWaiter' && <CallWaiterStage />}
-          {stage === 'offers' && <OffersStage />}
-          {stage === 'feedback' && <FeedbackStage />}
-          {stage === 'support' && <SupportStage />}
+          {stage === 'menu' && renderMenuStage()}
+          {stage === 'foodDetails' && FoodDetailsStage()}
+          {stage === 'cart' && CartStage()}
+          {stage === 'confirm' && ConfirmStage()}
+          {stage === 'tracking' && TrackingStage()}
+          {stage === 'bill' && BillStage()}
+          {stage === 'callWaiter' && CallWaiterStage()}
+          {stage === 'offers' && OffersStage()}
+          {stage === 'feedback' && FeedbackStage()}
+          {stage === 'support' && SupportStage()}
         </AppShell>
       )}
 
