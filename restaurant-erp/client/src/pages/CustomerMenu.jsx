@@ -1314,13 +1314,13 @@ const CustomerMenu = () => {
                   
                   <button 
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id || item._id); }} 
-                    className="transition-all p-1.5 bg-slate-50/80 hover:bg-red-50 hover:text-red-500 text-slate-400 rounded-full active:scale-90 flex items-center justify-center border border-slate-100 shadow-sm"
+                    className="transition-all p-1.5 bg-slate-50/80 hover:bg-red-50 rounded-full active:scale-90 flex items-center justify-center border border-slate-100 shadow-sm group/fav"
                   >
                     <svg 
-                      className={`w-3.5 h-3.5 transition-colors ${
+                      className={`w-3.5 h-3.5 transition-all duration-300 ${
                         favorites.includes(item.id || item._id) 
-                          ? 'text-red-500 fill-red-500' 
-                          : 'currentColor'
+                          ? 'text-red-500 fill-red-500 scale-105' 
+                          : 'text-slate-400 fill-none group-hover/fav:text-red-500 group-hover/fav:fill-red-500 group-hover/fav:scale-110'
                       }`} 
                       stroke="currentColor" 
                       strokeWidth="2.5" 
