@@ -63,7 +63,7 @@ const seedDatabase = async () => {
       // STARTERS
       { name: 'Fish Finger',   category: 'Starters', price: 199, available: true, image: m('fish-finger.png'),   description: 'Crispy golden fish fingers with tartar sauce & lemon', recipe: [{ ingredientId: ing[2]._id, qty: 0.2 }] },
       { name: 'Paneer Tikka',  category: 'Starters', price: 199, available: true, image: m('paneer-tikka.png'),  description: 'Grilled paneer with capsicum & onion, served with mint chutney', recipe: [{ ingredientId: ing[5]._id, qty: 0.2 }] },
-      { name: 'Chicken Wings', category: 'Starters', price: 199, available: true, image: '🍗', description: 'Crispy spiced chicken wings with dipping sauce', recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }] },
+      { name: 'Chicken Wings', category: 'Starters', price: 199, available: true, image: m('chicken-wings.png'), description: 'Crispy spiced chicken wings with dipping sauce', recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }] },
 
       // BIRYANI & RICE
       { name: 'Chicken Biryani', category: 'Biryani & Rice', price: 299, available: true, image: m('chicken-biryani.png'), description: 'Aromatic basmati rice layered with spiced chicken & caramelised onions', recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }, { ingredientId: ing[3]._id, qty: 0.2 }] },
@@ -73,7 +73,7 @@ const seedDatabase = async () => {
       // MAIN COURSE
       { name: 'Paneer Butter Masala',  category: 'Main Course', price: 249, available: true, image: m('paneer-butter-masala.png'),  description: 'Soft paneer cubes in rich, creamy tomato-butter gravy',          recipe: [{ ingredientId: ing[5]._id, qty: 0.2  }, { ingredientId: ing[6]._id, qty: 0.1 }] },
       { name: 'Chicken Butter Masala', category: 'Main Course', price: 299, available: true, image: m('chicken-butter-masala.png'), description: 'Tender chicken in a velvety tomato-butter-cream sauce',           recipe: [{ ingredientId: ing[0]._id, qty: 0.25 }, { ingredientId: ing[6]._id, qty: 0.1 }] },
-      { name: 'Dal',                   category: 'Main Course', price: 40,  available: true, image: '🫘',                          description: 'Home-style dal tadka — comforting and flavourful',               recipe: [] },
+      { name: 'Dal',                   category: 'Main Course', price: 40,  available: true, image: m('dal.png'),                  description: 'Home-style dal tadka — comforting and flavourful',               recipe: [] },
 
       // BREAD
       { name: 'Tandoori Roti',  category: 'Bread', price: 30, available: true, image: m('tandoori-roti.png'),  description: 'Whole wheat roti baked fresh in a tandoor',                          recipe: [{ ingredientId: ing[4]._id, qty: 0.05 }] },
@@ -97,7 +97,7 @@ const seedDatabase = async () => {
 
       // BEVERAGES
       { name: 'Fresh Orange Soda', category: 'Beverages', price: 69,  available: true, image: m('fresh-orange-soda.png'), description: 'Freshly squeezed orange with chilled soda',                      recipe: [] },
-      { name: 'Fresh Lime Soda',   category: 'Beverages', price: 69,  available: true, image: '🍋',                      description: 'Tangy fresh lime with sweet or salted soda',                    recipe: [] },
+      { name: 'Fresh Lime Soda',   category: 'Beverages', price: 69,  available: true, image: m('fresh-lime-soda.png'),   description: 'Tangy fresh lime with sweet or salted soda',                    recipe: [] },
       { name: 'Mint Mojito',       category: 'Beverages', price: 99,  available: true, image: m('mint-mojito.png'),       description: 'Refreshing mint, lime & crushed ice mocktail',                  recipe: [] },
       { name: 'Cold Coffee',       category: 'Beverages', price: 129, available: true, image: m('cold-coffee.png'),       description: 'Rich blended cold coffee topped with whipped cream',            recipe: [{ ingredientId: ing[9]._id, qty: 0.2  }] },
       { name: 'Milkshake',         category: 'Beverages', price: 129, available: true, image: m('milkshake.png'),         description: 'Thick & creamy milkshake — chocolate, vanilla or strawberry',   recipe: [{ ingredientId: ing[9]._id, qty: 0.25 }] },
@@ -112,7 +112,7 @@ const seedDatabase = async () => {
       { name: 'Fruit Salad with Ice Cream',category:'Desserts', price: 129, available: true, image: m('fruit-salad-ice-cream.png'),description: 'Fresh seasonal fruits topped with a scoop of vanilla ice cream', recipe: [] },
 
       // WAFFLES
-      { name: 'Classic Belgian Waffle', category: 'Waffles', price: 199, available: true, image: '🧇',                         description: 'Light crispy Belgian waffle with maple syrup & butter',          recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }, { ingredientId: ing[10]._id, qty: 0.05 }] },
+      { name: 'Classic Belgian Waffle', category: 'Waffles', price: 199, available: true, image: m('classic-belgian-waffle.png'),description: 'Light crispy Belgian waffle with maple syrup & butter',          recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }, { ingredientId: ing[10]._id, qty: 0.05 }] },
       { name: 'Strawberry Waffle',      category: 'Waffles', price: 249, available: true, image: m('strawberry-waffle.png'),    description: 'Golden waffle topped with fresh strawberries & cream',           recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
       { name: 'Blueberry Waffle',       category: 'Waffles', price: 269, available: true, image: m('blueberry-waffle.png'),     description: 'Crispy waffle loaded with fresh blueberries & whipped cream',    recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
       { name: 'Red Velvet Waffle',      category: 'Waffles', price: 299, available: true, image: m('red-velvet-waffle.png'),    description: 'Red velvet waffle with cream cheese drizzle & strawberries',     recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },

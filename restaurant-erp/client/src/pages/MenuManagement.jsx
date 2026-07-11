@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { PageLoader, LoadingButton } from '../components/LoadingSkeleton';
 import ConfirmModal from '../components/ConfirmModal';
+import MenuItemImage from '../components/MenuItemImage';
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState('items');
@@ -445,8 +446,8 @@ const MenuManagement = () => {
 
                       <div className="space-y-4">
                         {/* Image Bubble */}
-                        <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100/50 flex items-center justify-center text-3xl shadow-inner shrink-0">
-                          {item.image || '🍔'}
+                        <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100/50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-16 h-16 object-cover" emojiClassName="text-3xl" />
                         </div>
                         
                         <div>
@@ -477,8 +478,8 @@ const MenuManagement = () => {
                       
                       <div className="flex items-center gap-4 min-w-0">
                         {/* Round circular image bubble */}
-                        <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100/50 flex items-center justify-center text-3xl shadow-inner shrink-0">
-                          {item.image || '🍔'}
+                        <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100/50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden">
+                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-16 h-16 object-cover" emojiClassName="text-3xl" />
                         </div>
                         
                         <div className="min-w-0 space-y-1">
@@ -860,17 +861,22 @@ const MenuManagement = () => {
                   >
                     <option value="Main Course">Main Course</option>
                     <option value="Starters">Starters</option>
+                    <option value="Biryani & Rice">Biryani & Rice</option>
                     <option value="Bread">Bread</option>
+                    <option value="Pizza">Pizza</option>
+                    <option value="Burgers">Burgers</option>
+                    <option value="Snacks">Snacks</option>
                     <option value="Beverages">Beverages</option>
                     <option value="Desserts">Desserts</option>
+                    <option value="Waffles">Waffles</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Emoji Icon</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Emoji / Image Path</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 🍔"
+                    placeholder="e.g. 🍔 or /menu/dal.png"
                     className="w-full p-3 bg-white border border-slate-200 rounded-xl text-center text-xs font-bold focus:outline-none focus:border-indigo-500"
                     value={newItem.image}
                     onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
