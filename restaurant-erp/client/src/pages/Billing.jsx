@@ -391,11 +391,10 @@ const Billing = () => {
       {/* ── SECTIONS GRID ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         
-        {/* Unpaid Bills Column card */}
         <div className="bg-white p-5 rounded-3xl border border-slate-100 space-y-4 shadow-sm min-h-[500px]">
           <div className="flex justify-between items-center border-b border-slate-50 pb-3">
              <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-red-500"/>Unpaid Bills
+               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"/>Unpaid Bills
              </h3>
              <span className="bg-red-50 text-red-650 font-black px-2.5 py-0.5 rounded-lg border border-red-100 text-[10px] uppercase">
                {unpaidOrders.length} Pending
@@ -409,56 +408,88 @@ const Billing = () => {
               unpaidOrders.map(o => {
                 const id = o._id || o.id;
                 const isSelected = selectedOrders.includes(id);
+                const isDineIn = o.type?.toLowerCase() === 'dine-in';
+                const formattedTable = o.table !== 'N/A' ? (o.table.toUpperCase().includes('TABLE') ? o.table : `Table ${o.table}`) : '';
+
                 return (
                   <div 
                     key={id} 
-                    className={`p-4.5 border rounded-2xl transition-all duration-300 relative ${
+                    className={`p-5 border rounded-3xl transition-all duration-350 relative flex flex-col gap-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] ${
                       isSelected 
-                        ? 'border-indigo-350 bg-indigo-50/20 shadow-sm' 
-                        : 'border-slate-100 bg-slate-50/40 hover:bg-slate-50/70'
+                        ? 'border-indigo-500 bg-indigo-50/15 ring-1 ring-indigo-500/25' 
+                        : 'border-slate-100/80 bg-white hover:bg-slate-50/40'
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2.5">
+                    {/* Top Row: Order ID, Type Badge and Price */}
+                    <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
-                        <input 
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleOrderSelection(id)}
-                          className="w-4 h-4 text-indigo-600 border-slate-300 rounded cursor-pointer"
-                        />
-                        <div>
-                          <span className="font-extrabold text-slate-800 text-sm block">#{id.substring(id.length - 8).toUpperCase()}</span>
-                          <span className="text-[9px] font-black text-[#f97316] uppercase tracking-wider block mt-0.5">
-                            {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
+                        <label className="relative flex items-center justify-center shrink-0 cursor-pointer">
+                          <input 
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleOrderSelection(id)}
+                            className="peer sr-only"
+                          />
+                          <span className="w-5 h-5 rounded-full border-2 border-slate-200 peer-checked:border-indigo-650 peer-checked:bg-indigo-650 flex items-center justify-center transition-all shadow-sm">
+                            <svg className="w-3 h-3 text-white scale-0 peer-checked:scale-100 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
                           </span>
+                        </label>
+                        
+                        <div className="space-y-1">
+                          <span className="font-extrabold text-slate-800 text-sm block tracking-tight">#{id.substring(id.length - 8).toUpperCase()}</span>
+                          <div className="flex items-center gap-1.5">
+                            {isDineIn ? (
+                              <span className="bg-orange-50 text-orange-700 border border-orange-100 rounded-full px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider flex items-center gap-1">
+                                🍽️ Dine-in {formattedTable && `· ${formattedTable}`}
+                              </span>
+                            ) : (
+                              <span className="bg-blue-50 text-blue-700 border border-blue-100 rounded-full px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider flex items-center gap-1">
+                                🛍️ Takeaway
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <span className="font-black text-slate-800 text-sm">₹{o.total}</span>
+                      <div className="text-right">
+                        <span className="font-black text-slate-850 text-base block tracking-tight">₹{o.total}</span>
+                        <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5 block">Total Bill</span>
+                      </div>
                     </div>
                     
-                    <div className="text-[11px] text-slate-500 font-bold mb-4 bg-white/60 p-2.5 rounded-xl border border-slate-100/50">
-                      {o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
+                    {/* Items List: Rendered as clean tag pills */}
+                    <div className="flex flex-wrap gap-1.5 py-1">
+                      {o.items.map((i, idx) => (
+                        <span key={idx} className="bg-slate-50 border border-slate-100/70 text-slate-600 text-[9.5px] font-bold px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-sm hover:scale-[1.01] transition-transform">
+                          <span className="text-[#f97316] font-black">{i.qty}x</span> 
+                          <span>{i.name}</span>
+                        </span>
+                      ))}
                     </div>
 
-                    <div className="flex gap-2">
+                    {/* Bottom Actions Row */}
+                    <div className="flex gap-2.5 pt-2 border-t border-slate-50">
                       <button 
                         onClick={() => openPayModal(o)} 
-                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl text-[10px] uppercase shadow-sm shadow-emerald-600/10 transition-all cursor-pointer"
+                        className="flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white font-black rounded-xl text-[10px] uppercase shadow-md shadow-emerald-500/10 transition-all cursor-pointer tracking-wider flex items-center justify-center gap-1"
                       >
-                        Collect Payment 💵
+                        <span>Collect Payment</span> 💵
                       </button>
                       <button 
                         onClick={() => openInvoice(o)} 
-                        className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold rounded-xl text-[10px] uppercase transition-all cursor-pointer"
+                        className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-black rounded-xl text-[10px] uppercase transition-all cursor-pointer tracking-wider flex items-center justify-center gap-1"
                       >
-                        Invoice 📄
+                        <span>Invoice</span> 📄
                       </button>
                       <button
                         onClick={() => downloadPDF(o)}
                         title="Download PDF directly"
-                        className="w-9 h-9 flex items-center justify-center bg-indigo-50 hover:bg-[#0F286B] text-[#0F286B] hover:text-white border border-indigo-150 rounded-xl cursor-pointer transition-all"
+                        className="w-9.5 h-9.5 flex items-center justify-center bg-indigo-50 hover:bg-indigo-650 hover:text-white text-indigo-600 border border-indigo-100 rounded-xl cursor-pointer transition-all active:scale-90 shadow-sm shrink-0"
                       >
-                        ⬇
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
                       </button>
                     </div>
                   </div>
@@ -486,44 +517,59 @@ const Billing = () => {
               paidOrders.map(o => {
                 const id = o._id || o.id;
                 return (
-                  <div key={id} className="p-4 border border-slate-100 bg-white hover:bg-slate-50/50 rounded-2xl transition-all flex justify-between items-center group shadow-sm">
-                    <div>
-                      <span className="font-extrabold text-slate-850 text-sm block">#{id.substring(id.length - 8).toUpperCase()}</span>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{o.type}</span>
+                  <div key={id} className="p-4.5 border border-slate-100/70 bg-white hover:bg-slate-50/20 rounded-3xl transition-all duration-300 flex justify-between items-center group shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.025)]">
+                    <div className="space-y-1.5 min-w-0">
+                      <span className="font-extrabold text-slate-800 text-sm block tracking-tight">#{id.substring(id.length - 8).toUpperCase()}</span>
+                      <div className="flex items-center gap-2">
+                        {o.type?.toLowerCase() === 'dine-in' ? (
+                          <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
+                            🍽️ Dine-in
+                          </span>
+                        ) : (
+                          <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
+                            🛍️ Takeaway
+                          </span>
+                        )}
+                        
+                        {o.paymentMethod && (
+                          <span className={`text-[8.5px] font-black uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1 leading-none ${
+                            o.paymentMethod === 'Cash'   ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                            o.paymentMethod === 'Card'   ? 'bg-blue-50    text-blue-700    border-blue-100'    :
+                            o.paymentMethod === 'UPI'    ? 'bg-violet-50  text-violet-700  border-violet-100'  :
+                            o.paymentMethod === 'Wallet' ? 'bg-amber-50   text-amber-700   border-amber-100'   :
+                            'bg-slate-50 text-slate-650 border-slate-200'
+                          }`}>
+                            {PAYMENT_METHODS.find(m => m.id === o.paymentMethod)?.icon} {o.paymentMethod}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {o.paymentMethod && (
-                        <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg border flex items-center gap-1 leading-none ${
-                          o.paymentMethod === 'Cash'   ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                          o.paymentMethod === 'Card'   ? 'bg-blue-50    text-blue-700    border-blue-100'    :
-                          o.paymentMethod === 'UPI'    ? 'bg-violet-50  text-violet-700  border-violet-100'  :
-                          o.paymentMethod === 'Wallet' ? 'bg-amber-50   text-amber-700   border-amber-100'   :
-                          'bg-slate-50 text-slate-650 border-slate-200'
-                        }`}>
-                          {PAYMENT_METHODS.find(m => m.id === o.paymentMethod)?.icon} {o.paymentMethod}
+                    
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="text-right">
+                        <span className="font-black text-slate-850 block text-sm tracking-tight">₹{o.total}</span>
+                        <span className="text-[9px] text-emerald-600 font-extrabold tracking-wide uppercase flex items-center justify-end gap-0.5">
+                          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> Settled
                         </span>
-                      )}
-                      
-                      <div className="text-right shrink-0">
-                        <span className="font-black text-slate-850 block text-xs">₹{o.total}</span>
-                        <span className="text-[9px] text-emerald-600 font-extrabold tracking-wide uppercase">PAID</span>
                       </div>
                       
                       {/* Action hover buttons */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => openInvoice(o)} 
-                          className="w-7 h-7 flex items-center justify-center bg-indigo-50 hover:bg-[#0F286B] text-[#0F286B] hover:text-white rounded-lg cursor-pointer transition-all" 
+                          className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl cursor-pointer transition-all active:scale-90 shadow-sm" 
                           title="View Invoice"
                         >
                           📄
                         </button>
                         <button 
                           onClick={() => downloadPDF(o)} 
-                          className="w-7 h-7 flex items-center justify-center bg-slate-50 hover:bg-slate-900 text-slate-500 hover:text-white rounded-lg cursor-pointer transition-all" 
+                          className="w-8 h-8 flex items-center justify-center bg-indigo-50 hover:bg-indigo-650 text-indigo-600 hover:text-white rounded-xl cursor-pointer transition-all active:scale-90 shadow-sm" 
                           title="Download Receipt"
                         >
-                          ⬇
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                          </svg>
                         </button>
                       </div>
                     </div>
