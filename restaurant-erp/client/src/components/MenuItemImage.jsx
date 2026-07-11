@@ -4,7 +4,7 @@
  * - Otherwise → treats it as an emoji and renders a <span>
  */
 const MenuItemImage = ({ src, alt = '', className = '', imgClassName = '', emojiClassName = '' }) => {
-  const isPath = src && src.startsWith('/assets/');
+  const isPath = src && (src.startsWith('/assets/') || src.startsWith('/menu/') || src.startsWith('http'));
 
   if (isPath) {
     return (
