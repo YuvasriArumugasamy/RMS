@@ -729,323 +729,11 @@ const CustomerMenu = () => {
     );
   };
 
-  /* ── BOTTOM NAV (Mobile View) ── */
-  const BottomNav = () => {
-    const items = [
-      { 
-        id: 'menu', 
-        label: t.menu || 'Menu', 
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-          </svg>
-        )
-      },
-      { 
-        id: 'cart', 
-        label: t.cart || 'Cart', 
-        badge: cart.length,
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-          </svg>
-        )
-      },
-      { 
-        id: 'scan', 
-        label: 'SCAN QR', 
-        isCenter: true,
-        icon: (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM3.75 14.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM13.125 4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM6.75 6.75h.008v.008H6.75V6.75zM6.75 16.5h.008v.008H6.75V16.5zM16.125 6.75h.008v.008h-.008V6.75zM12 12h.008v.008H12V12zM12 16.5h.008v.008H12V16.5zM16.5 12h.008v.008h-.008V12zM18 18h.008v.008H18V18zM15 15h.008v.008H15V15z" />
-          </svg>
-        )
-      },
-      { 
-        id: 'tracking', 
-        label: t.orders || 'Orders', 
-        badge: placedOrders.length,
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-        )
-      },
-      { 
-        id: 'feedback', 
-        label: t.profile || 'Profile', 
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-          </svg>
-        )
-      },
-    ];
 
-    return (
-      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[1.8rem] px-6 py-3 flex items-center justify-between shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-40 select-none border-t border-slate-100 pb-safe">
-        {items.map(item => {
-          const isActive = (item.id === 'menu')
-            ? (stage === 'menu' && activeCategory !== 'Favorites')
-            : (stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback'));
-
-          if (item.isCenter) {
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveCategory('All');
-                  setStage('welcome');
-                }}
-                className="flex flex-col items-center -mt-8 cursor-pointer select-none"
-              >
-                <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center ring-4 ring-white shadow-xl active:scale-95 transition-transform overflow-hidden border border-slate-100/50">
-                  <img 
-                    src={logoImage} 
-                    alt="Scan Menu" 
-                    className="w-full h-full object-cover rounded-full" 
-                  />
-                </div>
-              </button>
-            );
-          }
-
-          return (
-            <button 
-              key={item.id} 
-              onClick={() => {
-                if (item.id === 'menu') {
-                  setActiveCategory('All');
-                  setStage('menu');
-                } else if (item.id === 'tracking' && placedOrders.length > 0) {
-                  setStage('tracking');
-                } else {
-                  setStage(item.id);
-                }
-              }}
-              className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all duration-300 cursor-pointer relative ${
-                isActive 
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 scale-105 font-black' 
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'
-              }`}
-            >
-              <div className="relative">
-                {item.icon}
-                {item.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-md animate-bounce">
-                    {item.badge}
-                  </span>
-                )}
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-white' : 'text-slate-400'}`}>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
-
-  /* ── COMMON SHELL WRAPPER ── */
-  const AppShell = ({ children }) => {
-    return (
-      <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
-        {/* Desktop Left Sidebar */}
-        <aside className="hidden lg:flex flex-col w-72 bg-[#0B0F19] text-white p-6 justify-between shrink-0 select-none">
-          <div className="space-y-8">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl">👨‍🍳</div>
-              <div>
-                <h2 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
-                  Resto <span className="text-[9px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded">QR</span>
-                </h2>
-                <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">Delicious Food</p>
-              </div>
-            </div>
-
-            {/* Navigation links */}
-            <nav className="space-y-1 select-none">
-              {[
-                { 
-                  id: 'menu', 
-                  label: t.menu || 'Menu', 
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                  ) 
-                },
-                { 
-                  id: 'cart', 
-                  label: t.cart || 'Cart', 
-                  badge: cart.length,
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                    </svg>
-                  ) 
-                },
-                { 
-                  id: 'tracking', 
-                  label: t.orders || 'Orders', 
-                  badge: placedOrders.length,
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  ) 
-                },
-                { 
-                  id: 'favorites', 
-                  label: 'Favorites', 
-                  badge: favorites.length,
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                  ) 
-                },
-                { 
-                  id: 'feedback', 
-                  label: t.profile || 'Profile', 
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                  ) 
-                },
-              ].map(item => {
-                const isActive = (item.id === 'favorites')
-                  ? (activeCategory === 'Favorites' && stage === 'menu')
-                  : ((item.id === 'menu' && activeCategory !== 'Favorites') 
-                      ? (stage === 'menu') 
-                      : (stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback')));
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
-                      else if (item.id === 'feedback') setStage('feedback');
-                      else if (item.id === 'favorites') {
-                        setActiveCategory('Favorites');
-                        setStage('menu');
-                      } else {
-                        if (item.id === 'menu' && activeCategory === 'Favorites') {
-                          setActiveCategory('All');
-                        }
-                        setStage(item.id);
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                      isActive 
-                        ? 'bg-orange-500 text-white shadow-md scale-105' 
-                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge > 0 && (
-                      <span className="bg-[#f97316] text-white text-[10px] font-bold rounded-full h-5.5 w-5.5 flex items-center justify-center shadow-md animate-bounce">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-
-              <div className="h-px bg-white/10 my-4" />
-
-              {[
-                {
-                  id: 'offers',
-                  label: t.offersForYou || 'Offers',
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.43 1.43 0 002.022 0l4.318-4.318a1.43 1.43 0 000-2.022L10.16 3.659A2.25 2.25 0 009.568 3z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-                    </svg>
-                  )
-                },
-                {
-                  id: 'help',
-                  label: 'Help & Support',
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                    </svg>
-                  )
-                }
-              ].map(item => {
-                const isActive = stage === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      if (item.id === 'offers') setStage('offers');
-                      else if (item.id === 'help') setStage('support');
-                    }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                      isActive 
-                        ? 'bg-orange-500 text-white shadow-md' 
-                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Bottom special item */}
-          <div className="relative bg-slate-900/60 rounded-3xl p-4 overflow-hidden border border-slate-800/80 mt-auto select-none flex flex-col gap-2.5">
-            <div>
-              <p className="text-amber-500 font-black text-xs">Today's Special</p>
-              <p className="text-slate-305 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
-            </div>
-            
-            <div className="relative mt-1 h-24 rounded-2xl overflow-hidden group">
-              <img 
-                src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" 
-                alt="Special Dish" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-              
-              <button 
-                onClick={() => setStage('offers')} 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-[9px] font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest cursor-pointer whitespace-nowrap"
-              >
-                ORDER NOW
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
-          {/* Main content body */}
-          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 px-6 pt-0">
-            {children}
-          </main>
-
-          {/* Mobile bottom nav */}
-          <div className="lg:hidden">
-            <BottomNav />
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   /* ── STAGE: MENU ── */
   const MenuStage = () => (
-    <AppShell>
+    <>
       {/* Hero Banner */}
       <div 
         className="relative -mx-6 sm:mx-0 rounded-none rounded-b-[2.2rem] sm:rounded-3xl p-6 md:p-8 text-white overflow-hidden shadow-xl mb-6 mt-0 sm:mt-6 bg-cover bg-center select-none"
@@ -1488,7 +1176,7 @@ const CustomerMenu = () => {
           <button onClick={() => setStage('offers')} className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-black text-[9px] rounded-xl transition-all uppercase tracking-wider shadow-md shadow-orange-500/10">Explore Combos</button>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 
   /* ── STAGE: FOOD DETAILS ── */
@@ -1513,7 +1201,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <AppShell>
+      <>
         <div className="flex items-center gap-3.5 mb-6">
           <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
             ←
@@ -1631,7 +1319,7 @@ const CustomerMenu = () => {
     const neededAmount = Math.max(0, freeDeliveryThreshold - cartSubtotal);
 
     return (
-      <AppShell>
+      <>
         <div className="flex items-center justify-between mb-6 select-none">
           <div>
             <h2 className="text-xl font-black text-slate-800">{t.myCart}</h2>
@@ -1815,13 +1503,13 @@ const CustomerMenu = () => {
 
           </div>
         )}
-      </AppShell>
+      </>
     );
   };
 
   /* ── STAGE: CONFIRM ORDER ── */
   const ConfirmStage = () => (
-    <AppShell>
+    <>
       <div className="flex items-center gap-3.5 mb-6">
         <button onClick={() => setStage('cart')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
           ←
@@ -1917,7 +1605,7 @@ const CustomerMenu = () => {
           </button>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 
   /* ── STAGE: ORDER TRACKING ── */
@@ -1928,7 +1616,7 @@ const CustomerMenu = () => {
       : null;
 
     return (
-      <AppShell>
+      <>
         <div className="flex items-center justify-between mb-6 select-none">
           <div>
             <h2 className="text-xl font-black text-slate-800">{t.orderStatus}</h2>
@@ -2088,7 +1776,7 @@ const CustomerMenu = () => {
             </div>
           </div>
         )}
-      </AppShell>
+      </>
     );
   };
 
@@ -2096,7 +1784,7 @@ const CustomerMenu = () => {
   const BillStage = () => {
     const order = selectedOrder || placedOrders[0];
     return (
-      <AppShell>
+      <>
         <div className="flex items-center gap-3.5 mb-6 select-none">
           <button onClick={() => setStage('tracking')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
             ←
@@ -2152,7 +1840,7 @@ const CustomerMenu = () => {
             ⭐ SUBMIT FEEDBACK
           </button>
         </div>
-      </AppShell>
+      </>
     );
   };
 
@@ -2177,7 +1865,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <AppShell>
+      <>
         <div className="flex items-center gap-3.5 mb-6 select-none">
           <button onClick={() => setStage('tracking')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
             ←
@@ -2215,7 +1903,7 @@ const CustomerMenu = () => {
             </div>
           )}
         </div>
-      </AppShell>
+      </>
     );
   };
 
@@ -2278,7 +1966,7 @@ const CustomerMenu = () => {
     };
 
     return (
-      <AppShell>
+      <>
         <div className="flex items-center gap-3.5 mb-6 select-none">
           <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
             ←
@@ -2385,13 +2073,13 @@ const CustomerMenu = () => {
             </div>
           </div>
         </div>
-      </AppShell>
+      </>
     );
   };
 
   /* ── STAGE: OFFERS ── */
   const OffersStage = () => (
-    <AppShell>
+    <>
       <div className="flex items-center gap-3.5 mb-6 select-none">
         <button onClick={() => setStage('menu')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
           ←
@@ -2443,12 +2131,12 @@ const CustomerMenu = () => {
           </button>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 
   /* ── STAGE: FEEDBACK ── */
   const FeedbackStage = () => (
-    <AppShell>
+    <>
       <div className="flex items-center justify-between mb-6 select-none">
         <div>
           <h2 className="text-xl font-black text-slate-800">{t.feedback}</h2>
@@ -2500,7 +2188,7 @@ const CustomerMenu = () => {
           {t.submitFeedback}
         </button>
       </div>
-    </AppShell>
+    </>
   );
 
   /* ── STAGE: THANK YOU ── */
@@ -2539,18 +2227,37 @@ const CustomerMenu = () => {
   return (
     <>
       {voiceOpen && <VoicePanel />}
-      {stage === 'welcome' && <WelcomeStage />}
-      {stage === 'menu' && <MenuStage />}
-      {stage === 'foodDetails' && <FoodDetailsStage />}
-      {stage === 'cart' && <CartStage />}
-      {stage === 'confirm' && <ConfirmStage />}
-      {stage === 'tracking' && <TrackingStage />}
-      {stage === 'bill' && <BillStage />}
-      {stage === 'callWaiter' && <CallWaiterStage />}
-      {stage === 'offers' && <OffersStage />}
-      {stage === 'feedback' && <FeedbackStage />}
-      {stage === 'thankYou' && <ThankYouStage />}
-      {stage === 'support' && <SupportStage />}
+      {stage === 'welcome' ? (
+        <WelcomeStage />
+      ) : stage === 'thankYou' ? (
+        <ThankYouStage />
+      ) : (
+        <AppShell 
+          t={t}
+          cart={cart}
+          placedOrders={placedOrders}
+          favorites={favorites}
+          activeCategory={activeCategory}
+          stage={stage}
+          setStage={setStage}
+          setActiveCategory={setActiveCategory}
+          isDrawerOpen={isDrawerOpen}
+          setIsDrawerOpen={setIsDrawerOpen}
+          logoImage={logoImage}
+          bannerBgImage={bannerBgImage}
+        >
+          {stage === 'menu' && <MenuStage />}
+          {stage === 'foodDetails' && <FoodDetailsStage />}
+          {stage === 'cart' && <CartStage />}
+          {stage === 'confirm' && <ConfirmStage />}
+          {stage === 'tracking' && <TrackingStage />}
+          {stage === 'bill' && <BillStage />}
+          {stage === 'callWaiter' && <CallWaiterStage />}
+          {stage === 'offers' && <OffersStage />}
+          {stage === 'feedback' && <FeedbackStage />}
+          {stage === 'support' && <SupportStage />}
+        </AppShell>
+      )}
 
       {/* Mobile Navigation Drawer Overlay */}
       {isDrawerOpen && (
@@ -2743,6 +2450,331 @@ const CustomerMenu = () => {
         </div>
       )}
     </>
+  );
+};
+
+/* ── APP SHELL AND BOTTOM NAV DEFINITIONS (OUTSIDE TO PRESERVE SCROLL) ── */
+const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, setActiveCategory, logoImage }) => {
+  const items = [
+    { 
+      id: 'menu', 
+      label: t.menu || 'Menu', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+        </svg>
+      )
+    },
+    { 
+      id: 'cart', 
+      label: t.cart || 'Cart', 
+      badge: cart.length,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+      )
+    },
+    { 
+      id: 'scan', 
+      label: 'SCAN QR', 
+      isCenter: true,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM3.75 14.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM13.125 4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25zM6.75 6.75h.008v.008H6.75V6.75zM6.75 16.5h.008v.008H6.75V16.5zM16.125 6.75h.008v.008h-.008V6.75zM12 12h.008v.008H12V12zM12 16.5h.008v.008H12V16.5zM16.5 12h.008v.008h-.008V12zM18 18h.008v.008H18V18zM15 15h.008v.008H15V15z" />
+        </svg>
+      )
+    },
+    { 
+      id: 'tracking', 
+      label: t.orders || 'Orders', 
+      badge: placedOrders.length,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+      )
+    },
+    { 
+      id: 'feedback', 
+      label: t.profile || 'Profile', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+      )
+    },
+  ];
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[1.8rem] px-6 py-3 flex items-center justify-between shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-40 select-none border-t border-slate-100 pb-safe">
+      {items.map(item => {
+        const isActive = (item.id === 'menu')
+          ? (stage === 'menu' && activeCategory !== 'Favorites')
+          : (stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback'));
+
+        if (item.isCenter) {
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveCategory('All');
+                setStage('welcome');
+              }}
+              className="flex flex-col items-center -mt-8 cursor-pointer select-none"
+            >
+              <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center ring-4 ring-white shadow-xl active:scale-95 transition-transform overflow-hidden border border-slate-100/50">
+                <img 
+                  src={logoImage} 
+                  alt="Scan Menu" 
+                  className="w-full h-full object-cover rounded-full" 
+                />
+              </div>
+            </button>
+          );
+        }
+
+        return (
+          <button 
+            key={item.id} 
+            onClick={() => {
+              if (item.id === 'menu') {
+                setActiveCategory('All');
+                setStage('menu');
+              } else if (item.id === 'tracking' && placedOrders.length > 0) {
+                setStage('tracking');
+              } else {
+                setStage(item.id);
+              }
+            }}
+            className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all duration-300 cursor-pointer relative ${
+              isActive 
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 scale-105 font-black' 
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'
+            }`}
+          >
+            <div className="relative">
+              {item.icon}
+              {item.badge > 0 && (
+                <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-md animate-bounce">
+                  {item.badge}
+                </span>
+              )}
+            </div>
+            <span className={`text-[9px] font-black uppercase tracking-wider mt-1 ${isActive ? 'text-white' : 'text-slate-400'}`}>{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const AppShell = ({ 
+  children, t, cart, placedOrders, favorites, activeCategory, stage, setStage, 
+  setActiveCategory, isDrawerOpen, setIsDrawerOpen, logoImage, bannerBgImage 
+}) => {
+  return (
+    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+      {/* Desktop Left Sidebar */}
+      <aside className="hidden lg:flex flex-col w-72 bg-[#0B0F19] text-white p-6 justify-between shrink-0 select-none">
+        <div className="space-y-8">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl">👨‍🍳</div>
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+                Resto <span className="text-[9px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded">QR</span>
+              </h2>
+              <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">Delicious Food</p>
+            </div>
+          </div>
+
+          {/* Navigation links */}
+          <nav className="space-y-1 select-none">
+            {[
+              { 
+                id: 'menu', 
+                label: t.menu || 'Menu', 
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'cart', 
+                label: t.cart || 'Cart', 
+                badge: cart.length,
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'tracking', 
+                label: t.orders || 'Orders', 
+                badge: placedOrders.length,
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'favorites', 
+                label: 'Favorites', 
+                badge: favorites.length,
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'feedback', 
+                label: t.profile || 'Profile', 
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                ) 
+              },
+            ].map(item => {
+              const isActive = (item.id === 'favorites')
+                ? (activeCategory === 'Favorites' && stage === 'menu')
+                : ((item.id === 'menu' && activeCategory !== 'Favorites') 
+                    ? (stage === 'menu') 
+                    : (stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback')));
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
+                    else if (item.id === 'feedback') setStage('feedback');
+                    else if (item.id === 'favorites') {
+                      setActiveCategory('Favorites');
+                      setStage('menu');
+                    } else {
+                      if (item.id === 'menu' && activeCategory === 'Favorites') {
+                        setActiveCategory('All');
+                      }
+                      setStage(item.id);
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    isActive 
+                      ? 'bg-orange-500 text-white shadow-md scale-105' 
+                      : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge > 0 && (
+                    <span className="bg-[#f97316] text-white text-[10px] font-bold rounded-full h-5.5 w-5.5 flex items-center justify-center shadow-md animate-bounce">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+
+            <div className="h-px bg-white/10 my-4" />
+
+            {[
+              {
+                id: 'offers',
+                label: t.offersForYou || 'Offers',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.43 1.43 0 002.022 0l4.318-4.318a1.43 1.43 0 000-2.022L10.16 3.659A2.25 2.25 0 009.568 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+                  </svg>
+                )
+              },
+              {
+                id: 'help',
+                label: 'Help & Support',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                  </svg>
+                )
+              }
+            ].map(item => {
+              const isActive = stage === item.id || (item.id === 'help' && stage === 'support');
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'offers') setStage('offers');
+                    else if (item.id === 'help') setStage('support');
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    isActive 
+                      ? 'bg-orange-500 text-white shadow-md' 
+                      : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom special item */}
+        <div className="relative bg-slate-900/60 rounded-3xl p-4 overflow-hidden border border-slate-800/80 mt-auto select-none flex flex-col gap-2.5">
+          <div>
+            <p className="text-amber-500 font-black text-xs">Today's Special</p>
+            <p className="text-slate-305 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
+          </div>
+          
+          <div className="relative mt-1 h-24 rounded-2xl overflow-hidden group">
+            <img 
+              src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" 
+              alt="Special Dish" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            
+            <button 
+              onClick={() => setStage('offers')} 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-[9px] font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest cursor-pointer whitespace-nowrap"
+            >
+              ORDER NOW
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Main content body */}
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-6 px-6 pt-0">
+          {children}
+        </main>
+
+        {/* Mobile bottom nav */}
+        <div className="lg:hidden">
+          <BottomNav 
+            t={t}
+            cart={cart}
+            placedOrders={placedOrders}
+            activeCategory={activeCategory}
+            stage={stage}
+            setStage={setStage}
+            setActiveCategory={setActiveCategory}
+            logoImage={logoImage}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
