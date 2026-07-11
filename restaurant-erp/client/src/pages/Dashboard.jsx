@@ -231,7 +231,7 @@ const Dashboard = () => {
     <div className="space-y-5 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out]">
 
       {/* ── Welcome Banner ── */}
-      <div className="bg-gradient-to-br from-[#f97316] to-orange-600 text-white p-6 rounded-2xl relative overflow-hidden flex items-center justify-between shadow-lg">
+      <div className="bg-gradient-to-br from-[#f97316] to-orange-600 text-white p-6 rounded-2xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[60px]"/>
         <div className="z-10 space-y-1">
           <h2 className="text-2xl font-extrabold">Live Dashboard</h2>
@@ -239,7 +239,7 @@ const Dashboard = () => {
             Real-time restaurant overview · Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
           </p>
         </div>
-        <div className="z-10 flex gap-2">
+        <div className="z-10 flex flex-wrap gap-2">
           <span className={`text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border ${
             connected ? 'bg-white/20 text-white border-white/30' : 'bg-red-500/30 text-white border-red-400/30'
           }`}>
