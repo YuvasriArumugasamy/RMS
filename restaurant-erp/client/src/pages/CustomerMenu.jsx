@@ -1068,14 +1068,7 @@ const CustomerMenu = () => {
                 🎤 Voice
               </button>
             )}
-            <button className="relative bg-white/10 hover:bg-white/15 rounded-full p-2.5 transition-colors cursor-pointer select-none">
-              <svg className="h-4.5 w-4.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a9.04 9.04 0 01-1.201 1.492M14.857 17.082a9.04 9.04 0 01-1.201-1.492m0 0a8.96 8.96 0 01-3.204 0m3.204 0V14.3a3 3 0 00-3-3m3 3a3 3 0 003-3v-1.302M12 9V3M3.105 13H5m14 0h1.895M6.208 6.208L7.62 7.62m8.76-8.76L17.79 7.62M3.105 13a9.006 9.006 0 0017.79 0" />
-              </svg>
-              <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[7.5px] font-black rounded-full h-3.5 w-3.5 flex items-center justify-center shadow">
-                1
-              </span>
-            </button>
+
             <img 
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face"
               alt="Profile"
