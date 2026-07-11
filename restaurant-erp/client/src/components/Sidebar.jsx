@@ -171,7 +171,7 @@ const roleColorMap = {
   Cashier: 'bg-violet-600 text-white',
 };
 
-const Sidebar = () => {
+const Sidebar = ({ onClose }) => {
   const { user, logout, permissions } = useAuth();
   const navigate = useNavigate();
 
@@ -200,12 +200,20 @@ const Sidebar = () => {
     <aside className="w-64 h-full bg-[#1e3a8a] flex flex-col border-r border-white/5 shadow-2xl">
 
       {/* ── Brand ── */}
-      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-center">
+      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between w-full">
         <div className="flex items-center gap-1.5">
           <span className="text-2xl font-black text-[#f97316]">R</span>
           <span className="text-2xl font-black text-white">MS</span>
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-tight">Restaurant<br/>Management<br/>System</span>
         </div>
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="md:hidden w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-white text-xs hover:bg-white/20 transition-all cursor-pointer"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* ── Nav ── */}

@@ -36,7 +36,7 @@ const Layout = () => {
             
             {/* Scrollable Navigation Items */}
             <div className="flex-1 overflow-y-auto" onClick={() => setIsMobileSidebarOpen(false)}>
-              <Sidebar />
+              <Sidebar onClose={() => setIsMobileSidebarOpen(false)} />
             </div>
           </div>
         </div>
