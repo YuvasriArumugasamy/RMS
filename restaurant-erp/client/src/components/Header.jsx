@@ -115,17 +115,17 @@ const Header = ({ onOpenMobileSidebar }) => {
 
         <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
-        {/* Active orders badge */}
-        <div className="flex items-center gap-2 text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl">
+        {/* Active orders badge - Desktop/tablet only */}
+        <div className="hidden sm:flex items-center gap-2 text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl">
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
           {pendingCount} Active
         </div>
 
-        {/* New Order button */}
+        {/* New Order button - Desktop/tablet only */}
         {['Admin', 'Manager', 'Waiter'].includes(user?.role) && (
           <button
             onClick={() => navigate('/orders')}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-400/20 transition-all"
+            className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-400/20 transition-all"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -134,16 +134,16 @@ const Header = ({ onOpenMobileSidebar }) => {
           </button>
         )}
 
-        <div className="w-px h-5 bg-slate-200" />
+        <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
-        {/* User role badge */}
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-bold ${roleBadge}`}>
+        {/* User role badge - compact on mobile */}
+        <div className={`flex items-center gap-2 px-2.5 py-1.5 sm:px-3 rounded-xl border text-[11px] font-bold ${roleBadge}`}>
           <div className="w-5 h-5 rounded-full bg-current/10 flex items-center justify-center text-[9px] font-black opacity-80">
             {user?.username?.slice(0, 2).toUpperCase() || 'US'}
           </div>
-          <span>{user?.username}</span>
-          <span className="opacity-60">·</span>
-          <span>{user?.role}</span>
+          <span className="hidden sm:inline">{user?.username}</span>
+          <span className="opacity-60 hidden sm:inline">·</span>
+          <span className="hidden sm:inline">{user?.role}</span>
         </div>
       </div>
     </header>
