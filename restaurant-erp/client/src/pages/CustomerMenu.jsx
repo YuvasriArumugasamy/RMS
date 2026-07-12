@@ -1217,72 +1217,7 @@ const CustomerMenu = () => {
               <p className="text-[11px] text-slate-400 leading-relaxed pt-3 border-t border-slate-50">
                 {item.description || 'Prepared fresh with high quality organic ingredients, seasoned to absolute deliciousness.'}
               </p>
-            </div>
-
-            <div className="bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm space-y-4">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.customize}</h4>
-              <div className="space-y-2.5">
-                {[
-                  { key: 'extraCheese', label: t.extraCheese, price: '₹50', icon: '🧀' },
-                  { key: 'noOnion', label: t.noOnion, price: '₹0', icon: '🧅' },
-                  { key: 'spicy', label: t.spicy, price: '₹0', icon: '🌶️' },
-                ].map(opt => {
-                  const isChecked = detailsCustom[opt.key];
-                  return (
-                    <div key={opt.key} onClick={() => setDetailsCustom(p => ({ ...p, [opt.key]: !p[opt.key] }))}
-                      className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.98] select-none ${
-                        isChecked 
-                          ? 'border-orange-500 bg-orange-50/20 shadow-sm' 
-                          : 'border-slate-150 bg-slate-50/30 hover:bg-slate-50/70'
-                      }`}>
-                      <div className="flex items-center gap-3.5">
-                        <span className="text-base">{opt.icon}</span>
-                        <span className={`text-xs font-bold transition-colors ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{opt.label}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {opt.price !== '₹0' && (
-                          <span className="text-[10px] font-black text-slate-400 bg-slate-100/50 border border-slate-200 px-2 py-0.5 rounded-lg">{opt.price}</span>
-                        )}
-                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                          isChecked ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-white'
-                        }`}>
-                          {isChecked && <span className="text-[9px] font-black">✓</span>}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quantity select & Buy Block */}
-            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">{t.qty}</span>
-                <div className="flex items-center gap-3 bg-slate-100/75 rounded-2xl px-2.5 py-1">
-                  <button onClick={() => setDetailsQty(p => Math.max(1, p - 1))}
-                    className="w-7.5 h-7.5 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-extrabold flex items-center justify-center transition-all cursor-pointer">-</button>
-                  <span className="text-sm font-black text-slate-800 w-5 text-center">{detailsQty}</span>
-                  <button onClick={() => setDetailsQty(p => p + 1)}
-                    className="w-7.5 h-7.5 rounded-xl bg-orange-500 text-white shadow-md font-extrabold flex items-center justify-center transition-all cursor-pointer">+</button>
-                </div>
-              </div>
-
-              <button onClick={handleAddToCart}
-                className="w-full sm:w-auto px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all uppercase tracking-widest active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-                <span>{t.addToCart}</span>
-                <span>|</span>
-                <span>₹{item.price * detailsQty}</span>
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </>
-    );
-  };
-
-  /* ── STAGE: CART ── */
+            </  /* ── STAGE: CART ── */
   const CartStage = () => {
     const freeDeliveryThreshold = 200;
     const progressPercent = Math.min(100, Math.round((cartSubtotal / freeDeliveryThreshold) * 100));
@@ -1292,12 +1227,13 @@ const CustomerMenu = () => {
       <>
         <div className="flex items-center justify-between mb-6 select-none">
           <div>
-            <h2 className="text-xl font-black text-slate-800">{t.myCart}</h2>
-            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Manage items & review summary</p>
+            <h2 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-orange-600 bg-clip-text text-transparent">{t.myCart}</h2>
+            <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Manage items & review summary</p>
           </div>
           {cart.length > 0 && (
-            <button onClick={() => setStage('menu')} className="px-4 py-2 border border-slate-150 rounded-xl text-orange-500 text-xs font-black bg-white hover:bg-slate-50 transition-all shadow-sm">
-              Add More Items
+            <button onClick={() => setStage('menu')} className="px-4 py-2 border border-orange-500/25 rounded-xl text-orange-500 text-xs font-black bg-orange-500/5 hover:bg-orange-500/10 transition-all duration-300 shadow-sm active:scale-95 flex items-center gap-1.5 cursor-pointer">
+              <span>➕</span>
+              <span>Add More Items</span>
             </button>
           )}
         </div>
@@ -1307,67 +1243,76 @@ const CustomerMenu = () => {
             <span className="text-6xl mb-4 animate-bounce block select-none">🛒</span>
             <h3 className="text-base font-black text-slate-800">Cart is Empty</h3>
             <p className="text-xs text-slate-400 font-medium max-w-xs mt-1">Browse our delicious menu and add some food here!</p>
-            <button onClick={() => setStage('menu')} className="mt-6 px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 text-xs uppercase tracking-wider">
+            <button onClick={() => setStage('menu')} className="mt-6 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 text-xs uppercase tracking-wider cursor-pointer">
               Browse Menu
             </button>
           </div>
         ) : (
           <div className="space-y-6 pb-20">
             {/* Free Delivery Bar */}
-            <div className="bg-[#FFF7ED] border border-orange-100 rounded-3xl p-4.5 flex items-center justify-between gap-4 shadow-sm select-none">
-              <div className="flex-1 space-y-2">
-                <p className="text-[11px] text-orange-800 font-black">
-                  {neededAmount > 0 
-                    ? `Add items worth ₹${neededAmount} more to get FREE delivery!` 
-                    : '🎉 You qualify for FREE delivery!'}
-                </p>
-                <div className="relative w-full h-2 bg-orange-100 rounded-full overflow-hidden">
+            <div className="bg-gradient-to-br from-orange-50/80 via-white to-amber-50/30 border border-orange-100 rounded-3xl p-5 flex items-center justify-between gap-5 shadow-[0_8px_30px_rgba(251,146,60,0.04)] select-none transition-all duration-300 hover:shadow-[0_8px_30px_rgba(251,146,60,0.08)]">
+              <div className="flex-1 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                  </span>
+                  <p className="text-[11.5px] text-slate-800 font-extrabold tracking-wide">
+                    {neededAmount > 0 
+                      ? <>Add items worth <span className="text-orange-600 font-black">₹{neededAmount}</span> more to get <span className="text-orange-600 font-black">FREE delivery</span>!</>
+                      : '🎉 You qualify for FREE delivery!'}
+                  </p>
+                </div>
+                <div className="relative w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-[2px]">
                   <div 
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" 
+                    className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 rounded-full transition-all duration-500 ease-out" 
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
-                <p className="text-[9px] text-orange-600 font-extrabold uppercase">₹{cartSubtotal} / ₹{freeDeliveryThreshold}</p>
+                <div className="flex justify-between items-center text-[9px] text-slate-400 font-black uppercase tracking-wider">
+                  <span>₹{cartSubtotal} Spent</span>
+                  <span>Goal: ₹{freeDeliveryThreshold}</span>
+                </div>
               </div>
-              <div className="text-3xl animate-pulse">🛵</div>
+              <div className="text-4xl bg-orange-500/10 p-3 rounded-2xl animate-bounce">🛵</div>
             </div>
 
             {/* Cart Items List */}
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               {cart.map((item, index) => (
-                <div key={index} className="bg-white rounded-3xl p-4 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex items-center justify-between gap-4">
+                <div key={index} className="bg-white rounded-[2rem] p-4.5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-300 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-18 h-18 bg-slate-50 border border-slate-100/80 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden shadow-inner relative group">
                       <MenuItemImage src={item.image} alt={item.name}
-                        imgClassName="w-16 h-16 object-contain p-1"
-                        emojiClassName="text-4xl select-none" />
+                        imgClassName="w-16 h-16 object-contain p-1 transform group-hover:scale-110 transition-transform duration-300"
+                        emojiClassName="text-4xl select-none transform group-hover:scale-110 transition-transform duration-300" />
                     </div>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800 line-clamp-1">{item.name}</h4>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        <span className="text-[8.5px] bg-slate-100 text-slate-500 font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">{item.category}</span>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-black text-slate-800 line-clamp-1 hover:text-orange-600 transition-colors duration-250">{item.name}</h4>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-[8px] bg-slate-100 text-slate-500 font-black px-2 py-0.5 rounded-md uppercase tracking-wider">{item.category}</span>
                         {Object.entries(item.customizations || {}).filter(([_, v]) => v).map(([k]) => {
                           const labels = { extraCheese: '🧀 Cheese', noOnion: '🧅 No Onion', spicy: '🌶️ Spicy' };
                           return (
-                            <span key={k} className="text-[8.5px] bg-amber-50 text-amber-700 font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">
+                            <span key={k} className="text-[8px] bg-amber-50 text-amber-700 border border-amber-100/50 font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
                               {labels[k] || k}
                             </span>
                           );
                         })}
                       </div>
-                      <p className="text-xs text-orange-600 font-black mt-1.5">₹{item.price}</p>
+                      <p className="text-sm text-orange-600 font-black pt-0.5">₹{item.price}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-155 rounded-xl p-0.5">
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-1 shadow-inner">
                       <button onClick={() => index > -1 && cart[index].qty === 1 ? removeFromCart(index) : updateQty(index, -1)}
-                        className="w-6.5 h-6.5 rounded-lg bg-white shadow-sm font-extrabold text-orange-600 flex items-center justify-center active:scale-90">-</button>
+                        className="w-7 h-7 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-black flex items-center justify-center transition-all cursor-pointer active:scale-90 hover:bg-orange-50/20">-</button>
                       <span className="text-xs font-black text-slate-800 w-4 text-center">{item.qty}</span>
                       <button onClick={() => updateQty(index, 1)}
-                        className="w-6.5 h-6.5 rounded-lg bg-orange-500 font-extrabold text-white flex items-center justify-center active:scale-90">+</button>
+                        className="w-7 h-7 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-sm hover:shadow-md font-black text-white flex items-center justify-center transition-all cursor-pointer active:scale-90">+</button>
                     </div>
-                    <button onClick={() => removeFromCart(index)} className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all active:scale-90 flex items-center justify-center">
+                    <button onClick={() => removeFromCart(index)} className="p-2.5 bg-red-50 hover:bg-red-100/80 text-red-600 rounded-xl transition-all duration-200 active:scale-90 flex items-center justify-center shadow-sm border border-red-100/20">
                       <span className="text-sm">🗑️</span>
                     </button>
                   </div>
@@ -1380,14 +1325,17 @@ const CustomerMenu = () => {
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Coupon Panel */}
-                {/* Coupon Panel */}
-                <div className="bg-white rounded-[2.2rem] p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] relative overflow-hidden">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Have a coupon?</h4>
-                  <div className="flex gap-2">
+                <div className="bg-gradient-to-br from-white to-slate-50/30 rounded-[2.2rem] p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] relative overflow-hidden">
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-orange-500/5 rounded-full blur-xl" />
+                  <div className="flex items-center gap-2 mb-3.5">
+                    <span className="text-sm">🎟️</span>
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Have a coupon?</h4>
+                  </div>
+                  <div className="flex gap-2.5">
                     <input 
                       type="text" 
-                      placeholder="Enter coupon code (FLAT10 / WELCOME20)" 
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-white transition-all uppercase placeholder-slate-400"
+                      placeholder="ENTER CODE (FLAT10 / WELCOME20)" 
+                      className="flex-1 bg-slate-50/80 border border-slate-200/80 rounded-2xl px-4 py-3 text-xs font-extrabold focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-500/10 transition-all uppercase placeholder-slate-400 tracking-wide"
                       id="couponCodeInput"
                     />
                     <button onClick={() => {
@@ -1401,12 +1349,88 @@ const CustomerMenu = () => {
                       } else {
                         toast.error('Invalid coupon code');
                       }
-                    }} className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl transition-all shadow-md shadow-orange-500/10 cursor-pointer select-none">Apply</button>
+                    }} className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs rounded-2xl transition-all shadow-md shadow-orange-500/10 hover:shadow-orange-500/20 active:scale-95 cursor-pointer select-none">
+                      Apply
+                    </button>
                   </div>
                   {appliedCoupon && (
-                    <div className="mt-3.5 bg-emerald-50/50 border border-dashed border-emerald-300 text-emerald-600 p-3 rounded-2xl text-[9.5px] font-black text-center uppercase tracking-wider relative">
+                    <div className="mt-4 bg-emerald-50 border border-dashed border-emerald-300 text-emerald-700 p-3.5 rounded-2xl text-[10px] font-black text-center uppercase tracking-wider relative flex items-center justify-center gap-1.5 animate-fade-in">
                       <div className="absolute top-1/2 -left-1.5 w-3 h-3 bg-[#F8FAFC] border-r border-slate-100 rounded-full -translate-y-1/2" />
                       <div className="absolute top-1/2 -right-1.5 w-3 h-3 bg-[#F8FAFC] border-l border-slate-100 rounded-full -translate-y-1/2" />
+                      🎉 Applied: {appliedCoupon.code} <span className="font-normal text-slate-400">|</span> <span className="text-emerald-600">Saved ₹{discount}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Trust Badges */}
+                <div className="bg-white rounded-[2.2rem] p-5.5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex justify-between text-center select-none">
+                  <div className="flex-1 flex flex-col items-center gap-1.5 group">
+                    <span className="text-2.5xl p-2 bg-blue-50/60 rounded-2xl group-hover:scale-110 transition-transform duration-300">🛡️</span>
+                    <span className="text-[10px] font-black text-slate-800">Safe & Secure</span>
+                    <span className="text-[7.5px] text-slate-400 font-extrabold uppercase tracking-wider">Payments</span>
+                  </div>
+                  <div className="w-px bg-slate-100/80 my-2" />
+                  <div className="flex-1 flex flex-col items-center gap-1.5 group">
+                    <span className="text-2.5xl p-2 bg-orange-50/60 rounded-2xl group-hover:scale-110 transition-transform duration-300">🛵</span>
+                    <span className="text-[10px] font-black text-slate-800">Fast Delivery</span>
+                    <span className="text-[7.5px] text-slate-400 font-extrabold uppercase tracking-wider">On Time</span>
+                  </div>
+                  <div className="w-px bg-slate-100/80 my-2" />
+                  <div className="flex-1 flex flex-col items-center gap-1.5 group">
+                    <span className="text-2.5xl p-2 bg-yellow-50/60 rounded-2xl group-hover:scale-110 transition-transform duration-300">🏆</span>
+                    <span className="text-[10px] font-black text-slate-800">Best Quality</span>
+                    <span className="text-[7.5px] text-slate-400 font-extrabold uppercase tracking-wider">Always</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Order Summary & Checkout */}
+              <div className="bg-gradient-to-br from-white via-white to-slate-50/20 rounded-[2.2rem] p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.015)] flex flex-col justify-between space-y-5">
+                <div>
+                  <div className="flex items-center gap-2 mb-4.5">
+                    <span className="text-sm">📋</span>
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Summary</h4>
+                  </div>
+                  <div className="space-y-3.5 border-b border-slate-100 pb-5">
+                    <div className="flex justify-between text-xs text-slate-500 font-bold">
+                      <span>Item Total</span>
+                      <span className="text-slate-800 font-black">₹{cartSubtotal}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-500 font-bold">
+                      <span>GST (5%)</span>
+                      <span className="text-slate-800 font-black">₹{finalGst}</span>
+                    </div>
+                    {appliedCoupon && (
+                      <div className="flex justify-between text-xs text-emerald-600 font-black">
+                        <span>Discount ({appliedCoupon.code})</span>
+                        <span>-₹{discount}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-center pt-4 text-xs font-black text-slate-900">
+                    <span className="text-sm font-black">Total Amount</span>
+                    <span className="text-xl text-orange-600 font-black tracking-tight">₹{finalTotal}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="mt-4 bg-emerald-50/60 border border-emerald-100 text-emerald-700 px-4 py-2.5 rounded-2xl text-[9px] font-black text-center uppercase tracking-wider">
+                      🎉 You saved ₹{discount} on this order
+                    </div>
+                  )}
+                </div>
+
+                <button onClick={() => setStage('confirm')}
+                  className="w-full py-4.5 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2xl text-xs shadow-lg shadow-orange-500/25 hover:shadow-orange-500/35 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-widest group">
+                  <span>Place Order</span>
+                  <span className="w-5 h-5 bg-white text-orange-600 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transform group-hover:translate-x-1 transition-transform duration-250">➔</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </>
+    );
+  };"absolute top-1/2 -right-1.5 w-3 h-3 bg-[#F8FAFC] border-l border-slate-100 rounded-full -translate-y-1/2" />
                       🎉 Applied: {appliedCoupon.code} (Saved ₹{discount})
                     </div>
                   )}
