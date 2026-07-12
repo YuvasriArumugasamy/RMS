@@ -366,8 +366,6 @@ const CustomerMenu = () => {
           </p>
         )}
 
-
-
         {cart.length > 0 && (
           <button
             onClick={() => { setVoiceOpen(false); setStage('cart'); }}
@@ -667,7 +665,7 @@ const CustomerMenu = () => {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-orange-600 leading-tight">
               {t.welcome}
             </h1>
-            <p className="mt-1.5 text-gray-500 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
+            <p className="mt-1.5 text-gray-550 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
           </div>
 
           <div className="mt-5 rounded-2xl bg-white shadow-sm border border-orange-50 py-4.5 px-4 text-center">
@@ -942,7 +940,7 @@ const CustomerMenu = () => {
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
               </svg>
             </button>
             <button
@@ -1024,7 +1022,7 @@ const CustomerMenu = () => {
                 </div>
 
                 <div className="flex items-center justify-between border-t border-slate-50 pt-3" onClick={e => e.stopPropagation()}>
-                  <div className="flex items-center gap-1.5 bg-slate-50/60 border border-slate-150/60 rounded-xl p-0.5 shadow-inner">
+                  <div className="flex items-center gap-1.5 bg-slate-50/60 border border-slate-155/60 rounded-xl p-0.5 shadow-inner">
                     <button 
                       onClick={() => {
                         const idx = cart.findIndex(ci => ci.id === item.id);
@@ -1157,19 +1155,29 @@ const CustomerMenu = () => {
     </>
   );
 
-  const renderFoodDetailsStage = () => {
+  const FoodDetailsStage = () => {
     const item = selectedFood;
     if (!item) return null;
 
     const handleAddToCart = () => {
-      for (let i = 0; i < detailsQty; i++) {
-        setCart(prev => {
-          const existing = prev.find(ci => ci.id === item.id);
-          if (existing) {
-            return prev.map(ci => ci.id === item.id ? { ...ci, qty: ci.qty + 1, customizations: detailsCustom } : ci);
-          }
-          return [...prev, { ...item, qty: 1, customizations: detailsCustom, specialNote: '' }];
-        });
+      // Find if item already in cart with same customizations
+      const existingIndex = cart.findIndex(ci => 
+        ci.id === item.id && 
+        JSON.stringify(ci.customizations || {}) === JSON.stringify(detailsCustom)
+      );
+
+      if (existingIndex > -1) {
+        const updated = [...cart];
+        updated[existingIndex].qty += detailsQty;
+        setCart(updated);
+      } else {
+        const cartItem = {
+          ...item,
+          qty: detailsQty,
+          customizations: detailsCustom,
+          specialNote: ''
+        };
+        setCart(prev => [...prev, cartItem]);
       }
       setStage('menu');
       toast.success(`🛒 Added ${detailsQty}x ${item.name} to cart!`);
@@ -1258,7 +1266,7 @@ const CustomerMenu = () => {
             {/* Quantity select & Buy Block */}
             <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">{t.qty}</span>
+                <span className="text-xs font-black text-slate-550 uppercase tracking-wider">{t.qty}</span>
                 <div className="flex items-center gap-3 bg-slate-100/75 rounded-2xl px-2.5 py-1">
                   <button onClick={() => setDetailsQty(p => Math.max(1, p - 1))}
                     className="w-7.5 h-7.5 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-extrabold flex items-center justify-center transition-all cursor-pointer">-</button>
@@ -1282,7 +1290,6 @@ const CustomerMenu = () => {
     );
   };
 
-  /* ── STAGE: CART ── */
   const CartStage = () => {
     const freeDeliveryThreshold = 200;
     const progressPercent = Math.min(100, Math.round((cartSubtotal / freeDeliveryThreshold) * 100));
@@ -1461,7 +1468,7 @@ const CustomerMenu = () => {
                       <span>Item Total</span>
                       <span className="text-slate-800 font-black">₹{cartSubtotal}</span>
                     </div>
-                    <div className="flex justify-between text-xs text-slate-500 font-bold">
+                    <div className="flex justify-between text-xs text-slate-555 font-bold">
                       <span>GST (5%)</span>
                       <span className="text-slate-800 font-black">₹{finalGst}</span>
                     </div>
@@ -1487,75 +1494,6 @@ const CustomerMenu = () => {
                   className="w-full py-4.5 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2xl text-xs shadow-lg shadow-orange-500/25 hover:shadow-orange-500/35 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-widest group">
                   <span>Place Order</span>
                   <span className="w-5 h-5 bg-white text-orange-600 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transform group-hover:translate-x-1 transition-transform duration-250">➔</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        )}
-      </>
-    );
-  };"absolute top-1/2 -right-1.5 w-3 h-3 bg-[#F8FAFC] border-l border-slate-100 rounded-full -translate-y-1/2" />
-                      🎉 Applied: {appliedCoupon.code} (Saved ₹{discount})
-                    </div>
-                  )}
-                </div>
-
-                {/* Trust Badges */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex justify-between text-center">
-                  <div className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-2xl">🛡️</span>
-                    <span className="text-[10px] font-black text-slate-800">Safe & Secure</span>
-                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Payments</span>
-                  </div>
-                  <div className="w-px bg-slate-100" />
-                  <div className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-2xl">🛵</span>
-                    <span className="text-[10px] font-black text-slate-800">Fast Delivery</span>
-                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">On Time</span>
-                  </div>
-                  <div className="w-px bg-slate-100" />
-                  <div className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-2xl">🏆</span>
-                    <span className="text-[10px] font-black text-slate-800">Best Quality</span>
-                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Always</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Order Summary & Checkout */}
-              <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-4">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Summary</h4>
-                <div className="space-y-2.5 border-b border-slate-100 pb-4">
-                  <div className="flex justify-between text-xs text-slate-500 font-semibold">
-                    <span>Item Total</span>
-                    <span>₹{cartSubtotal}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-500 font-semibold">
-                    <span>GST (5%)</span>
-                    <span>₹{finalGst}</span>
-                  </div>
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-xs text-emerald-600 font-black">
-                      <span>Discount ({appliedCoupon.code})</span>
-                      <span>-₹{discount}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex justify-between items-center text-xs font-black text-[#0B0F19]">
-                  <span className="text-sm">Total Amount</span>
-                  <span className="text-lg text-orange-600 font-black">₹{finalTotal}</span>
-                </div>
-                {appliedCoupon && (
-                  <div className="bg-emerald-50 border border-emerald-100 text-emerald-600 px-3.5 py-2 rounded-2xl text-[9px] font-black text-center uppercase tracking-wider">
-                    🎉 You saved ₹{discount} on this order
-                  </div>
-                )}
-
-                <button onClick={() => setStage('confirm')}
-                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
-                  <span>PLACE ORDER</span>
-                  <span className="w-5 h-5 bg-white text-orange-500 rounded-full flex items-center justify-center text-[10px] font-black">➔</span>
                 </button>
               </div>
             </div>
@@ -1682,7 +1620,7 @@ const CustomerMenu = () => {
             <p className="text-[10px] text-slate-400 font-bold mt-0.5">Track your order in real time</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setStage('callWaiter')} className="px-4 py-2 border border-slate-150 rounded-xl text-slate-650 text-xs font-black bg-white hover:bg-slate-50 transition-all shadow-sm cursor-pointer">
+            <button onClick={() => setStage('callWaiter')} className="px-4 py-2 border border-slate-155 rounded-xl text-slate-655 text-xs font-black bg-white hover:bg-slate-50 transition-all shadow-sm cursor-pointer">
               Need Help?
             </button>
             <div className="px-3.5 py-2 bg-white border border-slate-155 rounded-xl flex items-center gap-1.5 text-xs font-black text-slate-800 shadow-sm">
@@ -1718,9 +1656,8 @@ const CustomerMenu = () => {
                       <div className={`absolute -left-[35px] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all z-10 ${
                         isCurrent 
                           ? 'bg-orange-500 scale-110 shadow-orange-500/20 text-white' 
-                          : isPast 
-                            ? 'bg-emerald-500 text-white' 
-                            : 'bg-slate-200 text-slate-400'
+                          : 'bg-emerald-500 text-white' 
+                          : 'bg-slate-200 text-slate-400'
                       }`}>
                         {isCurrent && (
                           <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping scale-125 pointer-events-none" />
@@ -1736,9 +1673,8 @@ const CustomerMenu = () => {
                       <div className={`flex-1 p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
                         isCurrent 
                           ? 'border-orange-200 bg-orange-50/10 shadow-sm' 
-                          : isPast 
-                            ? 'border-slate-100 bg-slate-50/30' 
-                            : 'border-slate-100/50 bg-white opacity-40'
+                          : 'border-slate-100 bg-slate-50/30' 
+                          : 'border-slate-100/50 bg-white opacity-40'
                       }`}>
                         <div>
                           <div className="flex items-center gap-2">
@@ -1800,7 +1736,7 @@ const CustomerMenu = () => {
                 <span className="text-xl shrink-0">🛡️</span>
                 <div>
                   <h4 className="text-[11px] font-black uppercase tracking-wider mb-0.5">Your order is safe!</h4>
-                  <p className="text-[10px] text-blue-700 font-semibold leading-relaxed">We do not share your physical location and use high encryption protocols.</p>
+                  <p className="text-[10px] text-blue-750 font-semibold leading-relaxed">We do not share your physical location and use high encryption protocols.</p>
                 </div>
               </div>
 
@@ -1869,7 +1805,7 @@ const CustomerMenu = () => {
 
           <div className="space-y-2.5 mb-4">
             {(order?.items || cart).map((item, i) => (
-              <div key={i} className="flex justify-between text-xs font-semibold text-slate-650">
+              <div key={i} className="flex justify-between text-xs font-semibold text-slate-655">
                 <span>{item.qty}x {item.name}</span>
                 <span>₹{item.price * item.qty}</span>
               </div>
@@ -1937,7 +1873,7 @@ const CustomerMenu = () => {
         <div className="flex flex-col items-center justify-center p-8 max-w-sm mx-auto select-none pt-12">
           {!waiterRequested ? (
             <div className="text-center space-y-6">
-              <div className="w-28 h-28 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 border-2 border-blue-100 rounded-full flex items-center justify-center mx-auto shadow-xl relative animate-pulse">
+              <div className="w-28 h-28 bg-gradient-to-br from-blue-500/10 to-indigo-650/10 border-2 border-blue-100 rounded-full flex items-center justify-center mx-auto shadow-xl relative animate-pulse">
                 <span className="text-5xl relative z-10">🙋</span>
                 <span className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping" />
               </div>
@@ -2603,7 +2539,7 @@ const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, set
             className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all duration-300 cursor-pointer relative ${
               isActive 
                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 scale-105 font-black' 
-                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'
+                : 'text-slate-400 hover:text-slate-650 hover:bg-slate-50/50'
             }`}
           >
             <div className="relative">
@@ -2785,7 +2721,190 @@ const AppShell = ({
         <div className="relative bg-slate-900/60 rounded-3xl p-4 overflow-hidden border border-slate-800/80 mt-auto select-none flex flex-col gap-2.5">
           <div>
             <p className="text-amber-500 font-black text-xs">Today's Special</p>
-            <p className="text-slate-305 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
+            <p className="text-slate-300 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
+          </div>
+          
+          <div className="relative mt-1 h-24 rounded-2xl overflow-hidden group">
+            <img 
+              src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80" 
+              alt="Special Dish" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            
+            <button 
+              onClick={() => setStage('offers')} 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-[9px] font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest cursor-pointer whitespace-nowrap"
+            >
+              ORDER NOW
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  /* Main Content Area */
+  return (
+    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+      {/* Desktop Left Sidebar */}
+      <aside className="hidden lg:flex flex-col w-72 bg-[#0B0F19] text-white p-6 justify-between shrink-0 select-none">
+        <div className="space-y-8">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl">👨‍🍳</div>
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+                Resto <span className="text-[9px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded">QR</span>
+              </h2>
+              <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">Delicious Food</p>
+            </div>
+          </div>
+
+          {/* Navigation links */}
+          <nav className="space-y-1 select-none">
+            {[
+              { 
+                id: 'menu', 
+                label: t.menu || 'Menu', 
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'cart', 
+                label: t.cart || 'Cart', 
+                badge: cart.length,
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'tracking', 
+                label: t.orders || 'Orders', 
+                badge: placedOrders.length,
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'favorites', 
+                label: 'Favorites', 
+                badge: favorites.length,
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                  </svg>
+                ) 
+              },
+              { 
+                id: 'feedback', 
+                label: t.profile || 'Profile', 
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                ) 
+              },
+            ].map(item => {
+              const isActive = (item.id === 'favorites')
+                ? (activeCategory === 'Favorites' && stage === 'menu')
+                : ((item.id === 'menu' && activeCategory !== 'Favorites') 
+                    ? (stage === 'menu') 
+                    : (stage === item.id || (item.id === 'tracking' && stage === 'tracking') || (item.id === 'feedback' && stage === 'feedback')));
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'tracking' && placedOrders.length > 0) setStage('tracking');
+                    else if (item.id === 'feedback') setStage('feedback');
+                    else if (item.id === 'favorites') {
+                      setActiveCategory('Favorites');
+                      setStage('menu');
+                    } else {
+                      if (item.id === 'menu' && activeCategory === 'Favorites') {
+                        setActiveCategory('All');
+                      }
+                      setStage(item.id);
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    isActive 
+                      ? 'bg-orange-500 text-white shadow-md scale-105' 
+                      : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge > 0 && (
+                    <span className="bg-[#f97316] text-white text-[10px] font-bold rounded-full h-5.5 w-5.5 flex items-center justify-center shadow-md animate-bounce">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+
+            <div className="h-px bg-white/10 my-4" />
+
+            {[
+              {
+                id: 'offers',
+                label: t.offersForYou || 'Offers',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.43 1.43 0 002.022 0l4.318-4.318a1.43 1.43 0 000-2.022L10.16 3.659A2.25 2.25 0 009.568 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+                  </svg>
+                )
+              },
+              {
+                id: 'help',
+                label: 'Help & Support',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                  </svg>
+                )
+              }
+            ].map(item => {
+              const isActive = stage === item.id || (item.id === 'help' && stage === 'support');
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'offers') setStage('offers');
+                    else if (item.id === 'help') setStage('support');
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    isActive 
+                      ? 'bg-orange-500 text-white shadow-md' 
+                      : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom special item */}
+        <div className="relative bg-slate-900/60 rounded-3xl p-4 overflow-hidden border border-slate-800/80 mt-auto select-none flex flex-col gap-2.5">
+          <div>
+            <p className="text-amber-500 font-black text-xs">Today's Special</p>
+            <p className="text-slate-300 text-[10px] mt-0.5 leading-relaxed">Get 20% OFF on your first order!</p>
           </div>
           
           <div className="relative mt-1 h-24 rounded-2xl overflow-hidden group">
