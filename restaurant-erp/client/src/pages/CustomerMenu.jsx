@@ -1217,7 +1217,72 @@ const CustomerMenu = () => {
               <p className="text-[11px] text-slate-400 leading-relaxed pt-3 border-t border-slate-50">
                 {item.description || 'Prepared fresh with high quality organic ingredients, seasoned to absolute deliciousness.'}
               </p>
-            </  /* ── STAGE: CART ── */
+            </div>
+
+            <div className="bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm space-y-4">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.customize}</h4>
+              <div className="space-y-2.5">
+                {[
+                  { key: 'extraCheese', label: t.extraCheese, price: '₹50', icon: '🧀' },
+                  { key: 'noOnion', label: t.noOnion, price: '₹0', icon: '🧅' },
+                  { key: 'spicy', label: t.spicy, price: '₹0', icon: '🌶️' },
+                ].map(opt => {
+                  const isChecked = detailsCustom[opt.key];
+                  return (
+                    <div key={opt.key} onClick={() => setDetailsCustom(p => ({ ...p, [opt.key]: !p[opt.key] }))}
+                      className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.98] select-none ${
+                        isChecked 
+                          ? 'border-orange-500 bg-orange-50/20 shadow-sm' 
+                          : 'border-slate-150 bg-slate-50/30 hover:bg-slate-50/70'
+                      }`}>
+                      <div className="flex items-center gap-3.5">
+                        <span className="text-base">{opt.icon}</span>
+                        <span className={`text-xs font-bold transition-colors ${isChecked ? 'text-slate-800' : 'text-slate-600'}`}>{opt.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {opt.price !== '₹0' && (
+                          <span className="text-[10px] font-black text-slate-400 bg-slate-100/50 border border-slate-200 px-2 py-0.5 rounded-lg">{opt.price}</span>
+                        )}
+                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                          isChecked ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-white'
+                        }`}>
+                          {isChecked && <span className="text-[9px] font-black">✓</span>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quantity select & Buy Block */}
+            <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">{t.qty}</span>
+                <div className="flex items-center gap-3 bg-slate-100/75 rounded-2xl px-2.5 py-1">
+                  <button onClick={() => setDetailsQty(p => Math.max(1, p - 1))}
+                    className="w-7.5 h-7.5 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-extrabold flex items-center justify-center transition-all cursor-pointer">-</button>
+                  <span className="text-sm font-black text-slate-800 w-5 text-center">{detailsQty}</span>
+                  <button onClick={() => setDetailsQty(p => p + 1)}
+                    className="w-7.5 h-7.5 rounded-xl bg-orange-500 text-white shadow-md font-extrabold flex items-center justify-center transition-all cursor-pointer">+</button>
+                </div>
+              </div>
+
+              <button onClick={handleAddToCart}
+                className="w-full sm:w-auto px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all uppercase tracking-widest active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <span>{t.addToCart}</span>
+                <span>|</span>
+                <span>₹{item.price * detailsQty}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  /* ── STAGE: CART ── */
   const CartStage = () => {
     const freeDeliveryThreshold = 200;
     const progressPercent = Math.min(100, Math.round((cartSubtotal / freeDeliveryThreshold) * 100));
