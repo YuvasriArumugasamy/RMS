@@ -1656,8 +1656,9 @@ const CustomerMenu = () => {
                       <div className={`absolute -left-[35px] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all z-10 ${
                         isCurrent 
                           ? 'bg-orange-500 scale-110 shadow-orange-500/20 text-white' 
-                          : 'bg-emerald-500 text-white' 
-                          : 'bg-slate-200 text-slate-400'
+                          : isPast 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-slate-200 text-slate-400'
                       }`}>
                         {isCurrent && (
                           <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping scale-125 pointer-events-none" />
@@ -1673,8 +1674,9 @@ const CustomerMenu = () => {
                       <div className={`flex-1 p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
                         isCurrent 
                           ? 'border-orange-200 bg-orange-50/10 shadow-sm' 
-                          : 'border-slate-100 bg-slate-50/30' 
-                          : 'border-slate-100/50 bg-white opacity-40'
+                          : isPast 
+                            ? 'border-slate-100 bg-slate-50/30' 
+                            : 'border-slate-100/50 bg-white opacity-40'
                       }`}>
                         <div>
                           <div className="flex items-center gap-2">
