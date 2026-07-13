@@ -1614,16 +1614,16 @@ const CustomerMenu = () => {
 
     return (
       <>
-        <div className="flex items-center justify-between mb-6 select-none">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 select-none bg-white p-5 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
           <div>
-            <h2 className="text-xl font-black text-slate-800">{t.orderStatus}</h2>
-            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Track your order in real time</p>
+            <h2 className="text-xl font-black text-slate-800 tracking-tight">{t.orderStatus}</h2>
+            <p className="text-[11px] text-slate-400 font-bold mt-0.5">Track your order in real time</p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setStage('callWaiter')} className="px-4 py-2 border border-slate-155 rounded-xl text-slate-655 text-xs font-black bg-white hover:bg-slate-50 transition-all shadow-sm cursor-pointer">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button onClick={() => setStage('callWaiter')} className="flex-1 sm:flex-none px-5 py-2.5 border border-slate-200 rounded-2xl text-slate-600 text-xs font-black bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm cursor-pointer active:scale-95">
               Need Help?
             </button>
-            <div className="px-3.5 py-2 bg-white border border-slate-155 rounded-xl flex items-center gap-1.5 text-xs font-black text-slate-800 shadow-sm">
+            <div className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-1.5 text-xs font-black text-slate-800 shadow-inner">
               <span className="text-slate-400 font-bold">ID:</span>
               <span className="font-mono text-orange-600">{latest?.orderId || latest?.id || '#ORD1234'}</span>
             </div>
@@ -1642,8 +1642,23 @@ const CustomerMenu = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Timeline on left (spans 2 cols) */}
-            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-6">
-              <div className="relative pl-6 border-l-2 border-slate-100 ml-3 space-y-6">
+            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.012)]">
+              <div className="relative pl-8 space-y-8 py-2">
+                {/* Static background track */}
+                <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-100" />
+                
+                {/* Active progress track */}
+                {(() => {
+                  const currentStep = STATUS_META[latest.status]?.step || 1;
+                  const percent = ((currentStep - 1) / 3) * 100;
+                  return (
+                    <div 
+                      className="absolute left-[15px] top-4 w-0.5 bg-gradient-to-b from-emerald-500 to-orange-550 transition-all duration-500" 
+                      style={{ height: `calc(${percent}% - 2px)` }}
+                    />
+                  );
+                })()}
+
                 {['Pending', 'Preparing', 'Ready', 'Served'].map((status) => {
                   const meta = STATUS_META[status];
                   const isCurrent = latest.status === status;
@@ -1651,32 +1666,32 @@ const CustomerMenu = () => {
                   const isActive = isCurrent || isPast;
                   
                   return (
-                    <div key={status} className="relative flex gap-4 items-start">
+                    <div key={status} className="relative flex gap-5 items-start">
                       {/* Dot indicator */}
-                      <div className={`absolute -left-[35px] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all z-10 ${
+                      <div className={`absolute -left-[37px] w-6 h-6 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all duration-300 z-10 ${
                         isCurrent 
-                          ? 'bg-orange-500 scale-110 shadow-orange-500/20 text-white' 
+                          ? 'bg-orange-500 scale-110 shadow-lg shadow-orange-500/20 text-white' 
                           : isPast 
-                            ? 'bg-emerald-500 text-white' 
-                            : 'bg-slate-200 text-slate-400'
+                            ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' 
+                            : 'bg-slate-205 text-slate-400'
                       }`}>
                         {isCurrent && (
-                          <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping scale-125 pointer-events-none" />
+                          <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping scale-150 pointer-events-none" />
                         )}
                         {isPast ? (
-                          <span className="text-xs font-black">✓</span>
+                          <span className="text-[10px] font-black">✓</span>
                         ) : (
                           <span className="w-1.5 h-1.5 bg-white rounded-full" />
                         )}
                       </div>
 
                       {/* Card */}
-                      <div className={`flex-1 p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
+                      <div className={`flex-1 p-4.5 rounded-3xl border-2 transition-all duration-300 flex items-center justify-between gap-4 ${
                         isCurrent 
-                          ? 'border-orange-200 bg-orange-50/10 shadow-sm' 
+                          ? 'border-orange-500/30 bg-orange-50/15 shadow-[0_10px_25px_rgba(249,115,22,0.06)]' 
                           : isPast 
-                            ? 'border-slate-100 bg-slate-50/30' 
-                            : 'border-slate-100/50 bg-white opacity-40'
+                            ? 'border-emerald-500/10 bg-emerald-50/5' 
+                            : 'border-slate-100 bg-white opacity-60'
                       }`}>
                         <div>
                           <div className="flex items-center gap-2">
@@ -1684,18 +1699,18 @@ const CustomerMenu = () => {
                               {meta.label}
                             </h3>
                             {isCurrent && (
-                              <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping" />
+                              <span className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse border border-white" />
                             )}
                           </div>
-                          <p className={`text-[11px] mt-1 ${isActive ? 'text-slate-500' : 'text-slate-400'} font-semibold`}>
+                          <p className={`text-[10.5px] mt-1 ${isActive ? 'text-slate-500' : 'text-slate-400'} font-semibold`}>
                             {isCurrent ? meta.desc : isPast ? 'Completed successfully' : 'Pending status'}
                           </p>
                         </div>
                         
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{meta.icon}</span>
+                          <span className="text-xl">{meta.icon}</span>
                           {isPast && (
-                            <span className="text-[9px] bg-emerald-100 text-emerald-600 font-extrabold px-2.5 py-0.5 rounded-full">Completed</span>
+                            <span className="text-[8px] bg-emerald-100/60 text-emerald-600 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200/30 uppercase tracking-wider">Done</span>
                           )}
                         </div>
                       </div>
