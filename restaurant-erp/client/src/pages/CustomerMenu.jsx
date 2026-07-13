@@ -144,6 +144,7 @@ const CustomerMenu = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // grid | list
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sortBy, setSortBy] = useState('Popular');
@@ -209,6 +210,97 @@ const CustomerMenu = () => {
     }
   }, [stage]);
 
+  const handleRazorpayPayment = async (order) => {
+    if (!order || isProcessingPayment) return;
+    if (typeof window.Razorpay === 'undefined') {
+      toast.error('Razorpay SDK failed to load. Please check your internet connection or reload the page.');
+      return;
+    }
+    setIsProcessingPayment(true);
+    try {
+      // 1. Fetch Razorpay config
+      const configRes = await axios.get(`${API_URL}/payments/config`);
+      if (!configRes.data.success) {
+        throw new Error('Could not load payment configuration.');
+      }
+      const keyId = configRes.data.keyId;
+
+      // 2. Create order on backend
+      const createRes = await axios.post(`${API_URL}/payments/create-order`, {
+        orderId: order._id || order.id,
+      });
+
+      if (!createRes.data.success) {
+        throw new Error(createRes.data.message || 'Could not initiate payment.');
+      }
+
+      const rzpOrder = createRes.data.data;
+
+      // 3. Configure Razorpay options
+      const options = {
+        key: keyId,
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency,
+        name: 'Restaurant ERP',
+        description: `Order #${order.orderId || order._id}`,
+        order_id: rzpOrder.id,
+        handler: async function (response) {
+          try {
+            toast.info('Verifying payment signature...');
+            const verifyRes = await axios.post(`${API_URL}/payments/verify-payment`, {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: order._id || order.id,
+            });
+
+            if (verifyRes.data.success) {
+              const updatedOrder = { 
+                ...order, 
+                billingStatus: 'Paid', 
+                status: 'Completed',
+                paymentMethod: verifyRes.data.data.paymentMethod || 'UPI',
+                paidAt: verifyRes.data.data.paidAt
+              };
+              
+              setPlacedOrders(prev => prev.map(o => 
+                String(o._id || o.id) === String(order._id || order.id) ? updatedOrder : o
+              ));
+              setSelectedOrder(updatedOrder);
+              
+              toast.success('🎉 Payment successful! Thank you.');
+            } else {
+              toast.error('❌ Signature verification failed.');
+            }
+          } catch (verifyErr) {
+            console.error('Verify payment error:', verifyErr);
+            toast.error('❌ Error verifying payment: ' + (verifyErr.response?.data?.message || verifyErr.message));
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+        prefill: {
+          name: 'Customer',
+          contact: order.customerPhone || '',
+        },
+        theme: {
+          color: '#F97316',
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error('Razorpay initialization error:', err);
+      toast.error('❌ Payment Error: ' + (err.response?.data?.message || err.message));
+      setIsProcessingPayment(false);
+    }
+  };
 
   const voiceSupported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
@@ -414,9 +506,11 @@ const CustomerMenu = () => {
     socket.on('connect', () => socket.emit('join-table', tableInfo.name));
 
     socket.on('order-status-update', (update) => {
-      setPlacedOrders(prev => prev.map(o =>
-        String(o._id || o.id) === String(update.id || update._id) ? { ...o, status: update.status } : o
-      ));
+      const updateOrder = o => String(o._id || o.id) === String(update.id || update._id)
+        ? { ...o, status: update.status, billingStatus: update.billingStatus || o.billingStatus }
+        : o;
+      setPlacedOrders(prev => prev.map(updateOrder));
+      setSelectedOrder(prev => prev ? updateOrder(prev) : null);
     });
 
     return () => socket.disconnect();
@@ -1847,6 +1941,8 @@ const CustomerMenu = () => {
   /* ── STAGE: BILL ── */
   const BillStage = () => {
     const order = selectedOrder || placedOrders[0];
+    const isPaid = order?.billingStatus === 'Paid';
+
     return (
       <>
         <div className="flex items-center gap-3.5 mb-6 select-none">
@@ -1855,7 +1951,7 @@ const CustomerMenu = () => {
           </button>
           <div>
             <h2 className="text-base font-black text-slate-800 leading-tight">{t.billSummary}</h2>
-            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Review summary and cashier billing instructions</p>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Review summary and checkout options</p>
           </div>
         </div>
 
@@ -1870,6 +1966,11 @@ const CustomerMenu = () => {
             <h3 className="text-base font-black text-slate-800">Payment Invoice</h3>
             <p className="text-[9px] text-slate-400 font-extrabold uppercase mt-1">ID: {order?.orderId || order?.id || '#ORD1234'}</p>
             <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{order?.date || fmtDate()} · {order?.timestamp || fmtTime()}</p>
+            {isPaid && (
+              <span className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-250 text-[9px] font-black uppercase tracking-wider rounded-full shadow-sm animate-pulse">
+                <span>●</span> Paid Online
+              </span>
+            )}
           </div>
 
           <div className="space-y-2.5 mb-4">
@@ -1894,11 +1995,41 @@ const CustomerMenu = () => {
             <span className="text-orange-600 text-lg font-black">₹{order?.total || finalTotal}</span>
           </div>
 
-          <div className="bg-[#0B0F19] text-white rounded-2.5rem p-5 text-center shadow-lg">
-            <span className="text-3xl mb-2.5 block select-none">💳</span>
-            <p className="text-[10px] font-black uppercase tracking-widest text-orange-400 mb-1">{t.payAtCashier}</p>
-            <p className="text-[10px] text-slate-400 font-medium">{t.thankYou}</p>
-          </div>
+          {isPaid ? (
+            <div className="bg-emerald-50/70 border border-emerald-100 text-emerald-800 rounded-2.5rem p-5 text-center shadow-md animate-fade-in">
+              <span className="text-3xl mb-2.5 block select-none">🎉</span>
+              <p className="text-[11px] font-black uppercase tracking-widest text-emerald-700 mb-1">Payment Successful</p>
+              <p className="text-[10px] text-emerald-600 font-semibold mb-2">We have received your payment of ₹{order?.total || finalTotal}.</p>
+              <p className="text-[9px] text-slate-400 font-medium">Method: {order?.paymentMethod || 'Online UPI'} · {order?.paidAt ? new Date(order.paidAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : fmtTime()}</p>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {/* Razorpay Online Payment Button */}
+              <button
+                onClick={() => handleRazorpayPayment(order)}
+                disabled={isProcessingPayment}
+                className="w-full py-4.5 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2.5rem text-xs shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-extrabold"
+              >
+                {isProcessingPayment ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Processing Payment...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Pay Online Now</span>
+                    <span className="w-5 h-5 bg-white text-orange-600 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm">💳</span>
+                  </>
+                )}
+              </button>
+
+              {/* Pay at Cashier Alternative */}
+              <div className="bg-[#0B0F19] text-white rounded-2.5rem p-4 text-center shadow-md border border-slate-800">
+                <p className="text-[9px] font-black uppercase tracking-widest text-orange-400 mb-0.5">Or Pay at Cashier</p>
+                <p className="text-[9.5px] text-slate-400 font-medium">You can also pay with cash / card at the billing counter.</p>
+              </div>
+            </div>
+          )}
 
           <button onClick={() => setStage('feedback')} className="w-full mt-5 py-4 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] cursor-pointer">
             ⭐ SUBMIT FEEDBACK

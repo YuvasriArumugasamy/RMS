@@ -255,13 +255,24 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
 
     // 🔌 Emit billing update
     const io = req.app.get('io');
-    if (io) io.to('staff').emit('billing-update', {
-      id: order._id,
-      orderId: order.orderId,
-      billingStatus: 'Paid',
-      paymentMethod: order.paymentMethod,
-      paidAt: order.paidAt,
-    });
+    if (io) {
+      io.to('staff').emit('billing-update', {
+        id: order._id,
+        orderId: order.orderId,
+        billingStatus: 'Paid',
+        paymentMethod: order.paymentMethod,
+        paidAt: order.paidAt,
+      });
+
+      if (order.table && order.table !== 'N/A') {
+        io.to(`table-${order.table}`).emit('order-status-update', {
+          id: order._id,
+          orderId: order.orderId,
+          status: order.status,
+          billingStatus: order.billingStatus,
+        });
+      }
+    }
 
     res.json({ success: true, data: order });
   } catch (err) {
