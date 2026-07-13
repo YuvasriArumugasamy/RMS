@@ -10,6 +10,8 @@ import bannerBgImage from '../assets/ChatGPT Image Jul 10, 2026, 06_08_46 PM.png
 import scanStepImg from '../assets/Screenshot 2026-07-11 201657.png';
 import orderStepImg from '../assets/Screenshot 2026-07-11 201635.png';
 import enjoyStepImg from '../assets/Screenshot 2026-07-11 201920.png';
+import chefImage from '../assets/image.png';
+
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -1301,9 +1303,9 @@ const CustomerMenu = () => {
   };
 
   const CartStage = () => {
-    const freeDeliveryThreshold = 200;
-    const progressPercent = Math.min(100, Math.round((cartSubtotal / freeDeliveryThreshold) * 100));
-    const neededAmount = Math.max(0, freeDeliveryThreshold - cartSubtotal);
+    const freeDessertThreshold = 200;
+    const progressPercent = Math.min(100, Math.round((cartSubtotal / freeDessertThreshold) * 100));
+    const neededAmount = Math.max(0, freeDessertThreshold - cartSubtotal);
 
     return (
       <>
@@ -1331,7 +1333,7 @@ const CustomerMenu = () => {
           </div>
         ) : (
           <div className="space-y-6 pb-20">
-            {/* Free Delivery Bar */}
+            {/* Free Dessert Progress Bar */}
             <div className="bg-gradient-to-br from-orange-50/80 via-white to-amber-50/30 border border-orange-100 rounded-3xl p-5 flex items-center justify-between gap-5 shadow-[0_8px_30px_rgba(251,146,60,0.04)] select-none transition-all duration-300 hover:shadow-[0_8px_30px_rgba(251,146,60,0.08)]">
               <div className="flex-1 space-y-2.5">
                 <div className="flex items-center gap-2">
@@ -1341,8 +1343,8 @@ const CustomerMenu = () => {
                   </span>
                   <p className="text-[11.5px] text-slate-800 font-extrabold tracking-wide">
                     {neededAmount > 0 
-                      ? <>Add items worth <span className="text-orange-600 font-black">₹{neededAmount}</span> more to get <span className="text-orange-600 font-black">FREE delivery</span>!</>
-                      : '🎉 You qualify for FREE delivery!'}
+                      ? <>Add items worth <span className="text-orange-600 font-black">₹{neededAmount}</span> more to get a <span className="text-orange-600 font-black">FREE Dessert</span>!</>
+                      : '🎉 You qualify for a FREE Dessert!'}
                   </p>
                 </div>
                 <div className="relative w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-[2px]">
@@ -1353,10 +1355,12 @@ const CustomerMenu = () => {
                 </div>
                 <div className="flex justify-between items-center text-[9px] text-slate-400 font-black uppercase tracking-wider">
                   <span>₹{cartSubtotal} Spent</span>
-                  <span>Goal: ₹{freeDeliveryThreshold}</span>
+                  <span>Goal: ₹{freeDessertThreshold}</span>
                 </div>
               </div>
-              <div className="text-4xl bg-orange-500/10 p-3 rounded-2xl animate-bounce">🛵</div>
+              <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden p-1.5 animate-bounce shadow-inner">
+                <img src={chefImage} alt="Chef" className="w-full h-full object-cover rounded-xl" />
+              </div>
             </div>
 
             {/* Cart Items List */}
@@ -1455,9 +1459,9 @@ const CustomerMenu = () => {
                   </div>
                   <div className="w-px bg-slate-100/80 my-2" />
                   <div className="flex-1 flex flex-col items-center gap-1.5 group">
-                    <span className="text-2.5xl p-2 bg-orange-50/60 rounded-2xl group-hover:scale-110 transition-transform duration-300">🛵</span>
-                    <span className="text-[10px] font-black text-slate-800">Fast Delivery</span>
-                    <span className="text-[7.5px] text-slate-400 font-extrabold uppercase tracking-wider">On Time</span>
+                    <span className="text-2.5xl p-2 bg-orange-50/60 rounded-2xl group-hover:scale-110 transition-transform duration-300">⚡</span>
+                    <span className="text-[10px] font-black text-slate-800">Quick Service</span>
+                    <span className="text-[7.5px] text-slate-400 font-extrabold uppercase tracking-wider">To Table</span>
                   </div>
                   <div className="w-px bg-slate-100/80 my-2" />
                   <div className="flex-1 flex flex-col items-center gap-1.5 group">
