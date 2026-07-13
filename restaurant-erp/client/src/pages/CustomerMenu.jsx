@@ -2605,10 +2605,10 @@ const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, set
                 setStage(item.id);
               }
             }}
-            className={`flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl transition-all duration-300 cursor-pointer relative ${
+            className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-xl transition-all duration-300 cursor-pointer relative ${
               isActive 
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 scale-105 font-black' 
-                : 'text-slate-400 hover:text-slate-650 hover:bg-slate-50/50'
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/15 font-black scale-102' 
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'
             }`}
           >
             <div className="relative">
