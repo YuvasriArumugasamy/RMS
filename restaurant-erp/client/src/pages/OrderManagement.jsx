@@ -564,7 +564,23 @@ const OrderManagement = () => {
                       
                       <div className="h-20 w-full flex items-center justify-center mb-3.5 overflow-hidden rounded-2xl bg-white border border-slate-100/50 group-hover:scale-105 transition-transform duration-300">
                         <MenuItemImage src={item.image} alt={item.name}
-                          imgClassName="h-20 w-full object-contain rou      {/* ── HISTORY TAB ── */}
+                          imgClassName="h-20 w-full object-contain rounded-2xl p-1 bg-white"
+                          emojiClassName="text-4xl" />
+                      </div>
+                      <div className="space-y-1.5 w-full">
+                        <h4 className="font-extrabold text-slate-800 text-xs truncate max-w-[130px] mx-auto" title={item.name}>{item.name}</h4>
+                        <p className="text-[10.5px] text-slate-500 font-extrabold">₹{item.price}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── HISTORY TAB ── */}
       {activeTab === 'history' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center bg-white p-5 rounded-3xl border border-slate-100/80 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
