@@ -564,109 +564,143 @@ const OrderManagement = () => {
                       
                       <div className="h-20 w-full flex items-center justify-center mb-3.5 overflow-hidden rounded-2xl bg-white border border-slate-100/50 group-hover:scale-105 transition-transform duration-300">
                         <MenuItemImage src={item.image} alt={item.name}
-                          imgClassName="h-20 w-full object-contain rounded-2xl p-1 bg-white"
-                          emojiClassName="text-4xl" />
-                      </div>
-                      <div className="space-y-1.5 w-full">
-                        <h4 className="font-extrabold text-slate-800 text-xs truncate max-w-[130px] mx-auto" title={item.name}>{item.name}</h4>
-                        <p className="text-[10.5px] text-slate-500 font-extrabold">₹{item.price}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── HISTORY TAB ── */}
+                          imgClassName="h-20 w-full object-contain rou      {/* ── HISTORY TAB ── */}
       {activeTab === 'history' && (
-        <div className="bg-white rounded-3xl shadow-[0_4px_25px_rgba(0,0,0,0.012)] border border-slate-100 p-5 space-y-6">
-          <h3 className="text-base font-extrabold text-slate-850">Historical & Active Orders</h3>
-          <div className="overflow-x-auto -mx-5 px-5">
-            <table className="w-full text-left min-w-[750px]">
-              <thead>
-                <tr className="text-slate-400 text-[10px] font-black uppercase tracking-wider border-b border-slate-100">
-                  <th className="pb-3.5">Order ID</th>
-                  <th className="pb-3.5">Date & Time</th>
-                  <th className="pb-3.5">Type</th>
-                  <th className="pb-3.5">Items</th>
-                  <th className="pb-3.5">Waiter</th>
-                  <th className="pb-3.5">Total</th>
-                  <th className="pb-3.5">Status</th>
-                  <th className="pb-3.5">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs">
-                {loading ? (
-                  Array.from({ length: 4 }).map((_, i) => <SkeletonTableRow key={i} cols={8} />)
-                ) : orders.length === 0 ? (
-                  <tr><td colSpan="8" className="text-center text-slate-400 py-14 font-extrabold bg-slate-50/50 rounded-2xl">No order history available.</td></tr>
-                ) : (
-                  orders.map(o => {
-                    const id = o._id || o.id;
-                    const canEdit   = o.status === 'Pending';
-                    const canCancel = !['Completed', 'Cancelled'].includes(o.status);
-                    return (
-                      <tr key={id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/35 transition-colors">
-                        <td className="py-4 font-extrabold text-slate-800">{o.orderId || id}</td>
-                        <td className="py-4 font-bold text-slate-505 text-[11px]">{o.date} {o.timestamp || new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                        <td className="py-4 font-bold text-slate-505 text-[11px]">{o.type} {o.table !== 'N/A' && `(${o.table})`}</td>
-                        <td className="py-4 font-bold text-slate-505 text-[11px] max-w-xs truncate">{o.items?.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
-                        <td className="py-4 text-[11px]">
-                          {o.waiterName
-                            ? <span className="font-extrabold text-indigo-655 bg-indigo-50/60 px-2 py-0.5 rounded-lg border border-indigo-100/50">👤 {o.waiterName}</span>
-                            : <span className="text-slate-350 font-bold">—</span>}
-                        </td>
-                        <td className="py-4 font-black text-slate-800 text-[11px]">₹{o.total}</td>
-                        <td className="py-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${statusClass(o.status)}`}>{o.status}</span>
-                        </td>
-                        <td className="py-4">
-                          <div className="flex gap-2">
-                            {/* ✅ Serve button — Ready only */}
-                            {o.status === 'Ready' && (
-                              <button onClick={async () => {
-                                try {
-                                  await api.put(`/orders/${id}/status`, { status: 'Served' });
-                                  setOrders(prev => prev.map(order => (order._id || order.id) === id ? { ...order, status: 'Served' } : order));
-                                  toast.success(`🍽️ Order marked as served!`);
-                                } catch {
-                                  toast.error("Failed to update status.");
-                                }
-                              }}
-                                className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-150 hover:bg-emerald-100 transition-all cursor-pointer">
-                                🛎️ Serve
-                              </button>
-                            )}
-                            {/* ✅ Edit button — Pending only */}
-                            {canEdit && (
-                              <button onClick={() => openEditModal(o)}
-                                className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-amber-50 text-amber-650 border border-amber-155 hover:bg-amber-100 transition-all cursor-pointer">
-                                ✏️ Edit
-                              </button>
-                            )}
-                            {/* ✅ Cancel button */}
-                            {canCancel && (
-                              <button onClick={() => cancelOrder(o)}
-                                disabled={cancellingId === id}
-                                className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-red-50 text-red-505 border border-red-155 hover:bg-red-100 transition-all disabled:opacity-50 cursor-pointer">
-                                {cancellingId === id ? '...' : '🚫 Cancel'}
-                              </button>
-                            )}
-                            {!canEdit && !canCancel && o.status !== 'Ready' && (
-                              <span className="text-[11px] text-slate-350 font-bold">—</span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center bg-white p-5 rounded-3xl border border-slate-100/80 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
+            <h3 className="text-base font-extrabold text-slate-850">Historical & Active Orders</h3>
+            <span className="text-xs font-bold text-slate-400 bg-slate-50 border border-slate-105 px-3 py-1.5 rounded-xl">
+              Total: {orders.length}
+            </span>
           </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-3xl border border-slate-100 p-5 space-y-4 animate-pulse">
+                  <div className="h-4 bg-slate-150 rounded w-1/3" />
+                  <div className="space-y-2">
+                    <div className="h-3 bg-slate-150 rounded w-3/4" />
+                    <div className="h-3 bg-slate-150 rounded w-1/2" />
+                  </div>
+                  <div className="h-8 bg-slate-150 rounded-2xl w-full" />
+                </div>
+              ))}
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center text-slate-400 py-16 font-extrabold bg-white rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.012)]">
+              <span className="text-3xl block mb-2">📋</span>
+              No order history available.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {orders.map(o => {
+                const id = o._id || o.id;
+                const canEdit   = o.status === 'Pending';
+                const canCancel = !['Completed', 'Cancelled'].includes(o.status);
+                return (
+                  <div key={id} className="bg-white rounded-3xl border border-slate-100 p-5 shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden group">
+                    {/* Top status bar & ID */}
+                    <div className="flex justify-between items-start border-b border-slate-50 pb-3">
+                      <div>
+                        <span className="text-[10px] font-black text-indigo-650 bg-indigo-50/50 px-2.5 py-1 rounded-lg uppercase border border-indigo-100/50 tracking-wider">
+                          {o.orderId || id.slice(-8).toUpperCase()}
+                        </span>
+                        <p className="text-[10px] text-slate-400 font-bold mt-1.5">
+                          📅 {o.date} {o.timestamp || new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${statusClass(o.status)}`}>
+                        {o.status}
+                      </span>
+                    </div>
+
+                    {/* Order Details */}
+                    <div className="space-y-3.5 flex-1">
+                      <div>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Type</span>
+                        <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-700 bg-slate-50/80 p-2 rounded-xl border border-slate-100 w-fit">
+                          <span>🍽️</span>
+                          <span>{o.type} {o.table !== 'N/A' && `(Table ${o.table.match(/\d+/)?.[0] || o.table})`}</span>
+                        </div>
+                      </div>
+
+                      {/* Items */}
+                      <div>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Items ({o.items?.reduce((s, i) => s + i.qty, 0) || 0})</span>
+                        <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                          {o.items?.map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-xs font-bold text-slate-650 bg-slate-50/40 p-2 rounded-xl border border-slate-100/50">
+                              <span className="truncate max-w-[170px]" title={item.name}>{item.name}</span>
+                              <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">x{item.qty}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Waiter Assigned */}
+                      {o.waiterName && (
+                        <div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Assigned Waiter</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-indigo-650 bg-indigo-50/40 px-2.5 py-1 rounded-xl border border-indigo-100/30">
+                            👤 {o.waiterName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Total Amount & Actions */}
+                    <div className="border-t border-slate-50 pt-3.5 space-y-3.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-450">Total Bill</span>
+                        <span className="text-base font-black text-slate-800">₹{o.total}</span>
+                      </div>
+
+                      {/* Action buttons */}
+                      {(o.status === 'Ready' || canEdit || canCancel) ? (
+                        <div className="flex gap-2 w-full pt-1">
+                          {/* Serve button */}
+                          {o.status === 'Ready' && (
+                            <button onClick={async () => {
+                              try {
+                                await api.put(`/orders/${id}/status`, { status: 'Served' });
+                                setOrders(prev => prev.map(order => (order._id || order.id) === id ? { ...order, status: 'Served' } : order));
+                                toast.success(`🍽️ Order marked as served!`);
+                              } catch {
+                                toast.error("Failed to update status.");
+                              }
+                            }}
+                              className="flex-1 text-[10px] font-black py-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-150 hover:bg-emerald-100 transition-all cursor-pointer text-center">
+                              🛎️ Serve
+                            </button>
+                          )}
+                          {/* Edit button */}
+                          {canEdit && (
+                            <button onClick={() => openEditModal(o)}
+                              className="flex-1 text-[10px] font-black py-2.5 rounded-xl bg-amber-50 text-amber-650 border border-amber-155 hover:bg-amber-100 transition-all cursor-pointer text-center">
+                              ✏️ Edit
+                            </button>
+                          )}
+                          {/* Cancel button */}
+                          {canCancel && (
+                            <button onClick={() => cancelOrder(o)}
+                              disabled={cancellingId === id}
+                              className="flex-1 text-[10px] font-black py-2.5 rounded-xl bg-red-50 text-red-500 border border-red-155 hover:bg-red-100 transition-all disabled:opacity-50 cursor-pointer text-center">
+                              {cancellingId === id ? '...' : '🚫 Cancel'}
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-2 text-[10px] font-bold text-slate-350 bg-slate-50 border border-slate-100 rounded-xl uppercase tracking-wider select-none">
+                          No actions available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
