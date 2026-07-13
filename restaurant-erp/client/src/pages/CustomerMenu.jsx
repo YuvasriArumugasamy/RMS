@@ -1352,40 +1352,42 @@ const CustomerMenu = () => {
             {/* Cart Items List */}
             <div className="space-y-4">
               {cart.map((item, index) => (
-                <div key={index} className="bg-white rounded-[2rem] p-4.5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-300 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-18 h-18 bg-slate-50 border border-slate-100/80 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden shadow-inner relative group">
+                <div key={index} className="bg-white rounded-[2rem] p-3.5 sm:p-4.5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-300 flex flex-row items-center justify-between gap-3 sm:gap-4">
+                  {/* Left side: Image and Info */}
+                  <div className="flex items-center gap-2.5 sm:gap-4 flex-1 min-w-0">
+                    <div className="w-14 h-14 sm:w-18 sm:h-18 bg-slate-50 border border-slate-100/80 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden shadow-inner relative group">
                       <MenuItemImage src={item.image} alt={item.name}
-                        imgClassName="w-16 h-16 object-contain p-1 transform group-hover:scale-110 transition-transform duration-300"
-                        emojiClassName="text-4xl select-none transform group-hover:scale-110 transition-transform duration-300" />
+                        imgClassName="w-12 h-12 sm:w-16 sm:h-16 object-contain p-1 transform group-hover:scale-110 transition-transform duration-300"
+                        emojiClassName="text-3xl sm:text-4xl select-none transform group-hover:scale-110 transition-transform duration-300" />
                     </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-black text-slate-800 line-clamp-1 hover:text-orange-600 transition-colors duration-250">{item.name}</h4>
+                    <div className="space-y-0.5 sm:space-y-1 flex-1 min-w-0">
+                      <h4 className="text-xs sm:text-sm font-black text-slate-800 truncate" title={item.name}>{item.name}</h4>
                       <div className="flex flex-wrap gap-1">
-                        <span className="text-[8px] bg-slate-100 text-slate-500 font-black px-2 py-0.5 rounded-md uppercase tracking-wider">{item.category}</span>
+                        <span className="text-[7.5px] sm:text-[8px] bg-slate-100 text-slate-500 font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">{item.category}</span>
                         {Object.entries(item.customizations || {}).filter(([_, v]) => v).map(([k]) => {
                           const labels = { extraCheese: '🧀 Cheese', noOnion: '🧅 No Onion', spicy: '🌶️ Spicy' };
                           return (
-                            <span key={k} className="text-[8px] bg-amber-50 text-amber-700 border border-amber-100/50 font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
+                            <span key={k} className="text-[7.5px] sm:text-[8px] bg-amber-50 text-amber-700 border border-amber-100/50 font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
                               {labels[k] || k}
                             </span>
                           );
                         })}
                       </div>
-                      <p className="text-sm text-orange-600 font-black pt-0.5">₹{item.price}</p>
+                      <p className="text-xs sm:text-sm text-orange-600 font-black pt-0.5">₹{item.price}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3.5">
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-1 shadow-inner">
+                  {/* Right side: Adjuster & Delete */}
+                  <div className="flex items-center gap-1.5 sm:gap-3.5 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-0.5 sm:p-1 shadow-inner">
                       <button onClick={() => index > -1 && cart[index].qty === 1 ? removeFromCart(index) : updateQty(index, -1)}
-                        className="w-7 h-7 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-black flex items-center justify-center transition-all cursor-pointer active:scale-90 hover:bg-orange-50/20">-</button>
-                      <span className="text-xs font-black text-slate-800 w-4 text-center">{item.qty}</span>
+                        className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-white shadow-sm hover:shadow text-orange-600 font-black flex items-center justify-center transition-all cursor-pointer active:scale-90 hover:bg-orange-50/20 text-xs sm:text-sm">-</button>
+                      <span className="text-[11px] sm:text-xs font-black text-slate-800 w-3 sm:w-4 text-center">{item.qty}</span>
                       <button onClick={() => updateQty(index, 1)}
-                        className="w-7 h-7 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-sm hover:shadow-md font-black text-white flex items-center justify-center transition-all cursor-pointer active:scale-90">+</button>
+                        className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-sm hover:shadow-md font-black text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs sm:text-sm">+</button>
                     </div>
-                    <button onClick={() => removeFromCart(index)} className="p-2.5 bg-red-50 hover:bg-red-100/80 text-red-600 rounded-xl transition-all duration-200 active:scale-90 flex items-center justify-center shadow-sm border border-red-100/20">
-                      <span className="text-sm">🗑️</span>
+                    <button onClick={() => removeFromCart(index)} className="p-2 sm:p-2.5 bg-red-50 hover:bg-red-100/80 text-red-650 rounded-xl transition-all duration-200 active:scale-90 flex items-center justify-center shadow-sm border border-red-100/20 shrink-0 cursor-pointer">
+                      <span className="text-xs sm:text-sm">🗑️</span>
                     </button>
                   </div>
                 </div>
