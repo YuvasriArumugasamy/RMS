@@ -124,16 +124,19 @@ const Header = ({ onOpenMobileSidebar }) => {
         <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
         {/* Active orders badge - Desktop/tablet only */}
-        <div className="hidden sm:flex items-center gap-2 text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl">
+        <button 
+          onClick={() => navigate('/orders')}
+          className="hidden sm:flex items-center gap-2 text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl hover:bg-amber-100/70 active:scale-95 transition-all cursor-pointer"
+        >
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
           {pendingCount} Active
-        </div>
+        </button>
 
         {/* New Order button - Desktop/tablet only */}
         {['Admin', 'Manager', 'Waiter'].includes(user?.role) && (
           <button
             onClick={() => navigate('/orders')}
-            className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-400/20 transition-all"
+            className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-400/20 transition-all cursor-pointer"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -145,7 +148,10 @@ const Header = ({ onOpenMobileSidebar }) => {
         <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
         {/* Notification Bell with Badge Count - Mobile Only */}
-        <button className="md:hidden uiverse-bell-btn select-none">
+        <button 
+          onClick={() => navigate('/orders')}
+          className="md:hidden uiverse-bell-btn select-none cursor-pointer"
+        >
           <svg viewBox="0 0 448 512" className="uiverse-bell-icon">
             <path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z" />
           </svg>
