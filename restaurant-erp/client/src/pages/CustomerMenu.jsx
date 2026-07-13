@@ -1358,8 +1358,8 @@ const CustomerMenu = () => {
                   <span>Goal: ₹{freeDessertThreshold}</span>
                 </div>
               </div>
-              <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden p-1.5 animate-bounce shadow-inner">
-                <img src={chefImage} alt="Chef" className="w-full h-full object-cover rounded-xl" />
+              <div className="w-16 h-16 flex items-center justify-center shrink-0 overflow-hidden animate-bounce">
+                <img src={chefImage} alt="Chef" className="w-full h-full object-contain" />
               </div>
             </div>
 
@@ -1793,8 +1793,8 @@ const CustomerMenu = () => {
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Total Amount</p>
                     <p className="text-xl font-black text-orange-600 mt-0.5">₹{latest.total}</p>
                   </div>
-                  <div className="w-16 h-16 bg-[#FFF7ED] rounded-2xl flex items-center justify-center shrink-0 overflow-hidden p-1.5 shadow-inner">
-                    <img src={chefImage} alt="Chef" className="w-full h-full object-cover rounded-xl" />
+                  <div className="w-16 h-16 flex items-center justify-center shrink-0 overflow-hidden">
+                    <img src={chefImage} alt="Chef" className="w-full h-full object-contain" />
                   </div>
                 </div>
               </div>
