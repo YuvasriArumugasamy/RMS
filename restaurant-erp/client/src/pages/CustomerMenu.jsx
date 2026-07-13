@@ -198,6 +198,16 @@ const CustomerMenu = () => {
     }
   }, [stage]);
 
+  // Scroll to top of the content area whenever the stage changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+    }
+  }, [stage]);
+
+
   const voiceSupported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
