@@ -1523,41 +1523,52 @@ const CustomerMenu = () => {
   /* ── STAGE: CONFIRM ORDER ── */
   const ConfirmStage = () => (
     <>
-      <div className="flex items-center gap-3.5 mb-6">
-        <button onClick={() => setStage('cart')} className="w-9 h-9 rounded-xl bg-white border border-slate-150 hover:bg-slate-50 flex items-center justify-center transition-all font-black text-slate-700 active:scale-95 shadow-sm text-xs">
-          ←
+      <div className="flex items-center gap-3.5 mb-6.5 select-none">
+        <button 
+          onClick={() => setStage('cart')} 
+          className="w-10 h-10 rounded-2xl bg-white border border-slate-100 hover:bg-slate-50 hover:border-slate-200 flex items-center justify-center transition-all shadow-sm group active:scale-95 cursor-pointer"
+        >
+          <svg className="w-4 h-4 text-slate-600 group-hover:-translate-x-0.5 transition-transform duration-250" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
         </button>
         <div>
-          <h2 className="text-base font-black text-slate-800 leading-tight">{t.confirmOrder}</h2>
+          <h2 className="text-lg font-black text-slate-800 leading-tight">{t.confirmOrder}</h2>
           <p className="text-[10px] text-slate-400 font-bold mt-0.5">Final details before checkout</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-none pb-20">
-        <div className="space-y-4">
+        <div className="space-y-4.5">
           {/* Table Details */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex items-center justify-between">
+          <div className="bg-gradient-to-br from-white via-white to-slate-50/30 rounded-[2rem] p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.02)] transition-all duration-300 flex items-center justify-between group">
             <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.tableLabel}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{t.tableLabel}</p>
               <p className="text-2xl font-black text-slate-800">{'Table ' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}</p>
             </div>
-            <div className="w-12 h-12 bg-orange-50 text-orange-600 border border-orange-100 rounded-2xl flex items-center justify-center text-2xl shadow-sm">🍽️</div>
+            <div className="w-14 h-14 bg-gradient-to-tr from-orange-50 to-amber-50 text-orange-500 border border-orange-100/60 rounded-2xl flex items-center justify-center text-2xl shadow-sm relative group-hover:scale-105 transition-transform duration-300">
+              🍽️
+            </div>
           </div>
 
           {/* Order Type Toggle */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-3.5">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.orderType}</h4>
-            <div className="flex gap-3 bg-slate-50 border border-slate-100 p-1.5 rounded-2xl">
+          <div className="bg-white rounded-[2rem] p-5.5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-4">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs">⚡</span>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.orderType}</h4>
+            </div>
+            <div className="flex gap-3 bg-slate-50 border border-slate-100/80 p-1.5 rounded-2xl">
               {['Dine In', 'Take Away'].map(type => {
                 const isActive = orderType === type;
                 return (
                   <button key={type} onClick={() => setOrderType(type)}
-                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${
+                    className={`flex-1 py-3.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.97] ${
                       isActive 
-                        ? 'bg-orange-500 text-white shadow-sm' 
-                        : 'bg-transparent text-slate-400 hover:text-slate-700'
+                        ? 'bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 text-white shadow-md shadow-orange-500/15' 
+                        : 'bg-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
                     }`}>
-                    {type === 'Dine In' ? t.dineIn : t.takeAway}
+                    <span>{type === 'Dine In' ? '🍽️' : '🛍️'}</span>
+                    <span>{type === 'Dine In' ? t.dineIn : t.takeAway}</span>
                   </button>
                 );
               })}
@@ -1565,62 +1576,76 @@ const CustomerMenu = () => {
           </div>
 
           {/* Special Instructions */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-2">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.specialInstructions}</h4>
+          <div className="bg-white rounded-[2rem] p-5.5 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] space-y-3.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs">✍️</span>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.specialInstructions}</h4>
+            </div>
             <textarea 
               value={specialInstructions} 
               onChange={e => setSpecialInstructions(e.target.value)}
               placeholder={t.siPlaceholder}
-              className="w-full p-4 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500/50 focus:bg-slate-50/30 transition-all resize-none"
+              className="w-full p-4.5 border border-slate-200 hover:border-slate-300 focus:border-orange-500/40 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-orange-500/5 focus:bg-white transition-all resize-none shadow-inner bg-slate-50/30"
               rows="3"
             />
           </div>
         </div>
 
         {/* Billing details card */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.billDetails}</h4>
-            <div className="space-y-3 border-slate-100 pb-3 border-b">
+        <div className="bg-gradient-to-br from-white via-white to-slate-50/10 rounded-[2.2rem] p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.025)] transition-all duration-300 flex flex-col justify-between space-y-6">
+          <div className="space-y-4.5">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3.5">
+              <span className="text-sm">🧾</span>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.billDetails}</h4>
+            </div>
+            <div className="space-y-3 pb-4.5 border-b border-dashed border-slate-200">
               <div className="flex justify-between text-xs text-slate-500 font-semibold">
                 <span>{t.subtotal}</span>
-                <span>₹{cartSubtotal}</span>
+                <span className="text-slate-800 font-black">₹{cartSubtotal}</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-xs text-emerald-600 font-black">
-                  <span>Discount</span>
+                  <span>Discount ({appliedCoupon.code})</span>
                   <span>-₹{discount}</span>
                 </div>
               )}
               <div className="flex justify-between text-xs text-slate-500 font-semibold">
                 <span>{t.gstLabel}</span>
-                <span>₹{finalGst}</span>
+                <span className="text-slate-800 font-black">₹{finalGst}</span>
               </div>
               <div className="flex justify-between text-xs text-slate-500 font-semibold">
                 <span>{t.serviceChargeLabel}</span>
-                <span>₹{finalService}</span>
+                <span className="text-slate-800 font-black">₹{finalService}</span>
               </div>
             </div>
 
             <div className="flex justify-between items-center text-xs font-black text-slate-800">
-              <span className="text-sm">Grand Total</span>
-              <span className="text-lg text-orange-600 font-black">₹{finalTotal}</span>
+              <span className="text-sm font-black text-slate-650">Grand Total</span>
+              <span className="text-xl text-orange-650 font-black tracking-tight">₹{finalTotal}</span>
             </div>
           </div>
 
-          <button onClick={placeOrder} disabled={isPlacingOrder}
-            className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl text-xs shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-6 sm:mt-0">
+          <button 
+            onClick={placeOrder} 
+            disabled={isPlacingOrder}
+            className="w-full py-4.5 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2xl text-xs shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group uppercase tracking-widest mt-6 sm:mt-0"
+          >
             {isPlacingOrder ? (
-              <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Placing Order...</span></>
+              <>
+                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                <span>Placing Order...</span>
+              </>
             ) : (
-              <span>CONFIRM & PLACE ORDER</span>
+              <>
+                <span>Confirm & Place Order</span>
+                <span className="w-5 h-5 bg-white text-orange-600 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transform group-hover:scale-110 transition-transform duration-250">✓</span>
+              </>
             )}
           </button>
         </div>
       </div>
     </>
   );
-
   /* ── STAGE: ORDER TRACKING ── */
   const TrackingStage = () => {
     const order = selectedOrder || placedOrders[0];
