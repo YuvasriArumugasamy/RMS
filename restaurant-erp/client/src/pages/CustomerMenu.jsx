@@ -1655,38 +1655,39 @@ const CustomerMenu = () => {
 
     return (
       <>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 select-none bg-white p-5 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6.5 select-none bg-gradient-to-r from-white via-white to-slate-50/50 p-5.5 rounded-[2rem] border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.01)]">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight">{t.orderStatus}</h2>
-            <p className="text-[11px] text-slate-400 font-bold mt-0.5">Track your order in real time</p>
+            <h2 className="text-xl font-black text-slate-800 tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-orange-650 bg-clip-text text-transparent">{t.orderStatus}</h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Track your order in real time</p>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <button onClick={() => setStage('callWaiter')} className="flex-1 sm:flex-none px-5 py-2.5 border border-slate-200 rounded-2xl text-slate-600 text-xs font-black bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm cursor-pointer active:scale-95">
-              Need Help?
+          <div className="flex flex-row items-center gap-3 w-full sm:w-auto">
+            <button onClick={() => setStage('callWaiter')} className="flex-1 sm:flex-none px-5 py-3 border border-slate-200 rounded-2xl text-slate-650 text-xs font-black bg-white hover:bg-slate-50 hover:border-slate-350 transition-all shadow-sm cursor-pointer active:scale-95 flex items-center justify-center gap-1.5">
+              <span>🔔</span>
+              <span>Need Help?</span>
             </button>
-            <div className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-1.5 text-xs font-black text-slate-800 shadow-inner">
+            <div className="px-4 py-3 bg-orange-50/40 border border-orange-100/50 rounded-2xl flex items-center gap-1.5 text-xs font-black text-slate-800 shadow-sm">
               <span className="text-slate-400 font-bold">ID:</span>
-              <span className="font-mono text-orange-600">{latest?.orderId || latest?.id || '#ORD1234'}</span>
+              <span className="font-mono text-orange-600 font-extrabold tracking-wide">{latest?.orderId || latest?.id || '#ORD1234'}</span>
             </div>
           </div>
         </div>
 
         {!latest ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white border border-slate-100 rounded-3xl p-8 shadow-sm text-center">
-            <span className="text-6xl mb-4 select-none">📍</span>
+          <div className="flex flex-col items-center justify-center py-20 bg-white border border-slate-100 rounded-[2.2rem] p-8 shadow-sm text-center select-none">
+            <span className="text-6xl mb-4 select-none animate-bounce">📍</span>
             <h3 className="text-base font-black text-slate-800">No active order</h3>
             <p className="text-xs text-slate-400 font-medium max-w-xs mt-1">Scan QR code and place order to track statuses.</p>
-            <button onClick={() => setStage('menu')} className="mt-6 px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 text-xs uppercase tracking-wider">
+            <button onClick={() => setStage('menu')} className="mt-6 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 text-xs uppercase tracking-wider cursor-pointer">
               Start Ordering
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Timeline on left (spans 2 cols) */}
-            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.012)]">
-              <div className="relative pl-8 space-y-8 py-2">
+            <div className="lg:col-span-2 bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.01)]">
+              <div className="relative pl-8.5 space-y-8 py-2">
                 {/* Static background track */}
-                <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-100" />
+                <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-slate-100" />
                 
                 {/* Active progress track */}
                 {(() => {
@@ -1694,7 +1695,7 @@ const CustomerMenu = () => {
                   const percent = ((currentStep - 1) / 3) * 100;
                   return (
                     <div 
-                      className="absolute left-[15px] top-4 w-0.5 bg-gradient-to-b from-emerald-500 to-orange-550 transition-all duration-500" 
+                      className="absolute left-[17px] top-4 w-0.5 bg-gradient-to-b from-emerald-500 to-orange-500 transition-all duration-500" 
                       style={{ height: `calc(${percent}% - 2px)` }}
                     />
                   );
@@ -1709,12 +1710,12 @@ const CustomerMenu = () => {
                   return (
                     <div key={status} className="relative flex gap-5 items-start">
                       {/* Dot indicator */}
-                      <div className={`absolute -left-[37px] w-6 h-6 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all duration-300 z-10 ${
+                      <div className={`absolute -left-[35px] w-7.5 h-7.5 rounded-full border-4 border-white flex items-center justify-center shadow-md transition-all duration-300 z-10 ${
                         isCurrent 
-                          ? 'bg-orange-500 scale-110 shadow-lg shadow-orange-500/20 text-white' 
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 scale-110 shadow-lg shadow-orange-500/20 text-white' 
                           : isPast 
                             ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' 
-                            : 'bg-slate-205 text-slate-400'
+                            : 'bg-slate-100 text-slate-400'
                       }`}>
                         {isCurrent && (
                           <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping scale-150 pointer-events-none" />
@@ -1722,17 +1723,17 @@ const CustomerMenu = () => {
                         {isPast ? (
                           <span className="text-[10px] font-black">✓</span>
                         ) : (
-                          <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-white' : 'bg-slate-350'}`} />
                         )}
                       </div>
 
                       {/* Card */}
-                      <div className={`flex-1 p-4.5 rounded-3xl border-2 transition-all duration-300 flex items-center justify-between gap-4 ${
+                      <div className={`flex-1 p-5 rounded-[2rem] border-2 transition-all duration-300 flex items-center justify-between gap-4 ${
                         isCurrent 
-                          ? 'border-orange-500/30 bg-orange-50/15 shadow-[0_10px_25px_rgba(249,115,22,0.06)]' 
+                          ? 'border-orange-500/20 bg-gradient-to-br from-orange-50/10 via-white to-amber-50/5 shadow-[0_12px_35px_rgba(249,115,22,0.05)]' 
                           : isPast 
-                            ? 'border-emerald-500/10 bg-emerald-50/5' 
-                            : 'border-slate-100 bg-white opacity-60'
+                            ? 'border-emerald-500/10 bg-emerald-50/5 opacity-90' 
+                            : 'border-slate-100 bg-white opacity-45'
                       }`}>
                         <div>
                           <div className="flex items-center gap-2">
@@ -1749,9 +1750,18 @@ const CustomerMenu = () => {
                         </div>
                         
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{meta.icon}</span>
+                          <span className={`text-2xl p-2 rounded-xl border transition-all ${
+                            isCurrent 
+                              ? 'bg-orange-50 border-orange-100/50 animate-bounce' 
+                              : isPast 
+                                ? 'bg-emerald-50 border-emerald-100/50' 
+                                : 'bg-slate-50 border-slate-100 opacity-60'
+                          }`}>{meta.icon}</span>
+                          {isCurrent && (
+                            <span className="text-[8px] bg-orange-500 text-white font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm animate-pulse">Active</span>
+                          )}
                           {isPast && (
-                            <span className="text-[8px] bg-emerald-100/60 text-emerald-600 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200/30 uppercase tracking-wider">Done</span>
+                            <span className="text-[8px] bg-emerald-100/60 text-emerald-600 font-extrabold px-2.5 py-1 rounded-full border border-emerald-200/20 uppercase tracking-wider">Done</span>
                           )}
                         </div>
                       </div>
@@ -1763,8 +1773,8 @@ const CustomerMenu = () => {
 
             {/* Right side Info Card */}
             <div className="space-y-6 select-none">
-              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.01)] relative overflow-hidden flex flex-col justify-between">
-                <div className="absolute top-1/2 -right-8 w-28 h-28 bg-orange-100/50 rounded-full blur-2xl pointer-events-none" />
+              <div className="bg-gradient-to-br from-white via-white to-slate-50/20 rounded-[2.2rem] p-6 border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.015)] relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute top-1/2 -right-8 w-28 h-28 bg-orange-100/40 rounded-full blur-2xl pointer-events-none" />
                 
                 <div>
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Order Summary</h3>
@@ -1778,23 +1788,23 @@ const CustomerMenu = () => {
                   </div>
                 </div>
 
-                <div className="border-t border-slate-100 pt-4.5 mt-5 flex justify-between items-center">
+                <div className="border-t border-slate-150 pt-4.5 mt-5 flex justify-between items-center">
                   <div>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Total Amount</p>
                     <p className="text-xl font-black text-orange-600 mt-0.5">₹{latest.total}</p>
                   </div>
-                  <div className="w-16 h-16 bg-[#FFF7ED] rounded-2xl flex items-center justify-center text-4xl shadow-inner">
-                    🛍️
+                  <div className="w-16 h-16 bg-[#FFF7ED] rounded-2xl flex items-center justify-center shrink-0 overflow-hidden p-1.5 shadow-inner">
+                    <img src={chefImage} alt="Chef" className="w-full h-full object-cover rounded-xl" />
                   </div>
                 </div>
               </div>
 
               {/* Alert Message */}
-              <div className="bg-blue-50 border border-blue-100 rounded-3xl p-4.5 flex gap-3 text-blue-800 shadow-inner">
-                <span className="text-xl shrink-0">🛡️</span>
+              <div className="bg-emerald-50/40 border border-emerald-100 rounded-3xl p-5 flex gap-3.5 text-emerald-800 shadow-inner">
+                <span className="text-2xl shrink-0">🛡️</span>
                 <div>
-                  <h4 className="text-[11px] font-black uppercase tracking-wider mb-0.5">Your order is safe!</h4>
-                  <p className="text-[10px] text-blue-750 font-semibold leading-relaxed">We do not share your physical location and use high encryption protocols.</p>
+                  <h4 className="text-[11px] font-black uppercase tracking-wider mb-1 text-emerald-900">Hygiene & Safety Assured</h4>
+                  <p className="text-[10.5px] text-emerald-700 font-semibold leading-relaxed">Our kitchen follows rigorous sanitization standards, and our staff uses complete protective gear to prepare your fresh meals.</p>
                 </div>
               </div>
 
@@ -1803,7 +1813,7 @@ const CustomerMenu = () => {
                 <button onClick={() => {
                   const check = confirm('Cancel this order?');
                   if (check) toast.success('Cancellation request sent');
-                }} className="py-3.5 border border-slate-200 hover:border-slate-350 text-slate-650 font-black rounded-2xl text-xs bg-white hover:bg-slate-50 transition-all cursor-pointer active:scale-95 shadow-sm">
+                }} className="py-4 border border-rose-100 hover:border-rose-250 text-rose-500 font-black rounded-2xl text-xs bg-rose-50/10 hover:bg-rose-50/30 transition-all cursor-pointer active:scale-95 shadow-sm text-center">
                   Cancel Order
                 </button>
                 <button onClick={() => {
@@ -1816,14 +1826,15 @@ const CustomerMenu = () => {
                   });
                   setStage('cart');
                   toast.success('🛒 Items added back to cart for reorder!');
-                }} className="py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-orange-500/10">
+                }} className="py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-orange-500/10 text-center">
                   Reorder
                 </button>
               </div>
 
               <div className="grid grid-cols-1 gap-2 pt-2">
-                <button onClick={() => setStage('bill')} className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-emerald-500/10">
-                  🧾 View Full Invoice
+                <button onClick={() => setStage('bill')} className="w-full py-4.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black rounded-2xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-emerald-500/10 text-center flex items-center justify-center gap-1.5">
+                  <span>🧾</span>
+                  <span>View Full Invoice</span>
                 </button>
               </div>
             </div>
