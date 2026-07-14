@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { toast } from 'react-toastify';
+import MenuItemImage from './MenuItemImage';
 
 const pageMeta = {
   '/':          { title: 'Operational Dashboard',       sub: 'Real-time restaurant overview' },
@@ -196,9 +197,11 @@ const QuickOrderModal = ({ onClose, onOrderPlaced }) => {
             const inCart = cart.find(i => i.id === id);
             return (
               <div key={id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-all group">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-xl leading-none flex-shrink-0">{item.image?.startsWith('http') ? '🍽️' : (item.image || '🍽️')}</span>
-                  <div className="min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <MenuItemImage src={item.image} alt={item.name} imgClassName="w-9 h-9 object-contain p-0.5" emojiClassName="text-xl leading-none" />
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-slate-800 truncate">{item.name}</p>
                     <p className="text-[10px] text-[#f97316] font-bold">₹{item.price}</p>
                   </div>
