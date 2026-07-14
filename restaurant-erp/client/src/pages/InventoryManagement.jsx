@@ -6,9 +6,13 @@ import ConfirmModal from '../components/ConfirmModal';
 
 const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState('stock');
-  const [ingredients, setIngredients] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [pageLoading, setPageLoading] = useState(true);
+  const [ingredients, setIngredients] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ingredients') || '[]'); } catch { return []; }
+  });
+  const [suppliers, setSuppliers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('suppliers') || '[]'); } catch { return []; }
+  });
+  const [pageLoading, setPageLoading] = useState(false); // No blocking spinner
   const [saving, setSaving] = useState(false);
   const [confirmState, setConfirmState] = useState(null);
 
@@ -23,15 +27,16 @@ const InventoryManagement = () => {
           api.get('/inventory'),
           api.get('/suppliers'),
         ]);
-        if (ingRes.data.success) setIngredients(ingRes.data.data);
-        if (supRes.data.success) setSuppliers(supRes.data.data);
+        if (ingRes.data.success) {
+          setIngredients(ingRes.data.data);
+          localStorage.setItem('ingredients', JSON.stringify(ingRes.data.data));
+        }
+        if (supRes.data.success) {
+          setSuppliers(supRes.data.data);
+          localStorage.setItem('suppliers', JSON.stringify(supRes.data.data));
+        }
       } catch {
-        const savedIngredients = localStorage.getItem('ingredients');
-        if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
-        const savedSuppliers = localStorage.getItem('suppliers');
-        if (savedSuppliers) setSuppliers(JSON.parse(savedSuppliers));
-      } finally {
-        setPageLoading(false);
+        // Cache already shown above — silent fail
       }
     };
     fetchData();

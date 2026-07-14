@@ -4,7 +4,9 @@ import { api } from '../context/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
 
 const StaffManagement = () => {
-  const [staffList, setStaffList] = useState([]);
+  const [staffList, setStaffList] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('staff') || '[]'); } catch { return []; }
+  });
   const [activeTab, setActiveTab] = useState('directory'); // 'directory' | 'permissions'
   const [showAddModal, setShowAddModal] = useState(false);
   
@@ -19,7 +21,9 @@ const StaffManagement = () => {
   const [newStaffPhone, setNewStaffPhone] = useState('');
 
   // Permissions State
-  const [rolePermissions, setRolePermissions] = useState({});
+  const [rolePermissions, setRolePermissions] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('rolePermissions') || '{}'); } catch { return {}; }
+  });
 
   // Date-wise Attendance State
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -39,13 +43,16 @@ const StaffManagement = () => {
           api.get('/staff'),
           api.get('/settings/permissions'),
         ]);
-        if (staffRes.data.success) setStaffList(staffRes.data.data);
-        if (permRes.data.success) setRolePermissions(permRes.data.data);
+        if (staffRes.data.success) {
+          setStaffList(staffRes.data.data);
+          localStorage.setItem('staff', JSON.stringify(staffRes.data.data));
+        }
+        if (permRes.data.success) {
+          setRolePermissions(permRes.data.data);
+          localStorage.setItem('rolePermissions', JSON.stringify(permRes.data.data));
+        }
       } catch {
-        const savedStaff = localStorage.getItem('staff');
-        if (savedStaff) setStaffList(JSON.parse(savedStaff));
-        const savedRoles = localStorage.getItem('rolePermissions');
-        if (savedRoles) setRolePermissions(JSON.parse(savedRoles));
+        // Cache already shown above — silent fail
       }
     };
     fetchData();

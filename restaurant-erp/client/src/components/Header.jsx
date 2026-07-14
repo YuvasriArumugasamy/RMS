@@ -165,8 +165,6 @@ const Header = ({ onOpenMobileSidebar }) => {
           <div className="w-5 h-5 rounded-full bg-current/10 flex items-center justify-center text-[9px] font-black opacity-80">
             {user?.username?.slice(0, 2).toUpperCase() || 'US'}
           </div>
-          <span className="hidden sm:inline">{user?.username}</span>
-          <span className="opacity-60 hidden sm:inline">·</span>
           <span className="hidden sm:inline">{user?.role}</span>
         </div>
       </div>

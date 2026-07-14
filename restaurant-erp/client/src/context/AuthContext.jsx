@@ -25,6 +25,7 @@ api.interceptors.response.use(
     // Auto-logout on 401 (token expired)
     if (status === 401) {
       localStorage.removeItem('rms_token');
+      localStorage.removeItem('rms_user');
       // Reload to trigger session restore → redirect to login
       if (window.location.pathname !== '/login' && window.location.pathname !== '/welcome') {
         window.location.href = '/login';
@@ -54,37 +55,53 @@ const ROLE_PERMISSIONS = {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(true); // loading while checking token
+  // ── Cache-first: restore user from localStorage instantly (no spinner) ──
+  const cachedUser = (() => {
+    try { return JSON.parse(localStorage.getItem('rms_user') || 'null'); } catch { return null; }
+  })();
 
-  // On app start: try to restore session from stored token
+  const [user, setUser] = useState(cachedUser);
+  const [permissions, setPermissions] = useState(
+    cachedUser ? (ROLE_PERMISSIONS[cachedUser.role] || []) : []
+  );
+  const [loading, setLoading] = useState(false); // Never block UI — verify in background
+
+  // On app start: silently verify token in background, update state if changed
   useEffect(() => {
-    const restoreSession = async () => {
+    const verifySession = async () => {
       const token = localStorage.getItem('rms_token');
-      if (!token) { setLoading(false); return; }
+      if (!token) {
+        // No token → clear any stale cached user
+        localStorage.removeItem('rms_user');
+        setUser(null);
+        setPermissions([]);
+        return;
+      }
 
       try {
         const { data } = await api.get('/auth/me');
         if (data.success) {
+          localStorage.setItem('rms_user', JSON.stringify(data.user));
           setUser(data.user);
           setPermissions(ROLE_PERMISSIONS[data.user.role] || []);
         }
       } catch {
-        // Token expired or invalid — clear it
+        // Token expired or invalid — clear everything
         localStorage.removeItem('rms_token');
-      } finally {
-        setLoading(false);
+        localStorage.removeItem('rms_user');
+        setUser(null);
+        setPermissions([]);
       }
     };
 
-    restoreSession();
+    verifySession();
   }, []);
 
   const login = useCallback(async (username, password) => {
     const { data } = await api.post('/auth/login', { username, password });
     if (data.success) {
       localStorage.setItem('rms_token', data.token);
+      localStorage.setItem('rms_user', JSON.stringify(data.user));
       setUser(data.user);
       setPermissions(ROLE_PERMISSIONS[data.user.role] || []);
     }
@@ -93,6 +110,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     localStorage.removeItem('rms_token');
+    localStorage.removeItem('rms_user');
     setUser(null);
     setPermissions([]);
   }, []);

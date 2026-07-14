@@ -7,9 +7,13 @@ import MenuItemImage from '../components/MenuItemImage';
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState('items');
-  const [menuItems, setMenuItems] = useState([]);
-  const [ingredients, setIngredients] = useState([]);
-  const [pageLoading, setPageLoading] = useState(true);
+  const [menuItems, setMenuItems] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('menuItems') || '[]'); } catch { return []; }
+  });
+  const [ingredients, setIngredients] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ingredients') || '[]'); } catch { return []; }
+  });
+  const [pageLoading, setPageLoading] = useState(false); // No blocking spinner
   const [saving, setSaving] = useState(false);
   const [confirmState, setConfirmState] = useState(null);
 
@@ -55,22 +59,23 @@ const MenuManagement = () => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Load from API
+  // Load from API (background refresh — cache shown instantly above)
   const fetchData = async () => {
     try {
       const [menuRes, ingRes] = await Promise.all([
         api.get('/menu'),
         api.get('/inventory'),
       ]);
-      if (menuRes.data.success) setMenuItems(menuRes.data.data);
-      if (ingRes.data.success) setIngredients(ingRes.data.data);
+      if (menuRes.data.success) {
+        setMenuItems(menuRes.data.data);
+        localStorage.setItem('menuItems', JSON.stringify(menuRes.data.data));
+      }
+      if (ingRes.data.success) {
+        setIngredients(ingRes.data.data);
+        localStorage.setItem('ingredients', JSON.stringify(ingRes.data.data));
+      }
     } catch {
-      const savedMenu = localStorage.getItem('menuItems');
-      if (savedMenu) setMenuItems(JSON.parse(savedMenu));
-      const savedIngredients = localStorage.getItem('ingredients');
-      if (savedIngredients) setIngredients(JSON.parse(savedIngredients));
-    } finally {
-      setPageLoading(false);
+      // Fallback: cache already shown, no action needed
     }
   };
 
