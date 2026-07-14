@@ -471,7 +471,7 @@ const Header = ({ onOpenMobileSidebar }) => {
 
           {/* Notification Bell - Mobile Only */}
           <button
-            onClick={() => navigate('/orders')}
+            onClick={() => navigate('/orders?tab=history')}
             className="md:hidden uiverse-bell-btn select-none cursor-pointer"
           >
             <svg viewBox="0 0 448 512" className="uiverse-bell-icon">
