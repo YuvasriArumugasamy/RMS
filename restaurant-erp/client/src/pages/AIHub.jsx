@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import MenuItemImage from '../components/MenuItemImage';
 
 /* ── Quick question chips ── */
 const QUICK_QUESTIONS = [
@@ -529,7 +530,9 @@ const ProfitAnalyzer = () => {
                 <tr key={item.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 text-xs">
                   <td className="py-3">
                     <div className="flex items-center gap-2">
-                      <span>{item.image}</span>
+                      <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                        <MenuItemImage src={item.image} alt={item.name} imgClassName="w-7 h-7 object-contain p-0.5" emojiClassName="text-sm leading-none" />
+                      </div>
                       <span className="font-bold text-slate-800">{item.name}</span>
                     </div>
                   </td>
@@ -801,7 +804,9 @@ const WeatherMenu = () => {
               return (
                 <div key={i} className={`flex items-center justify-between p-3 rounded-xl border ${menuItem ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-center gap-2">
-                    <span>{menuItem?.image || '🍽️'}</span>
+                    <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                      <MenuItemImage src={menuItem?.image || '🍽️'} alt={item} imgClassName="w-7 h-7 object-contain p-0.5" emojiClassName="text-sm leading-none" />
+                    </div>
                     <div>
                       <p className="text-xs font-bold text-slate-800">{item}</p>
                       {menuItem && <p className="text-[9px] text-emerald-600 font-medium">✅ In your menu · ₹{menuItem.price}</p>}

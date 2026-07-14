@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import MenuItemImage from '../components/MenuItemImage';
 
 /* ── Status Config ── */
 const STATUS = {
@@ -355,7 +356,9 @@ const KitchenLoadBalancer = ({ orders }) => {
             return (
               <div key={batch.name} className={`p-4 rounded-2xl border-2 transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.01)] ${isMultiTable ? 'border-[#0F286B]/70 bg-indigo-50/15' : 'border-slate-150/70 bg-slate-50/40'}`}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl select-none">{batch.image || '🍽️'}</span>
+                  <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 select-none">
+                    <MenuItemImage src={batch.image || '🍽️'} alt={batch.name} imgClassName="w-9 h-9 object-contain p-0.5" emojiClassName="text-2xl leading-none" />
+                  </div>
                   <div>
                     <p className="text-xs font-black text-slate-800 leading-snug">{batch.name}</p>
                     {isMultiTable && (

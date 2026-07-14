@@ -622,7 +622,10 @@ const MenuManagement = () => {
                         onChange={() => toggleComboItemSelection(item.id)}
                         className="rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-650"
                       />
-                      <span>{item.image} {item.name} (₹{item.price})</span>
+                      <span className="flex items-center gap-1.5">
+                        <MenuItemImage src={item.image} alt={item.name} imgClassName="w-5 h-5 object-contain rounded" emojiClassName="text-base leading-none" />
+                        {item.name} (₹{item.price})
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -661,14 +664,24 @@ const MenuManagement = () => {
                     menuItems.filter(item => item.isCombo).map((combo) => (
                       <tr key={combo.id} className="border-b border-slate-50 last:border-0">
                         <td className="py-4 flex items-center space-x-3">
-                          <span className="text-2xl">{combo.image}</span>
+                          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                            <MenuItemImage src={combo.image} alt={combo.name} imgClassName="w-9 h-9 object-contain p-0.5" emojiClassName="text-xl leading-none" />
+                          </div>
                           <span className="font-extrabold text-slate-800">{combo.name}</span>
                         </td>
-                        <td className="py-4 text-xs font-semibold text-slate-500 max-w-xs truncate">
-                          {combo.comboItems.map(itemId => {
-                            const found = menuItems.find(mi => mi.id === itemId);
-                            return found ? `${found.image} ${found.name}` : '';
-                          }).join(', ')}
+                        <td className="py-4 text-xs font-semibold text-slate-500 max-w-xs">
+                          <div className="flex flex-wrap gap-1">
+                            {combo.comboItems.map(itemId => {
+                              const found = menuItems.find(mi => mi.id === itemId);
+                              if (!found) return null;
+                              return (
+                                <span key={itemId} className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-lg px-1.5 py-0.5">
+                                  <MenuItemImage src={found.image} alt={found.name} imgClassName="w-4 h-4 object-contain" emojiClassName="text-xs leading-none" />
+                                  {found.name}
+                                </span>
+                              );
+                            })}
+                          </div>
                         </td>
                         <td className="py-4 font-black text-slate-800">₹{combo.price}</td>
                         <td className="py-4 text-right">
@@ -706,7 +719,7 @@ const MenuManagement = () => {
               >
                 <option value="">-- Choose Menu Item --</option>
                 {menuItems.filter(item => !item.isCombo).map(item => (
-                  <option key={item.id} value={item.id}>{item.image} {item.name}</option>
+                  <option key={item.id} value={item.id}>{item.name}</option>
                 ))}
               </select>
             </div>

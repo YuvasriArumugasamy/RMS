@@ -778,7 +778,9 @@ const OrderManagement = () => {
                     <button key={item.id} onClick={() => editAddItem(item)}
                       className="w-full flex items-center justify-between bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 rounded-2xl p-3 transition-all group">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{item.image}</span>
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-8 h-8 object-contain p-0.5" emojiClassName="text-base leading-none" />
+                        </div>
                         <div className="text-left">
                           <p className="text-xs font-bold text-slate-800">{item.name}</p>
                           <p className="text-[10px] text-slate-400">₹{item.price}</p>
