@@ -251,8 +251,7 @@ const Sidebar = ({ onClose }) => {
             {initials}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{user?.username}</p>
-            <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-0.5 ${roleBadge}`}>
+            <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full ${roleBadge}`}>
               {user?.role}
             </span>
           </div>
