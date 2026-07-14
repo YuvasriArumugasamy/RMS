@@ -619,20 +619,23 @@ const MenuManagement = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Include Menu Items</label>
                 <div className="border border-slate-100 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 bg-slate-50/30">
-                  {menuItems.filter(item => !item.isCombo).map(item => (
-                    <label key={item.id} className="flex items-center space-x-2 text-xs font-bold text-slate-700 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedItemsForCombo.includes(item.id)}
-                        onChange={() => toggleComboItemSelection(item.id)}
-                        className="rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-650"
-                      />
-                      <span className="flex items-center gap-1.5">
-                        <MenuItemImage src={item.image} alt={item.name} imgClassName="w-5 h-5 object-contain rounded" emojiClassName="text-base leading-none" />
-                        {item.name} (₹{item.price})
-                      </span>
-                    </label>
-                  ))}
+                  {menuItems.filter(item => !item.isCombo).map(item => {
+                    const itemId = item._id || item.id;
+                    return (
+                      <label key={itemId} className="flex items-center space-x-2 text-xs font-bold text-slate-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedItemsForCombo.includes(itemId)}
+                          onChange={() => toggleComboItemSelection(itemId)}
+                          className="rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-650"
+                        />
+                        <span className="flex items-center gap-1.5">
+                          <MenuItemImage src={item.image} alt={item.name} imgClassName="w-5 h-5 object-contain rounded" emojiClassName="text-base leading-none" />
+                          {item.name} (₹{item.price})
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
