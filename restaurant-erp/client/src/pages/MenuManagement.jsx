@@ -719,7 +719,7 @@ const MenuManagement = () => {
               >
                 <option value="">-- Choose Menu Item --</option>
                 {menuItems.filter(item => !item.isCombo).map(item => (
-                  <option key={item.id} value={item.id}>{item.name}</option>
+                  <option key={item._id || item.id} value={item._id || item.id}>{item.name}</option>
                 ))}
               </select>
             </div>
@@ -767,7 +767,7 @@ const MenuManagement = () => {
           {/* Current Recipe Ingredients List Card */}
           <div className="bg-white p-6 rounded-3xl border border-slate-100 lg:col-span-2 space-y-4 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 tracking-tight">
-              Recipe Ingredients {selectedRecipeItem && ` - ${menuItems.find(i => i.id === selectedRecipeItem)?.name}`}
+              Recipe Ingredients {selectedRecipeItem && ` - ${menuItems.find(i => (i._id || i.id) === selectedRecipeItem || String(i._id || i.id) === String(selectedRecipeItem))?.name || ''}`}
             </h3>
             
             {!selectedRecipeItem ? (
@@ -794,7 +794,7 @@ const MenuManagement = () => {
                         </tr>
                       ) : (
                         recipeIngredients.map((r, idx) => {
-                          const ing = ingredients.find(i => i.id === r.ingredientId);
+                          const ing = ingredients.find(i => String(i._id || i.id) === String(r.ingredientId));
                           return (
                             <tr key={idx} className="border-b border-slate-50 last:border-0 animate-[fadeIn_0.15s_ease-out]">
                               <td className="py-3.5 font-bold text-slate-800">{ing ? ing.name : 'Unknown Ingredient'}</td>
