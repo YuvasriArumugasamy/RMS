@@ -243,21 +243,8 @@ const Sidebar = ({ onClose }) => {
         ))}
       </nav>
 
-      {/* ── User + Logout ── */}
-      <div className="p-4 border-t border-white/5 space-y-3">
-        {/* User card */}
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 ${roleBadge}`}>
-            {initials}
-          </div>
-          <div className="min-w-0">
-            <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full ${roleBadge}`}>
-              {user?.role}
-            </span>
-          </div>
-        </div>
-
-        {/* Logout */}
+      {/* ── Logout ── */}
+      <div className="p-4 border-t border-white/5">
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-slate-400 border border-white/10 hover:bg-red-900/30 hover:text-red-400 hover:border-red-900/50 transition-all"
