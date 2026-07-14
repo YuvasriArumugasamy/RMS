@@ -28,6 +28,84 @@ const roleColors = {
   Cashier: 'bg-violet-500/10 text-violet-500 border-violet-500/20',
 };
 
+// ── Status color map ───────────────────────────────────────────────────────
+const statusColor = {
+  Pending:    'bg-amber-100 text-amber-700',
+  Preparing:  'bg-blue-100 text-blue-700',
+  Ready:      'bg-emerald-100 text-emerald-700',
+  Served:     'bg-purple-100 text-purple-700',
+};
+
+// ── Active Orders Popup ────────────────────────────────────────────────────
+const ActiveOrdersPopup = ({ orders, onClose, onViewAll }) => {
+  const popupRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[998] flex items-start justify-end pt-16 pr-6 pointer-events-none">
+      <div
+        ref={popupRef}
+        className="pointer-events-auto bg-white rounded-2xl shadow-2xl border border-slate-100 w-80 max-h-[70vh] flex flex-col animate-[fadeIn_0.15s_ease-out]"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <h3 className="text-sm font-extrabold text-slate-800">Active Orders</h3>
+            <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{orders.length}</span>
+          </div>
+          <button onClick={onClose} className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-[10px] font-bold cursor-pointer transition-all">✕</button>
+        </div>
+
+        {/* Orders list */}
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-50">
+          {orders.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-2xl mb-2">🎉</p>
+              <p className="text-xs font-semibold text-slate-400">All caught up! No active orders.</p>
+            </div>
+          ) : orders.map(order => (
+            <div key={order._id || order.id} className="px-4 py-3 hover:bg-slate-50 transition-all">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-extrabold text-slate-800">{order.orderId || `#${order.id}`}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                    {order.type === 'Dine-in' ? `🍽️ ${order.table}` : '🥡 Takeaway'}
+                    {' · '}{order.items?.length || 0} items
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className={`inline-block text-[9px] font-bold px-2 py-1 rounded-lg ${statusColor[order.status] || 'bg-slate-100 text-slate-600'}`}>
+                    {order.status}
+                  </span>
+                  <p className="text-[10px] font-bold text-slate-700 mt-1">₹{order.total}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 py-3 border-t border-slate-100">
+          <button
+            onClick={onViewAll}
+            className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+          >
+            View All in Orders Page →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── Quick Order Modal ──────────────────────────────────────────────────────
 const QuickOrderModal = ({ onClose, onOrderPlaced }) => {
   const [menuItems, setMenuItems]       = useState([]);
@@ -268,8 +346,10 @@ const Header = ({ onOpenMobileSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [pendingCount, setPendingCount] = useState(0);
+  const [activeOrders, setActiveOrders] = useState([]);
   const [now, setNow] = useState(new Date());
   const [showQuickOrder, setShowQuickOrder] = useState(false);
+  const [showActiveOrders, setShowActiveOrders] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -283,13 +363,16 @@ const Header = ({ onOpenMobileSidebar }) => {
       if (data.success) {
         const active = data.data.filter(o => !['Completed', 'Cancelled'].includes(o.status));
         setPendingCount(active.length);
+        setActiveOrders(active);
         return;
       }
     } catch {
       const saved = localStorage.getItem('orders');
       if (saved) {
         const orders = JSON.parse(saved);
-        setPendingCount(orders.filter(o => !['Completed', 'Cancelled'].includes(o.status)).length);
+        const active = orders.filter(o => !['Completed', 'Cancelled'].includes(o.status));
+        setPendingCount(active.length);
+        setActiveOrders(active);
       }
     }
   };
@@ -360,14 +443,16 @@ const Header = ({ onOpenMobileSidebar }) => {
 
           <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
-          {/* Active orders badge */}
-          <button
-            onClick={() => navigate('/orders')}
-            className="hidden sm:flex items-center gap-2 text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl hover:bg-amber-100/70 active:scale-95 transition-all cursor-pointer"
-          >
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
-            {pendingCount} Active
-          </button>
+          {/* Active orders badge → opens popup */}
+          <div className="relative hidden sm:block">
+            <button
+              onClick={() => setShowActiveOrders(v => !v)}
+              className="flex items-center gap-2 text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl hover:bg-amber-100/70 active:scale-95 transition-all cursor-pointer"
+            >
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
+              {pendingCount} Active
+            </button>
+          </div>
 
           {/* ── New Order button → opens Quick Order Modal ── */}
           {['Admin', 'Manager', 'Waiter'].includes(user?.role) && (
@@ -412,6 +497,15 @@ const Header = ({ onOpenMobileSidebar }) => {
         <QuickOrderModal
           onClose={() => setShowQuickOrder(false)}
           onOrderPlaced={fetchActiveCount}
+        />
+      )}
+
+      {/* Active Orders Popup */}
+      {showActiveOrders && (
+        <ActiveOrdersPopup
+          orders={activeOrders}
+          onClose={() => setShowActiveOrders(false)}
+          onViewAll={() => { setShowActiveOrders(false); navigate('/orders'); }}
         />
       )}
     </>
