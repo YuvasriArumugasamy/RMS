@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -8,7 +9,9 @@ import MenuItemImage from '../components/MenuItemImage';
 
 const OrderManagement = () => {
   const { on, connected } = useSocket();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab]       = useState('pos');
+
   const [loading, setLoading]           = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
 
@@ -105,6 +108,10 @@ const OrderManagement = () => {
     loadTables();
     loadStaff();
     loadOrders();
+
+    // Auto-switch tab from URL query param (?tab=history)
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'history') setActiveTab('history');
   }, []);
 
   // 🔌 Live order status updates via socket

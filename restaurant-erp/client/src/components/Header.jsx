@@ -505,7 +505,7 @@ const Header = ({ onOpenMobileSidebar }) => {
         <ActiveOrdersPopup
           orders={activeOrders}
           onClose={() => setShowActiveOrders(false)}
-          onViewAll={() => { setShowActiveOrders(false); navigate('/orders'); }}
+          onViewAll={() => { setShowActiveOrders(false); navigate('/orders?tab=history'); }}
         />
       )}
     </>
