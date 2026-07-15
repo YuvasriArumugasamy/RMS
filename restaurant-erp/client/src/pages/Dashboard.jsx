@@ -317,51 +317,84 @@ const Dashboard = () => {
             </span>
           </div>
 
-          <div className="overflow-x-auto max-h-64 overflow-y-auto">
-            <table className="w-full text-left">
-              <thead className="sticky top-0 bg-white">
-                <tr className="text-slate-400 text-[9px] font-bold uppercase tracking-wider border-b border-slate-100">
-                  <th className="pb-2">Order ID</th>
-                  <th className="pb-2">Type / Table</th>
-                  <th className="pb-2">Items</th>
-                  <th className="pb-2">Amount</th>
-                  <th className="pb-2">Status</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs">
-                {activeOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="text-center text-slate-400 py-10 font-medium">
-                      🎉 No active orders right now
-                    </td>
-                  </tr>
-                ) : (
-                  activeOrders.slice(0, 15).map(o => (
-                    <tr key={o._id || o.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition">
-                      <td className="py-2.5 font-bold text-slate-800">{o.orderId || o.id}</td>
-                      <td className="py-2.5 text-slate-500 font-semibold">
-                        {o.type} {o.table !== 'N/A' && `(${o.table})`}
-                      </td>
-                      <td className="py-2.5 text-slate-500 font-medium max-w-[160px] truncate">
-                        {(o.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
-                      </td>
-                      <td className="py-2.5 font-bold text-slate-800">₹{o.total}</td>
-                      <td className="py-2.5">
-                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
-                          o.status === 'Ready'     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                          o.status === 'Preparing' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                          o.status === 'Served'    ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
-                          'bg-blue-50 text-blue-700 border border-blue-200'
-                        }`}>
-                          {o.status}
-                        </span>
-                      </td>
+          {activeOrders.length === 0 ? (
+            <div className="text-center text-slate-400 py-10 font-medium text-xs">
+              🎉 No active orders right now
+            </div>
+          ) : (
+            <>
+              {/* ── MOBILE: Card list ── */}
+              <div className="sm:hidden space-y-2 max-h-72 overflow-y-auto pr-0.5" style={{scrollbarWidth:'none'}}>
+                {activeOrders.slice(0, 15).map(o => {
+                  const statusStyle =
+                    o.status === 'Ready'     ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                    o.status === 'Preparing' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                    o.status === 'Served'    ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                    'bg-blue-50 text-blue-700 border-blue-200';
+                  return (
+                    <div key={o._id || o.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center gap-3">
+                      {/* Left: Order info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[11px] font-black text-slate-800 truncate">{o.orderId || o.id}</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border flex-shrink-0 ${statusStyle}`}>{o.status}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-semibold truncate">
+                          {o.type}{o.table !== 'N/A' ? ` · ${o.table}` : ''}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                          {(o.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
+                        </p>
+                      </div>
+                      {/* Right: Amount */}
+                      <div className="flex-shrink-0 text-right">
+                        <span className="text-sm font-black text-slate-800">₹{o.total}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ── DESKTOP: Table ── */}
+              <div className="hidden sm:block overflow-x-auto max-h-64 overflow-y-auto">
+                <table className="w-full text-left">
+                  <thead className="sticky top-0 bg-white">
+                    <tr className="text-slate-400 text-[9px] font-bold uppercase tracking-wider border-b border-slate-100">
+                      <th className="pb-2">Order ID</th>
+                      <th className="pb-2">Type / Table</th>
+                      <th className="pb-2">Items</th>
+                      <th className="pb-2">Amount</th>
+                      <th className="pb-2">Status</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="text-xs">
+                    {activeOrders.slice(0, 15).map(o => (
+                      <tr key={o._id || o.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition">
+                        <td className="py-2.5 font-bold text-slate-800">{o.orderId || o.id}</td>
+                        <td className="py-2.5 text-slate-500 font-semibold">
+                          {o.type} {o.table !== 'N/A' && `(${o.table})`}
+                        </td>
+                        <td className="py-2.5 text-slate-500 font-medium max-w-[160px] truncate">
+                          {(o.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
+                        </td>
+                        <td className="py-2.5 font-bold text-slate-800">₹{o.total}</td>
+                        <td className="py-2.5">
+                          <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
+                            o.status === 'Ready'     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            o.status === 'Preparing' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            o.status === 'Served'    ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                            'bg-blue-50 text-blue-700 border border-blue-200'
+                          }`}>
+                            {o.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right column: Top Items + Alerts */}
