@@ -108,10 +108,10 @@ const StaffIDViewContent = ({ onBack, altLogin }) => {
         {[
           { l:'QR Login',  v:'qr',      ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
           { l:'Staff ID',  v:'staffid', ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg> },
-          { l:'Face ID',   v:null,      ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> },
-          { l:'Offline',   v:null,      ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6s4-2 11-2 11 2 11 2"/><path d="M1 12s4-2 11-2 11 2 11 2"/><line x1="2" y1="2" x2="22" y2="22"/></svg> },
+          { l:'Face ID',   v:'faceid',   ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg> },
+          { l:'Offline',   v:'offline',  ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6s4-2 11-2 11 2 11 2"/><path d="M1 12s4-2 11-2 11 2 11 2"/><line x1="2" y1="2" x2="22" y2="22"/></svg> },
         ].map(({l,v,ic})=>(
-          <button key={l} type="button" onClick={()=> v ? onBack(v) : null}
+          <button key={l} type="button" onClick={()=> onBack(v)}
             className={`flex flex-col items-center justify-center py-2.5 border rounded-2xl transition-all gap-1.5 ${v==='staffid'?'border-orange-300 bg-orange-50':'border-gray-200 hover:border-orange-400'}`}>
             <span className={v==='staffid'?'text-[#f97316]':'text-[#1e3a8a]'}>{ic}</span>
             <span className={`text-[9px] font-bold ${v==='staffid'?'text-[#f97316]':'text-gray-600'}`}>{l}</span>
