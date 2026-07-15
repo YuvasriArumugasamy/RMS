@@ -333,6 +333,15 @@ const FaceIDViewContent = ({ onBack }) => {
   const videoRef = useRef(null);
   const [status, setStatus] = useState('starting'); // 'starting'|'active'|'denied'|'unsupported'|'error'
   const [scanning, setScanning] = useState(false);
+  const [camH, setCamH] = useState(190);
+
+  useEffect(() => {
+    // Dynamically set camera height based on available screen space
+    const h = window.innerHeight;
+    if (h < 680) setCamH(150);
+    else if (h < 780) setCamH(175);
+    else setCamH(200);
+  }, []);
 
   useEffect(() => {
     let stream = null;
@@ -358,23 +367,20 @@ const FaceIDViewContent = ({ onBack }) => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center px-6 pt-5 pb-5 h-full overflow-y-auto" style={{scrollbarWidth:'none'}}>
-      <button onClick={onBack} className="flex items-center gap-1.5 text-gray-700 font-semibold text-sm mb-4 hover:text-gray-900 transition self-start">
+    <div className="flex flex-col items-center px-5 pt-4 pb-4 h-full overflow-y-auto" style={{scrollbarWidth:'none'}}>
+      {/* Back */}
+      <button onClick={onBack} className="flex items-center gap-1.5 text-gray-700 font-semibold text-sm mb-3 hover:text-gray-900 transition self-start">
         <IconBack/> Back
       </button>
 
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mb-2">
-        <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-      <h2 className="text-xl font-bold text-gray-900 text-center mb-0.5">Face ID Login</h2>
-      <p className="text-xs text-gray-500 text-center mb-4">
+      {/* Title row - compact, no big icon */}
+      <h2 className="text-lg font-bold text-gray-900 text-center mb-0.5">Face ID Login</h2>
+      <p className="text-xs text-gray-500 text-center mb-3">
         {status === 'active' ? 'Position your face in the frame' : 'Starting camera...'}
       </p>
 
-      {/* Camera / status area */}
-      <div className="relative w-full rounded-2xl overflow-hidden mb-4" style={{background:'#0f172a', height:'200px'}}>
+      {/* Camera / status area - uses dynamic height */}
+      <div className="relative w-full rounded-2xl overflow-hidden mb-3" style={{background:'#0f172a', height: `${camH}px`, flexShrink: 0}}>
         {/* Live video */}
         <video ref={videoRef} autoPlay playsInline muted
           className={`w-full h-full object-cover ${status === 'active' ? 'opacity-100' : 'opacity-0'}`}
@@ -418,18 +424,16 @@ const FaceIDViewContent = ({ onBack }) => {
           </div>
         )}
 
-        {/* Corner brackets overlay when active */}
+        {/* Corner brackets + scan line overlay when active */}
         {status === 'active' && (
           <>
-            <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-[#f97316] rounded-tl-md"/>
-            <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-[#f97316] rounded-tr-md"/>
-            <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-[#f97316] rounded-bl-md"/>
-            <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-[#f97316] rounded-br-md"/>
-            {/* Scanning line */}
-            {scanning && (
-              <div className="scan-line"/>
-            )}
-            <div className="absolute bottom-2 left-0 right-0 text-center">
+            <div className="absolute top-3 left-3 w-7 h-7 border-t-2 border-l-2 border-[#f97316] rounded-tl-md"/>
+            <div className="absolute top-3 right-3 w-7 h-7 border-t-2 border-r-2 border-[#f97316] rounded-tr-md"/>
+            <div className="absolute bottom-6 left-3 w-7 h-7 border-b-2 border-l-2 border-[#f97316] rounded-bl-md"/>
+            <div className="absolute bottom-6 right-3 w-7 h-7 border-b-2 border-r-2 border-[#f97316] rounded-br-md"/>
+            {/* Scanning line — uses .scan-line CSS class */}
+            {scanning && <div className="scan-line"/>}
+            <div className="absolute bottom-1.5 left-0 right-0 text-center">
               <span className="text-[10px] text-white/70 font-semibold bg-black/30 px-2 py-0.5 rounded-full">
                 🔍 Scanning...
               </span>
@@ -438,25 +442,27 @@ const FaceIDViewContent = ({ onBack }) => {
         )}
       </div>
 
-      {/* Info note for demo */}
-      <div className="w-full bg-orange-50 border border-orange-100 rounded-2xl p-3 flex items-start gap-2 mb-4">
-        <span className="text-[#f97316] text-sm mt-0.5">ℹ️</span>
-        <p className="text-[10.5px] text-gray-600 leading-relaxed font-medium">
-          Face ID is a demo feature. For actual authentication, use your <span className="font-bold text-gray-800">username & password</span>.
+      {/* Info note — compact */}
+      <div className="w-full bg-orange-50 border border-orange-100 rounded-xl p-2.5 flex items-start gap-2 mb-3">
+        <span className="text-[#f97316] text-sm flex-shrink-0">ℹ️</span>
+        <p className="text-[10px] text-gray-600 leading-relaxed font-medium">
+          Face ID is a <strong>demo</strong> feature. For actual authentication, use your <span className="font-bold text-gray-800">username & password</span>.
         </p>
       </div>
 
       {/* Cancel button */}
-      <button onClick={onBack} className="w-full py-3 border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 transition mb-3">
+      <button onClick={onBack} className="w-full py-2.5 border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 transition mb-2.5">
         Cancel
       </button>
 
-      {/* OR + alt buttons */}
-      <div className="flex items-center w-full gap-3 mb-3">
+      {/* OR divider */}
+      <div className="flex items-center w-full gap-3 mb-2.5">
         <div className="flex-1 h-px bg-gray-200"/>
         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">OR</span>
         <div className="flex-1 h-px bg-gray-200"/>
       </div>
+
+      {/* Alt login buttons */}
       <div className="grid grid-cols-4 gap-2 w-full">
         {[
           { l:'QR Login', v:'qr',      ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
@@ -465,7 +471,7 @@ const FaceIDViewContent = ({ onBack }) => {
           { l:'Offline',  v:null,      ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6s4-2 11-2 11 2 11 2"/><path d="M1 12s4-2 11-2 11 2 11 2"/><line x1="2" y1="2" x2="22" y2="22"/></svg> },
         ].map(({l,v,ic})=>(
           <button key={l} type="button" onClick={()=> v && v!=='faceid' ? onBack(v) : null}
-            className={`flex flex-col items-center justify-center py-2.5 border rounded-2xl transition-all gap-1.5 ${v==='faceid'?'border-orange-300 bg-orange-50':'border-gray-200 hover:border-orange-400'}`}>
+            className={`flex flex-col items-center justify-center py-2 border rounded-2xl transition-all gap-1 ${v==='faceid'?'border-orange-300 bg-orange-50':'border-gray-200 hover:border-orange-400'}`}>
             <span className={v==='faceid'?'text-[#f97316]':'text-[#1e3a8a]'}>{ic}</span>
             <span className={`text-[9px] font-bold ${v==='faceid'?'text-[#f97316]':'text-gray-600'}`}>{l}</span>
           </button>
