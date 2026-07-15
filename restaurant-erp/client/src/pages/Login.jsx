@@ -450,8 +450,8 @@ const LoginFormContent = ({ role, setRole, email, setEmail, password, setPasswor
   ];
   return (
     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-3" style={{scrollbarWidth:'none',msOverflowStyle:'none'}}>
-      {/* Brand - hidden on mobile (logo shown above card), visible on desktop */}
-      <div className="hidden md:block text-center mb-3">
+      {/* Brand */}
+      <div className="text-center mb-3">
         <p className="text-[10px] text-[#f97316] font-semibold tracking-[0.18em] uppercase">Welcome to</p>
         <div className="flex items-end justify-center">
           <span className="text-[38px] font-black text-[#f97316] leading-none">R</span>
@@ -461,14 +461,6 @@ const LoginFormContent = ({ role, setRole, email, setEmail, password, setPasswor
         <div className="flex justify-center gap-1.5 mt-1.5">
           <div className="h-[2px] w-7 bg-[#1e3a8a] rounded-full"/>
           <div className="h-[2px] w-7 bg-[#f97316] rounded-full"/>
-        </div>
-      </div>
-      {/* Mobile brand - compact version below logo circle */}
-      <div className="md:hidden text-center mb-2 pt-2">
-        <p className="text-[8px] font-bold text-gray-400 tracking-[0.2em] uppercase">Restaurant Management System</p>
-        <div className="flex justify-center gap-1.5 mt-1">
-          <div className="h-[2px] w-5 bg-[#1e3a8a] rounded-full"/>
-          <div className="h-[2px] w-5 bg-[#f97316] rounded-full"/>
         </div>
       </div>
       {/* Role pills */}
@@ -702,15 +694,15 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Logo */}
-        <div className="relative z-20 flex justify-center flex-shrink-0 -mt-11">
-          <div className="w-[84px] h-[84px] rounded-full overflow-hidden bg-white shadow-lg flex items-center justify-center border-4 border-white">
+        {/* Logo - overlaps into white card */}
+        <div className="relative z-20 flex justify-center flex-shrink-0" style={{marginTop:'-44px'}}>
+          <div className="w-[88px] h-[88px] rounded-full overflow-hidden bg-white shadow-lg flex items-center justify-center">
             <img src={centerLogo} alt="RMS" className="w-full h-full object-contain p-1"/>
           </div>
         </div>
 
-        {/* White card */}
-        <div className="flex-1 bg-white rounded-t-[28px] flex flex-col">
+        {/* White card - overlaps logo */}
+        <div className="flex-1 bg-white rounded-t-[28px] -mt-10 flex flex-col overflow-hidden">
           {view === 'qr' ? (
             <QRViewContent onBack={()=>setView('login')}/>
           ) : view === 'staffid' ? (
