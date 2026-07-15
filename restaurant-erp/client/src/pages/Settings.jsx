@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useSocket } from '../context/SocketContext';
-import { api } from '../context/AuthContext';
+import { api, useAuth } from '../context/AuthContext';
 
 const Settings = () => {
   const { requestNotificationPermission } = useSocket();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Admin';
   const [activeTab, setActiveTab] = useState('General Settings');
   const [saving, setSaving] = useState(false);
+
+  // Tax settings (Admin configurable)
+  const [gstRate, setGstRate] = useState(() => {
+    const saved = localStorage.getItem('rms_gst_rate');
+    return saved ? parseFloat(saved) : 5;
+  });
+  const [gstin, setGstin] = useState(() => {
+    return localStorage.getItem('rms_gstin') || '33AAAAA1111A1Z1';
+  });
   const [notifPermission, setNotifPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
   );
@@ -36,6 +47,14 @@ const Settings = () => {
           };
           setSettings(s);
           localStorage.setItem('settings', JSON.stringify(s));
+          if (data.data.gstRate !== undefined) {
+            setGstRate(data.data.gstRate);
+            localStorage.setItem('rms_gst_rate', data.data.gstRate.toString());
+          }
+          if (data.data.gstin !== undefined) {
+            setGstin(data.data.gstin);
+            localStorage.setItem('rms_gstin', data.data.gstin);
+          }
         }
       } catch {
         // offline — keep localStorage values
@@ -276,6 +295,98 @@ const Settings = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          ) : activeTab === 'Business Settings' ? (
+            <div className="space-y-6 max-w-xl animate-[fadeIn_0.2s_ease-out]">
+              {isAdmin ? (
+                <>
+                  {/* Tax Configuration */}
+                  <div className="bg-slate-50 border border-slate-150/60 rounded-3xl p-5 space-y-5">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-800 flex items-center gap-2">
+                        📊 Tax Configuration
+                        <span className="text-[8px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md uppercase">Admin Only</span>
+                      </h4>
+                      <p className="text-[10.5px] text-slate-400 font-bold mt-0.5 leading-relaxed">
+                        Set the GST percentage applied to all orders, invoices, and receipts.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">GST Rate (%)</label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            max="28"
+                            step="0.5"
+                            value={gstRate}
+                            onChange={(e) => setGstRate(parseFloat(e.target.value) || 0)}
+                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-xs font-bold pr-10"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">%</span>
+                        </div>
+                        <p className="text-[9px] text-slate-400 font-semibold">Common: 5% (Food) · 12% (Non-AC) · 18% (AC/Premium)</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">GSTIN Number</label>
+                        <input
+                          type="text"
+                          value={gstin}
+                          onChange={(e) => setGstin(e.target.value.toUpperCase())}
+                          placeholder="e.g. 33AAAAA1111A1Z1"
+                          maxLength={15}
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-xs font-bold tracking-wider"
+                        />
+                        <p className="text-[9px] text-slate-400 font-semibold">15-digit GST Identification Number for invoices</p>
+                      </div>
+                    </div>
+
+                    {/* Preview */}
+                    <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-4">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Invoice Preview</p>
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                        <span>Subtotal</span><span>₹1,000.00</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs font-bold text-[#f97316] mt-1">
+                        <span>GST ({gstRate}%)</span><span>₹{(1000 * gstRate / 100).toFixed(2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm font-extrabold text-slate-800 mt-2 pt-2 border-t border-dashed border-slate-150">
+                        <span>Total</span><span>₹{(1000 + 1000 * gstRate / 100).toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        localStorage.setItem('rms_gst_rate', gstRate.toString());
+                        localStorage.setItem('rms_gstin', gstin);
+                        try {
+                          await api.put('/settings', {
+                            ...settings,
+                            gstRate,
+                            gstin
+                          });
+                          toast.success(`✅ Tax settings saved! GST: ${gstRate}% · GSTIN: ${gstin}`);
+                        } catch (err) {
+                          toast.warning(`⚠️ Saved locally (server offline). GST: ${gstRate}%`);
+                        }
+                      }}
+                      className="w-full py-3.5 bg-indigo-600 hover:bg-[#0F286B] text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-indigo-600/10 cursor-pointer active:scale-95"
+                    >
+                      💾 Save Tax Settings
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="py-16 text-center space-y-3">
+                  <span className="text-5xl select-none block">🔒</span>
+                  <h4 className="text-sm font-extrabold text-slate-800">Admin Access Required</h4>
+                  <p className="text-xs text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">
+                    Only Admin users can modify GST rate and business tax settings.
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="py-16 text-center space-y-3 animate-[fadeIn_0.2s_ease-out]">

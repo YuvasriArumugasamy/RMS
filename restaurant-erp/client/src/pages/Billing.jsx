@@ -7,6 +7,9 @@ import autoTable from 'jspdf-autotable';
 
 const Billing = () => {
   const { on, connected } = useSocket();
+  const gstRatePercent = parseFloat(localStorage.getItem('rms_gst_rate') || '5');
+  const gstRate = gstRatePercent / 100;
+  const gstinNumber = localStorage.getItem('rms_gstin') || '33AAAAA1111A1Z1';
   const [orders, setOrders] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -171,7 +174,7 @@ const Billing = () => {
     const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const discount = order.discount || 0;
     const total = order.total || subtotal;
-    const gst = subtotal * 0.05;
+    const gst = subtotal * gstRate;
 
     setActiveInvoice({
       id: order._id || order.id,
@@ -200,7 +203,7 @@ const Billing = () => {
 
     const restaurantName = 'RMS RESTAURANT';
     const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const gst = subtotal * 0.05;
+    const gst = subtotal * gstRate;
     const discount = order.discount || 0;
     const total = order.total || (subtotal + gst - discount);
 
@@ -280,7 +283,7 @@ const Billing = () => {
     }
 
     doc.setTextColor(71, 85, 105);
-    doc.text('GST (5%):',        boxX + 2, ty);
+    doc.text(`GST (${gstRatePercent}%):`,        boxX + 2, ty);
     doc.text(`₹ ${gst.toFixed(2)}`, boxX + boxW - 2, ty, { align: 'right' });
     ty += lineH;
 
@@ -600,7 +603,7 @@ const Billing = () => {
             
             <div className="text-center py-2">
               <h2 className="text-lg font-black text-slate-800 tracking-tight">RMS RESTAURANT</h2>
-              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5">GSTIN: 33AAAAA1111A1Z1</p>
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5">GSTIN: {gstinNumber}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-y-1.5 text-[10px] font-bold text-slate-500 border-y border-slate-100 py-3">
@@ -638,7 +641,7 @@ const Billing = () => {
               {Number(activeInvoice.discount) > 0 && (
                 <p className="text-green-600">Discount: <span>- ₹{activeInvoice.discount}</span></p>
               )}
-              <p>GST (5%): <span className="text-slate-800">₹{activeInvoice.gst}</span></p>
+              <p>GST ({gstRatePercent}%): <span className="text-slate-800">₹{activeInvoice.gst}</span></p>
               <p className="text-base font-black text-slate-850 pt-2 border-t border-slate-100">
                 Total: ₹{activeInvoice.total}
               </p>

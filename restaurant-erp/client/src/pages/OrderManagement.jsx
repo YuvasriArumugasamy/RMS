@@ -10,6 +10,8 @@ import MenuItemImage from '../components/MenuItemImage';
 const OrderManagement = () => {
   const { on, connected } = useSocket();
   const [searchParams] = useSearchParams();
+  const gstRatePercent = parseFloat(localStorage.getItem('rms_gst_rate') || '5');
+  const gstRate = gstRatePercent / 100;
   const [activeTab, setActiveTab]       = useState('pos');
 
   const [loading, setLoading]           = useState(false);
@@ -167,8 +169,8 @@ const OrderManagement = () => {
       table: orderType === 'Dine-in' ? selectedTable : 'N/A',
       items: cart.map(i => ({ ...i, menuItemId: i.id })),
       subtotal: sub,
-      gst: Math.round(sub * 0.05),
-      total: Math.round(sub * 1.05),
+      gst: Math.round(sub * gstRate),
+      total: Math.round(sub * (1 + gstRate)),
       guestCount,
       waiterName,
     };
@@ -526,15 +528,15 @@ const OrderManagement = () => {
               {cart.length > 0 && (
                 <div className="border-t border-slate-100 pt-5 space-y-3.5">
                   <div className="flex justify-between text-xs font-extrabold text-slate-450"><span>Subtotal</span><span>₹{cartTotal}</span></div>
-                  <div className="flex justify-between text-xs font-extrabold text-slate-450"><span>GST (5%)</span><span>₹{Math.round(cartTotal * 0.05)}</span></div>
-                  <div className="flex justify-between text-sm font-black border-t border-dashed border-slate-150 pt-3.5 text-slate-800"><span>Total</span><span>₹{Math.round(cartTotal * 1.05)}</span></div>
+                  <div className="flex justify-between text-xs font-extrabold text-slate-450"><span>GST ({gstRatePercent}%)</span><span>₹{Math.round(cartTotal * gstRate)}</span></div>
+                  <div className="flex justify-between text-sm font-black border-t border-dashed border-slate-150 pt-3.5 text-slate-800"><span>Total</span><span>₹{Math.round(cartTotal * (1 + gstRate))}</span></div>
                   <div className="flex space-x-3 pt-2">
                     <button onClick={clearCart} className="flex-1 py-3.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold rounded-2xl text-xs transition-all cursor-pointer text-center">Clear</button>
                     <button onClick={placeOrder} disabled={placingOrder}
                       className="flex-2 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-750 disabled:opacity-60 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-indigo-600/10 flex items-center justify-center gap-2 cursor-pointer">
                       {placingOrder
                         ? <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Placing...</>
-                        : `Place Order (₹${Math.round(cartTotal * 1.05)})`
+                        : `Place Order (₹${Math.round(cartTotal * (1 + gstRate))})`
                       }
                     </button>
                   </div>
@@ -769,8 +771,8 @@ const OrderManagement = () => {
                     return (
                       <>
                         <div className="flex justify-between text-xs font-semibold text-slate-400"><span>Subtotal</span><span>₹{sub}</span></div>
-                        <div className="flex justify-between text-xs font-semibold text-slate-400"><span>GST (5%)</span><span>₹{Math.round(sub * 0.05)}</span></div>
-                        <div className="flex justify-between text-sm font-bold text-slate-800"><span>Total</span><span>₹{Math.round(sub * 1.05)}</span></div>
+                        <div className="flex justify-between text-xs font-semibold text-slate-400"><span>GST ({gstRatePercent}%)</span><span>₹{Math.round(sub * gstRate)}</span></div>
+                        <div className="flex justify-between text-sm font-bold text-slate-800"><span>Total</span><span>₹{Math.round(sub * (1 + gstRate))}</span></div>
                       </>
                     );
                   })()}

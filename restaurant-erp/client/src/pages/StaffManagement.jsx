@@ -9,7 +9,7 @@ const StaffManagement = () => {
   });
   const [activeTab, setActiveTab] = useState('directory'); // 'directory' | 'permissions'
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   // Attendance & Shift Form
   const [selectedStaffForShift, setSelectedStaffForShift] = useState('');
   const [shiftStart, setShiftStart] = useState('');
@@ -203,7 +203,7 @@ const StaffManagement = () => {
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto animate-[fadeIn_0.3s_ease-out] pb-12">
-      
+
       {/* ── HEADER ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-50 pb-5">
         <div>
@@ -216,17 +216,15 @@ const StaffManagement = () => {
           <div className="flex space-x-1.5 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
             <button
               onClick={() => setActiveTab('directory')}
-              className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                activeTab === 'directory' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
-              }`}
+              className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeTab === 'directory' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                }`}
             >
               👥 Directory & Shifts
             </button>
             <button
               onClick={() => setActiveTab('permissions')}
-              className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                activeTab === 'permissions' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
-              }`}
+              className={`px-4.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeTab === 'permissions' ? 'bg-[#0F286B] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                }`}
             >
               🔐 Access Control
             </button>
@@ -247,7 +245,7 @@ const StaffManagement = () => {
       {activeTab === 'directory' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-6">
-            
+
             {/* Quick Metrics Dashboard */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-4.5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-center">
@@ -326,7 +324,7 @@ const StaffManagement = () => {
                 />
               </div>
             </div>
-            
+
             {/* Desktop Table View (hidden on mobile) */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left">
@@ -346,24 +344,22 @@ const StaffManagement = () => {
                       <td className="py-4 font-semibold text-slate-500 text-xs">{staff.role}</td>
                       <td className="py-4 font-semibold text-slate-500 text-xs">{staff.shift}</td>
                       <td className="py-4 text-center">
-                         <div className="flex justify-center bg-slate-100 rounded-xl p-1 w-fit mx-auto select-none">
-                            <button 
-                              onClick={() => markAttendance(staff._id || staff.id, 'Present')}
-                              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
-                                getAttendanceForDate(staff, selectedDate) === 'Present' 
-                                  ? 'bg-green-500 text-white shadow-sm' 
-                                  : 'text-slate-500 hover:bg-slate-200'
+                        <div className="flex justify-center bg-slate-100 rounded-xl p-1 w-fit mx-auto select-none">
+                          <button
+                            onClick={() => markAttendance(staff._id || staff.id, 'Present')}
+                            className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${getAttendanceForDate(staff, selectedDate) === 'Present'
+                                ? 'bg-green-500 text-white shadow-sm'
+                                : 'text-slate-500 hover:bg-slate-200'
                               }`}
-                            >Present</button>
-                            <button 
-                              onClick={() => markAttendance(staff._id || staff.id, 'Absent')}
-                              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
-                                getAttendanceForDate(staff, selectedDate) === 'Absent' 
-                                  ? 'bg-red-500 text-white shadow-sm' 
-                                  : 'text-slate-500 hover:bg-slate-200'
+                          >Present</button>
+                          <button
+                            onClick={() => markAttendance(staff._id || staff.id, 'Absent')}
+                            className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${getAttendanceForDate(staff, selectedDate) === 'Absent'
+                                ? 'bg-red-500 text-white shadow-sm'
+                                : 'text-slate-500 hover:bg-slate-200'
                               }`}
-                            >Absent</button>
-                         </div>
+                          >Absent</button>
+                        </div>
                       </td>
                       <td className="py-4 text-right">
                         <div className="flex justify-end gap-1.5">
@@ -373,8 +369,8 @@ const StaffManagement = () => {
                             title="Edit Employee"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                             </svg>
                           </button>
                           <button
@@ -383,8 +379,8 @@ const StaffManagement = () => {
                             title="View Attendance History"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <circle cx="12" cy="12" r="10"/>
-                              <polyline points="12 6 12 12 16 14"/>
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
                             </svg>
                           </button>
                           <button
@@ -393,8 +389,8 @@ const StaffManagement = () => {
                             title="Remove Employee"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="3 6 5 6 21 6"/>
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             </svg>
                           </button>
                         </div>
@@ -455,23 +451,21 @@ const StaffManagement = () => {
                       <div className="space-y-1.5">
                         <label className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider block">Mark Attendance</label>
                         <div className="flex bg-white border border-slate-150 rounded-2xl p-1 w-full gap-1 shadow-sm select-none">
-                          <button 
+                          <button
                             onClick={() => markAttendance(id, 'Present')}
-                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
-                              attendanceStatus === 'Present' 
-                                ? 'bg-emerald-500 text-white shadow-md' 
+                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${attendanceStatus === 'Present'
+                                ? 'bg-emerald-500 text-white shadow-md'
                                 : 'text-slate-500 hover:bg-slate-100'
-                            }`}
+                              }`}
                           >
                             Present
                           </button>
-                          <button 
+                          <button
                             onClick={() => markAttendance(id, 'Absent')}
-                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
-                              attendanceStatus === 'Absent' 
-                                ? 'bg-red-500 text-white shadow-md' 
+                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${attendanceStatus === 'Absent'
+                                ? 'bg-red-500 text-white shadow-md'
                                 : 'text-slate-500 hover:bg-slate-100'
-                            }`}
+                              }`}
                           >
                             Absent
                           </button>
@@ -514,46 +508,46 @@ const StaffManagement = () => {
 
       {activeTab === 'permissions' && (
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
-           <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">Role-Based Access Control (RBAC)</h3>
-                <p className="text-xs text-slate-500 font-medium mt-1">Configure which pages each role can access. Changes require a refresh to reflect in the sidebar.</p>
-              </div>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {Object.keys(rolePermissions).map(role => {
-               // Protect Admin from being locked out of Staff & Settings ideally, but for demo let user toggle anything
-               return (
-                 <div key={role} className="border border-slate-100 rounded-3xl p-5 bg-slate-50">
-                    <h4 className="font-black text-slate-800 text-lg mb-4 capitalize border-b border-slate-200 pb-2">{role} Access</h4>
-                    <div className="space-y-3">
-                       {allAvailablePermissions.map(perm => {
-                         const hasAccess = rolePermissions[role].includes(perm);
-                         return (
-                           <label key={perm} className="flex items-center justify-between group cursor-pointer">
-                              <span className={`text-sm font-bold ${hasAccess ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                                {perm}
-                              </span>
-                              <div className={`w-10 h-5 flex items-center rounded-full p-1 transition-colors ${hasAccess ? 'bg-indigo-600' : 'bg-slate-300'}`}>
-                                 <input 
-                                   type="checkbox" 
-                                   className="hidden" 
-                                   checked={hasAccess} 
-                                   onChange={() => togglePermission(role, perm)}
-                                 />
-                                 <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform ${hasAccess ? 'translate-x-5' : ''}`}></div>
-                              </div>
-                           </label>
-                         );
-                       })}
-                    </div>
-                 </div>
-               );
-             })}
+          <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Role-Based Access Control (RBAC)</h3>
+              <p className="text-xs text-slate-500 font-medium mt-1">Configure which pages each role can access. Changes require a refresh to reflect in the sidebar.</p>
             </div>
-         </div>
-       )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Object.keys(rolePermissions).map(role => {
+              // Protect Admin from being locked out of Staff & Settings ideally, but for demo let user toggle anything
+              return (
+                <div key={role} className="border border-slate-100 rounded-3xl p-5 bg-slate-50">
+                  <h4 className="font-black text-slate-800 text-lg mb-4 capitalize border-b border-slate-200 pb-2">{role} Access</h4>
+                  <div className="space-y-3">
+                    {allAvailablePermissions.map(perm => {
+                      const hasAccess = rolePermissions[role].includes(perm);
+                      return (
+                        <label key={perm} className="flex items-center justify-between group cursor-pointer">
+                          <span className={`text-sm font-bold ${hasAccess ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                            {perm}
+                          </span>
+                          <div className={`w-10 h-5 flex items-center rounded-full p-1 transition-colors ${hasAccess ? 'bg-indigo-600' : 'bg-slate-300'}`}>
+                            <input
+                              type="checkbox"
+                              className="hidden"
+                              checked={hasAccess}
+                              onChange={() => togglePermission(role, perm)}
+                            />
+                            <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform ${hasAccess ? 'translate-x-5' : ''}`}></div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Attendance History Modal */}
       {selectedStaffForHistory && (
@@ -564,7 +558,7 @@ const StaffManagement = () => {
                 <h3 className="font-extrabold text-slate-800 text-lg">Attendance History</h3>
                 <p className="text-xs text-slate-400 font-semibold">{selectedStaffForHistory.name} ({selectedStaffForHistory.role})</p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedStaffForHistory(null)}
                 className="text-slate-400 hover:text-slate-600 transition"
               >
@@ -588,11 +582,10 @@ const StaffManagement = () => {
                       <span className="text-xs font-bold text-slate-700">
                         {new Date(record.date).toLocaleDateString([], { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
-                      <span className={`px-2.5 py-1 text-[10px] font-black rounded-lg ${
-                        record.status === 'Present' 
-                          ? 'bg-green-50 text-green-600 border border-green-100' 
+                      <span className={`px-2.5 py-1 text-[10px] font-black rounded-lg ${record.status === 'Present'
+                          ? 'bg-green-50 text-green-600 border border-green-100'
                           : 'bg-red-50 text-red-600 border border-red-100'
-                      }`}>
+                        }`}>
                         {record.status}
                       </span>
                     </div>
@@ -621,7 +614,7 @@ const StaffManagement = () => {
                 <h3 className="font-extrabold text-slate-800 text-lg">Edit Employee</h3>
                 <p className="text-xs text-slate-400 font-semibold">Update details for {editingStaff.name}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setEditingStaff(null)}
                 className="text-slate-400 hover:text-slate-600 transition"
               >
@@ -691,15 +684,15 @@ const StaffManagement = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease-out]">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
-          
+
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full relative z-10 p-6 space-y-4 animate-[scaleUp_0.2s_ease-out] border border-slate-100">
             <div className="flex items-center justify-between border-b border-slate-50 pb-3">
               <h3 className="text-base font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
                 <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-black">+</span>
                 Add New Employee
               </h3>
-              <button 
-                onClick={() => setShowAddModal(false)} 
+              <button
+                onClick={() => setShowAddModal(false)}
                 className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 hover:text-slate-800 transition-all cursor-pointer text-xs"
               >
                 ✕
@@ -770,8 +763,8 @@ const StaffManagement = () => {
       {confirmState && (
         <ConfirmModal {...confirmState} onClose={() => setConfirmState(null)} />
       )}
-     </div>
-   );
+    </div>
+  );
 };
 
 export default StaffManagement;

@@ -10,6 +10,8 @@ const settingsSchema = new mongoose.Schema({
   phone:    { type: String, default: '9876543210' },
   address:  { type: String, default: '123, Main Street, Chennai, Tamil Nadu - 600001' },
   currency: { type: String, default: 'INR (₹)' },
+  gstRate:  { type: Number, default: 5 },
+  gstin:    { type: String, default: '33AAAAA1111A1Z1' },
 
   // Role permissions map — stored as JSON object
   rolePermissions: {
