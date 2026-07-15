@@ -9,6 +9,7 @@ import bannerBgImage from '../assets/ChatGPT Image Jul 10, 2026, 06_08_46 PM.png
 import scanStepImg from '../assets/Screenshot 2026-07-11 201657.png';
 import orderStepImg from '../assets/Screenshot 2026-07-11 201635.png';
 import enjoyStepImg from '../assets/Screenshot 2026-07-11 201920.png';
+import logoImage from '../assets/Screenshot 2026-07-02 173735.png';
 import chefImage from '../assets/image.png';
 
 
@@ -2259,7 +2260,7 @@ const CustomerMenu = () => {
       }`}>
         <div className="absolute -top-12 left-1/2 -translate-x-1/2">
           <div className="rounded-full bg-white p-1.5 shadow-md shadow-orange-200 ring-4 ring-white flex items-center justify-center">
-            <img src={chefImage} alt="Resto Logo" className="w-20 h-20 rounded-full object-cover" />
+            <img src={logoImage} alt="Resto Logo" className="w-20 h-20 rounded-full object-cover" />
           </div>
         </div>
 
@@ -2713,7 +2714,9 @@ const AppShell = ({
         <div className="space-y-8">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl">👨‍🍳</div>
+            <div className="w-12 h-12 rounded-2xl overflow-hidden bg-amber-500/10 flex items-center justify-center">
+              <img src={logoImage} alt="Resto QR" className="w-full h-full object-cover" />
+            </div>
             <div>
               <h2 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
                 Resto <span className="text-[9px] bg-orange-500 text-white font-extrabold px-2 py-0.5 rounded">QR</span>
