@@ -55,7 +55,49 @@ const QRManagement = () => {
     const node = printRef.current;
     if (!node) return;
 
-    // Temporarily expand the node so all QR codes are visible for capture
+    // If printing all (no single selected), create one printable page per table
+    if (!selected) {
+      // Clone the node HTML and extract the list items
+      const tmp = document.createElement('div');
+      tmp.innerHTML = node.innerHTML;
+      // The preview wraps items inside the first child when printing "all"
+      const wrapper = tmp.firstElementChild || tmp;
+      const items = wrapper.children && wrapper.children.length ? Array.from(wrapper.children) : [];
+
+      // Build pages HTML where each item is on its own page
+      const pagesHtml = items.map(item => `
+        <div class="page">
+          <div class="page-inner">${item.outerHTML}</div>
+        </div>
+      `).join('\n');
+
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html>
+          <head>
+            <title>Print QR Codes - RMS</title>
+            <style>
+              @page { size: A4 portrait; margin: 20mm; }
+              body { margin: 0; padding: 0; background: #fff; font-family: system-ui, sans-serif; }
+              .page { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; page-break-after: always; }
+              .page-inner { width: 180mm; max-width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+              .page-inner .p-1.5 { padding: 12px; }
+              .page-inner h4, .page-inner h2 { margin: 12px 0 6px; text-align: center; }
+              .page-inner p { margin: 0; text-align: center; }
+            </style>
+          </head>
+          <body>
+            ${pagesHtml}
+            <script>window.onload = function(){ setTimeout(()=>window.print(), 250); };</script>
+          </body>
+        </html>
+      `);
+      win.document.close();
+      return;
+    }
+
+    // If a single item is selected, fall back to canvas capture for a single-image print
+    // Temporarily expand the node so it's fully visible
     const prevOverflow = node.style.overflow;
     const prevMaxH = node.style.maxHeight;
     node.style.overflow = 'visible';
@@ -73,13 +115,12 @@ const QRManagement = () => {
           </head>
           <body>
             <img src="${dataUrl}" alt="QR Codes" />
-            <script>window.onload = function(){ window.print(); /* do not auto-close to allow user save */ };</script>
+            <script>window.onload = function(){ window.print(); };</script>
           </body>
         </html>
       `);
       imgWin.document.close();
     } catch (err) {
-      // Fallback: previous simple print
       const content = node.innerHTML;
       const win = window.open('', '_blank');
       win.document.write(`
@@ -95,7 +136,6 @@ const QRManagement = () => {
       `);
       win.document.close();
     } finally {
-      // Restore styles
       node.style.overflow = prevOverflow;
       node.style.maxHeight = prevMaxH;
     }
