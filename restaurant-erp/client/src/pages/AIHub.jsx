@@ -425,35 +425,54 @@ const TheftWastagePanel = () => {
         {/* Mobile View */}
         <div className="sm:hidden space-y-3">
           {analysis.map(item => (
-            <div key={item.id} className={`p-4 rounded-2xl border ${item.isAlert ? 'bg-red-50/10 border-red-200' : 'bg-slate-50/40 border-slate-100'} space-y-2.5`}>
-              <div className="flex justify-between items-center">
-                <h4 className="font-extrabold text-xs text-slate-800">{item.name}</h4>
-                <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-md border uppercase tracking-wider ${
-                  item.isAlert && item.variance > 0 ? 'bg-red-50 text-red-750 border-red-200' :
-                  item.isAlert ? 'bg-amber-50 text-amber-750 border-amber-200' :
-                  'bg-emerald-50 text-emerald-750 border-emerald-200'}`}>
+            <div key={item.id} className={`rounded-3xl border p-4 shadow-sm ${item.isAlert ? 'border-red-200 bg-red-50/10' : 'border-slate-200 bg-white'}`}>
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">
+                  <MenuItemImage src={item.image} alt={item.name} imgClassName="w-full h-full object-contain" emojiClassName="text-base" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-extrabold text-sm text-slate-900">{item.name}</h4>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Selling {item.unit} • Sold {item.sold}</p>
+                </div>
+                <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border uppercase tracking-wider ${
+                  item.isAlert && item.variance > 0 ? 'bg-red-50 text-red-700 border-red-200' :
+                  item.isAlert ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
                   {item.isAlert && item.variance > 0 ? 'High Variance' : item.isAlert ? 'Low Usage' : 'Normal'}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-400 font-bold border-b border-slate-100 pb-2">
-                <div>
-                  <p className="uppercase text-[8px] text-slate-400 font-black">Stock</p>
-                  <p className="text-slate-700 mt-0.5">{item.stock} {item.unit}</p>
+
+              <div className="grid grid-cols-2 gap-3 mt-4 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Selling Price</p>
+                  <p className="mt-2 font-black text-slate-800">₹{item.price}</p>
                 </div>
-                <div>
-                  <p className="uppercase text-[8px] text-slate-400 font-black">Expected</p>
-                  <p className="text-slate-700 mt-0.5">{item.expectedUsage} {item.unit}</p>
-                </div>
-                <div>
-                  <p className="uppercase text-[8px] text-slate-400 font-black">Actual</p>
-                  <p className="text-slate-700 mt-0.5">{item.actualUsage} {item.unit}</p>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Cost Price</p>
+                  <p className="mt-2 font-black text-slate-800">₹{item.cost}</p>
                 </div>
               </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[10px] text-slate-400 font-bold">Variance</span>
-                <span className={`font-black ${item.variance > 0 ? 'text-red-600' : item.variance < -0.1 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                  {item.variance > 0 ? '+' : ''}{item.variance} {item.unit}
-                </span>
+
+              <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Profit / Unit</p>
+                  <p className="mt-2 font-black text-emerald-700">₹{item.profit}</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Total Revenue</p>
+                  <p className="mt-2 font-black text-slate-900">₹{item.revenue}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Qty Sold</p>
+                  <p className="mt-2 font-black text-slate-800">{item.sold}</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Margin</p>
+                  <p className={`mt-2 font-black ${item.profitPct >= 50 ? 'text-emerald-700' : item.profitPct >= 30 ? 'text-amber-700' : 'text-red-600'}`}>{item.profitPct}%</p>
+                </div>
               </div>
             </div>
           ))}
