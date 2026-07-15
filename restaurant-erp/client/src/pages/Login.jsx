@@ -683,10 +683,16 @@ const Login = () => {
       <div className="md:hidden h-full flex flex-col w-full bg-[#f97316]">
         {/* Orange top */}
         <div className="relative flex-shrink-0 h-36">
-          <div className="absolute right-0 top-0 bottom-0 w-[55%] overflow-hidden rounded-bl-[70px]">
-            <img src={chefImage} alt="Chef" className="w-full h-full object-cover" style={{objectPosition:'55% top'}}/>
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#f97316]/70"/>
-          </div>
+          <img
+            src={chefImage}
+            alt="Chef"
+            className="absolute right-0 top-0 w-[65%] h-full object-cover"
+            style={{
+              objectPosition: '55% top',
+              clipPath: 'ellipse(80% 68% at 93% 68%)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#f97316]/80 to-transparent" style={{clipPath:'ellipse(80% 68% at 93% 68%)'}} />
           <div className="absolute bottom-4 left-4 z-10">
             <p className="text-xl font-extrabold text-white leading-tight">Great food<br/>Great service<br/>Great experience</p>
             <p className="text-[#1e3a8a] font-black text-sm mt-0.5">Every single time.</p>
