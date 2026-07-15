@@ -135,6 +135,69 @@ const Settings = () => {
     }
   };
 
+  const getBackupPayload = () => {
+    return {
+      settings,
+      gstRate,
+      gstin,
+      paymentSettings,
+      printerSettings,
+      savedAt: new Date().toISOString(),
+    };
+  };
+
+  const downloadBackup = () => {
+    const payload = getBackupPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `rms-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const restoreFromFile = async (file) => {
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data || typeof data !== 'object') throw new Error('Invalid backup file');
+      if (data.settings) setSettings(data.settings);
+      if (data.gstRate !== undefined) setGstRate(data.gstRate);
+      if (data.gstin !== undefined) setGstin(data.gstin);
+      if (data.paymentSettings) setPaymentSettings(data.paymentSettings);
+      if (data.printerSettings) setPrinterSettings(data.printerSettings);
+      localStorage.setItem('settings', JSON.stringify(data.settings || settings));
+      if (data.gstRate !== undefined) localStorage.setItem('rms_gst_rate', data.gstRate.toString());
+      if (data.gstin !== undefined) localStorage.setItem('rms_gstin', data.gstin);
+      if (data.paymentSettings) localStorage.setItem('rms_payment_settings', JSON.stringify(data.paymentSettings));
+      if (data.printerSettings) localStorage.setItem('rms_printer_settings', JSON.stringify(data.printerSettings));
+      toast.success('✅ Backup restored locally');
+      try {
+        await api.put('/settings', {
+          ...settings,
+          name: data.settings?.name || settings.name,
+          email: data.settings?.email || settings.email,
+          phone: data.settings?.phone || settings.phone,
+          address: data.settings?.address || settings.address,
+          currency: data.settings?.currency || settings.currency,
+          gstRate: data.gstRate !== undefined ? data.gstRate : gstRate,
+          gstin: data.gstin !== undefined ? data.gstin : gstin,
+          payment: data.paymentSettings || paymentSettings,
+          printer: data.printerSettings || printerSettings,
+        });
+        toast.success('✅ Backup restored to server');
+      } catch {
+        toast.warning('⚠️ Restored locally; server update skipped');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Could not restore backup');
+    }
+  };
+
   const tabConfig = {
     'General Settings': { label: 'General Settings', icon: '⚙️' },
     'Notifications':    { label: 'Notifications',    icon: '🔔' },
@@ -608,6 +671,41 @@ const Settings = () => {
                   </p>
                 </div>
               )}
+            </div>
+          ) : activeTab === 'Backup & Restore' ? (
+            <div className="space-y-6 max-w-3xl animate-[fadeIn_0.2s_ease-out]">
+              <div className="bg-slate-50 border border-slate-150/60 rounded-3xl p-6 space-y-5">
+                <div>
+                  <h4 className="text-sm font-black text-slate-800">Backup & Restore</h4>
+                  <p className="text-[10.5px] text-slate-400 font-bold mt-0.5 leading-relaxed">
+                    Export current settings or restore from a JSON backup file.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3 p-4 rounded-3xl bg-white border border-slate-200">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Create Backup</p>
+                    <p className="text-xs text-slate-500 leading-relaxed">Download a snapshot of your current system settings, payment, printer and business configuration.</p>
+                    <button onClick={downloadBackup} className="w-full py-3.5 bg-indigo-600 hover:bg-[#0F286B] text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-indigo-600/10 active:scale-95">
+                      📄 Download Backup
+                    </button>
+                  </div>
+                  <div className="space-y-3 p-4 rounded-3xl bg-white border border-slate-200">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Restore Backup</p>
+                    <p className="text-xs text-slate-500 leading-relaxed">Select a valid RMS backup JSON file to restore settings locally and sync to the server.</p>
+                    <input type="file" accept="application/json" onChange={(e) => restoreFromFile(e.target.files?.[0])} className="w-full text-xs text-slate-700" />
+                  </div>
+                </div>
+                <div className="rounded-3xl bg-white border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+                  <p className="font-black text-slate-700 text-xs uppercase tracking-wider mb-2">Backup contents</p>
+                  <ul className="text-[10px] space-y-2">
+                    <li>• General settings</li>
+                    <li>• GST rate and GSTIN</li>
+                    <li>• Payment provider configuration</li>
+                    <li>• Printer configuration</li>
+                    <li>• Local storage sync</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="py-16 text-center space-y-3 animate-[fadeIn_0.2s_ease-out]">
