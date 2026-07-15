@@ -700,15 +700,17 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Logo - overlaps into white card */}
-        <div className="relative z-20 flex justify-center flex-shrink-0" style={{marginTop:'-44px'}}>
-          <div className="w-[88px] h-[88px] rounded-full overflow-hidden bg-white shadow-lg flex items-center justify-center">
-            <img src={centerLogo} alt="RMS" className="w-full h-full object-contain p-1"/>
+        {/* Logo - only show for main login view, so it doesn't block buttons in other views */}
+        {view === 'login' && (
+          <div className="relative z-20 flex justify-center flex-shrink-0 pointer-events-none" style={{marginTop:'-44px'}}>
+            <div className="w-[88px] h-[88px] rounded-full overflow-hidden bg-white shadow-lg flex items-center justify-center pointer-events-none">
+              <img src={centerLogo} alt="RMS" className="w-full h-full object-contain p-1"/>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* White card - overlaps logo */}
-        <div className="flex-1 bg-white rounded-t-[28px] -mt-10 flex flex-col overflow-hidden">
+        {/* White card */}
+        <div className={`flex-1 bg-white flex flex-col overflow-hidden ${view === 'login' ? 'rounded-t-[28px] -mt-10' : 'rounded-t-[28px] mt-0'}`}>
           {view === 'qr' ? (
             <QRViewContent onBack={()=>setView('login')}/>
           ) : view === 'staffid' ? (
