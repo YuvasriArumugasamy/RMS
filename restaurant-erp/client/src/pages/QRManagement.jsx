@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import QRCode from 'react-qr-code';
 import { api } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -50,30 +51,54 @@ const QRManagement = () => {
     );
   };
 
-  const handlePrint = () => {
-    const content = printRef.current?.innerHTML;
-    if (!content) return;
-    const win = window.open('', '_blank');
-    win.document.write(`
-      <html>
-        <head>
-          <title>Print QR Code - RMS</title>
-          <style>
-            body { font-family: system-ui, sans-serif; text-align: center; padding: 40px; background: #fff; }
-            h2 { font-size: 24px; font-weight: 900; margin-top: 15px; margin-bottom: 2px; color: #111827; }
-            p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 20px; font-weight: 600; }
-            .qr-wrap { display: inline-block; padding: 20px; border: 2px solid #e5e7eb; border-radius: 20px; background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-            .url { font-size: 11px; color: #9ca3af; font-family: monospace; word-break: break-all; max-width: 250px; margin: 15px auto 0; }
-          </style>
-        </head>
-        <body onload="window.print(); window.close();">
-          <div class="qr-wrap">
-            ${content}
-          </div>
-        </body>
-      </html>
-    `);
-    win.document.close();
+  const handlePrint = async () => {
+    const node = printRef.current;
+    if (!node) return;
+
+    // Temporarily expand the node so all QR codes are visible for capture
+    const prevOverflow = node.style.overflow;
+    const prevMaxH = node.style.maxHeight;
+    node.style.overflow = 'visible';
+    node.style.maxHeight = 'none';
+
+    try {
+      const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#ffffff' });
+      const dataUrl = canvas.toDataURL('image/png');
+      const imgWin = window.open('', '_blank');
+      imgWin.document.write(`
+        <html>
+          <head>
+            <title>Print QR Codes - RMS</title>
+            <style>body{margin:0;padding:20px;display:flex;align-items:center;justify-content:center;background:#fff;} img{max-width:100%;height:auto;display:block;}</style>
+          </head>
+          <body>
+            <img src="${dataUrl}" alt="QR Codes" />
+            <script>window.onload = function(){ window.print(); /* do not auto-close to allow user save */ };</script>
+          </body>
+        </html>
+      `);
+      imgWin.document.close();
+    } catch (err) {
+      // Fallback: previous simple print
+      const content = node.innerHTML;
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html>
+          <head>
+            <title>Print QR Code - RMS</title>
+            <style>body { font-family: system-ui, sans-serif; text-align: center; padding: 40px; background: #fff; } .qr-wrap { display: inline-block; padding: 20px; border-radius: 20px; background: #fff; }</style>
+          </head>
+          <body onload="window.print();">
+            <div class="qr-wrap">${content}</div>
+          </body>
+        </html>
+      `);
+      win.document.close();
+    } finally {
+      // Restore styles
+      node.style.overflow = prevOverflow;
+      node.style.maxHeight = prevMaxH;
+    }
   };
 
   const STATUS_COLORS = {
