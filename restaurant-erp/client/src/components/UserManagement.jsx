@@ -6,6 +6,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [newUser, setNewUser] = useState({ username: '', password: '', role: 'Waiter', phone: '', email: '' });
 
   const load = async () => {
@@ -70,7 +71,22 @@ export default function UserManagement() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <input value={newUser.username} onChange={e=>setNewUser({...newUser, username:e.target.value})} placeholder="username" className="px-3 py-2 border rounded-2xl text-xs" />
-        <input value={newUser.password} onChange={e=>setNewUser({...newUser, password:e.target.value})} placeholder="password" type="password" className="px-3 py-2 border rounded-2xl text-xs" />
+        <div className="relative">
+          <input
+            value={newUser.password}
+            onChange={e=>setNewUser({...newUser, password:e.target.value})}
+            placeholder="password"
+            type={showPassword ? 'text' : 'password'}
+            className="w-full px-3 py-2 border rounded-2xl text-xs pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs"
+          >
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </div>
         <select value={newUser.role} onChange={e=>setNewUser({...newUser, role:e.target.value})} className="px-3 py-2 border rounded-2xl text-xs">
           <option>Admin</option><option>Manager</option><option>Chef</option><option>Waiter</option><option>Cashier</option>
         </select>
