@@ -134,3 +134,9 @@
 .uiverse-bell-btn:active {
   transform: scale(0.9);
 }
+
+@keyframes scanLine {
+  0%   { top: 20%; opacity: 1; }
+  50%  { top: 75%; opacity: 0.8; }
+  100% { top: 20%; opacity: 1; }
+}

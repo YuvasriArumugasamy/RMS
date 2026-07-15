@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -316,65 +316,131 @@ const OfflineViewContent = ({ onBack, altLogin }) => {
           <button key={l} type="button" onClick={()=> v!=='offline' ? onBack(v) : null}
             className={`flex flex-col items-center justify-center py-2.5 border rounded-2xl transition-all gap-1.5 ${v==='offline'?'border-orange-300 bg-orange-50':'border-gray-200 hover:border-orange-400'}`}>
             <span className={v==='offline'?'text-[#f97316]':'text-[#1e3a8a]'}>{ic}</span>
-            <span className={`text-[9px] font-bold ${v==='offline'?'text-[#f97316]':'text-gray-600'}`}>{l}</span>
-          </button>
-        ))}
-      </div>
-      <p className="mt-3 text-[11px] text-gray-400 text-center">
-        Having trouble? <a href="#" className="text-[#f97316] font-bold">Contact admin</a>
-      </p>
-    </div>
-  );
-};
-
-/* â”€â”€ Face ID View Content â”€â”€ */
+/* ── Face ID View Content ── */
 const FaceIDViewContent = ({ onBack }) => {
+  const videoRef = useRef(null);
+  const [status, setStatus] = useState('starting'); // 'starting'|'active'|'denied'|'unsupported'|'error'
+  const [scanning, setScanning] = useState(false);
+
+  useEffect(() => {
+    let stream = null;
+    const startCamera = async () => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setStatus('unsupported'); return;
+      }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+          setStatus('active');
+          setTimeout(() => setScanning(true), 800);
+        }
+      } catch (err) {
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') setStatus('denied');
+        else setStatus('error');
+      }
+    };
+    startCamera();
+    return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
+  }, []);
+
   return (
-    <div className="flex flex-col items-center px-8 pt-6 pb-6 h-full overflow-y-auto" style={{scrollbarWidth:'none'}}>
+    <div className="flex flex-col items-center px-6 pt-5 pb-5 h-full overflow-y-auto" style={{scrollbarWidth:'none'}}>
       <button onClick={onBack} className="flex items-center gap-1.5 text-gray-700 font-semibold text-sm mb-4 hover:text-gray-900 transition self-start">
         <IconBack/> Back
       </button>
-      {/* Icon */}
-      <div className="mb-2">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-      </div>
-      <h2 className="text-xl font-bold text-gray-900 text-center mb-1">Face ID Login</h2>
-      <p className="text-sm text-gray-500 text-center mb-5">Please look at the camera to verify your identity</p>
 
-      {/* Camera preview */}
-      <div className="relative w-full rounded-2xl overflow-hidden mb-5" style={{background:'#1a1a2e', aspectRatio:'16/9'}}>
-        {/* Corner brackets */}
-        <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-white/70 rounded-tl-md"/>
-        <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-white/70 rounded-tr-md"/>
-        <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-white/70 rounded-bl-md"/>
-        <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-white/70 rounded-br-md"/>
-        {/* Face silhouette */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg width="120" height="130" viewBox="0 0 120 130" fill="none">
-            <ellipse cx="60" cy="50" rx="32" ry="38" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
-            <path d="M18 130 C18 95 42 80 60 80 C78 80 102 95 102 130" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
-          </svg>
-        </div>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mb-2">
+        <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <h2 className="text-xl font-bold text-gray-900 text-center mb-0.5">Face ID Login</h2>
+      <p className="text-xs text-gray-500 text-center mb-4">
+        {status === 'active' ? 'Position your face in the frame' : 'Starting camera...'}
+      </p>
+
+      {/* Camera / status area */}
+      <div className="relative w-full rounded-2xl overflow-hidden mb-4" style={{background:'#0f172a', aspectRatio:'4/3', maxHeight:'220px'}}>
+        {/* Live video */}
+        <video ref={videoRef} autoPlay playsInline muted
+          className={`w-full h-full object-cover ${status === 'active' ? 'opacity-100' : 'opacity-0'}`}
+          style={{transform:'scaleX(-1)'}}/>
+
+        {/* Loading */}
+        {status === 'starting' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <svg className="animate-spin w-8 h-8 text-[#f97316]" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <p className="text-white/70 text-xs font-medium">Opening camera...</p>
+          </div>
+        )}
+
+        {/* Denied */}
+        {status === 'denied' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
+            <span className="text-3xl">🚫</span>
+            <p className="text-white font-bold text-sm">Camera Access Denied</p>
+            <p className="text-white/60 text-xs leading-relaxed">Allow camera access in your browser settings and try again.</p>
+          </div>
+        )}
+
+        {/* Unsupported */}
+        {status === 'unsupported' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
+            <span className="text-3xl">📵</span>
+            <p className="text-white font-bold text-sm">Camera Not Supported</p>
+            <p className="text-white/60 text-xs">Your browser or device doesn't support camera access.</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {status === 'error' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
+            <span className="text-3xl">⚠️</span>
+            <p className="text-white font-bold text-sm">Camera Error</p>
+            <p className="text-white/60 text-xs">Could not start the camera. Try another login method.</p>
+          </div>
+        )}
+
+        {/* Corner brackets overlay when active */}
+        {status === 'active' && (
+          <>
+            <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-[#f97316] rounded-tl-md"/>
+            <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-[#f97316] rounded-tr-md"/>
+            <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-[#f97316] rounded-bl-md"/>
+            <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-[#f97316] rounded-br-md"/>
+            {/* Scanning line */}
+            {scanning && (
+              <div className="absolute left-0 right-0 h-0.5 bg-[#f97316]/70"
+                style={{animation: 'scanLine 2s ease-in-out infinite', top: '30%'}}/>
+            )}
+            <div className="absolute bottom-2 left-0 right-0 text-center">
+              <span className="text-[10px] text-white/70 font-semibold bg-black/30 px-2 py-0.5 rounded-full">
+                🔍 Scanning...
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Error message */}
-      <div className="flex items-center gap-2 mb-5">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <p className="text-sm text-red-500 font-medium">No face detected. Please look at the camera.</p>
+      {/* Info note for demo */}
+      <div className="w-full bg-orange-50 border border-orange-100 rounded-2xl p-3 flex items-start gap-2 mb-4">
+        <span className="text-[#f97316] text-sm mt-0.5">ℹ️</span>
+        <p className="text-[10.5px] text-gray-600 leading-relaxed font-medium">
+          Face ID is a demo feature. For actual authentication, use your <span className="font-bold text-gray-800">username & password</span>.
+        </p>
       </div>
 
       {/* Cancel button */}
-      <button onClick={onBack} className="w-full py-3 border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 transition mb-4">
+      <button onClick={onBack} className="w-full py-3 border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 transition mb-3">
         Cancel
       </button>
 
-      {/* OR + alt buttons with Face ID active */}
+      {/* OR + alt buttons */}
       <div className="flex items-center w-full gap-3 mb-3">
         <div className="flex-1 h-px bg-gray-200"/>
         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">OR</span>
@@ -394,13 +460,6 @@ const FaceIDViewContent = ({ onBack }) => {
           </button>
         ))}
       </div>
-      <p className="mt-3 text-[11px] text-gray-400 text-center">
-        Having trouble? <a href="#" className="text-[#f97316] font-bold">Contact admin</a>
-      </p>
-    </div>
-  );
-};
-
 /* â”€â”€ QR View Content â”€â”€ */
 const QRViewContent = ({ onBack }) => (
   <div className="flex flex-col items-center px-8 pt-6 pb-6 h-full overflow-y-auto" style={{scrollbarWidth:'none'}}>
