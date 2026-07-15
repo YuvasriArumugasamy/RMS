@@ -44,6 +44,7 @@ const settingsRoutes      = require('./routes/settings');
 const reservationRoutes   = require('./routes/reservations');
 const couponRoutes        = require('./routes/coupons');
 const paymentRoutes       = require('./routes/payments');
+const usersRoutes         = require('./routes/users');
 
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:5173',
@@ -98,6 +99,7 @@ app.use('/api/settings',      settingsRoutes);
 app.use('/api/reservations',  reservationRoutes);
 app.use('/api/coupons',       couponRoutes);
 app.use('/api/payments',      paymentRoutes);
+app.use('/api/users',         usersRoutes);
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));

@@ -39,6 +39,8 @@ const Settings = () => {
       port: 9100,
     };
   });
+  const [users, setUsers] = useState([]);
+  const [newUser, setNewUser] = useState({ username: '', password: '', role: 'Waiter', phone: '', email: '' });
   const [notifPermission, setNotifPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
   );
@@ -83,6 +85,13 @@ const Settings = () => {
                   if (data.data.printer !== undefined) {
                     setPrinterSettings(data.data.printer);
                     localStorage.setItem('rms_printer_settings', JSON.stringify(data.data.printer));
+                  }
+                  // load users list if authorized
+                  try {
+                    const usersRes = await api.get('/users');
+                    if (usersRes.data && usersRes.data.success) setUsers(usersRes.data.data || []);
+                  } catch (e) {
+                    // ignore — may not have permissions in demo
                   }
         }
       } catch {
@@ -595,6 +604,70 @@ const Settings = () => {
               )}
             </div>
           ) : (
+            activeTab === 'Users & Roles' ? (
+            <div className="space-y-6 max-w-3xl animate-[fadeIn_0.2s_ease-out]">
+              {isAdmin ? (
+                <div className="bg-white p-4 rounded-2xl border border-slate-100 space-y-4">
+                  <h4 className="text-sm font-black text-slate-800">Users & Roles</h4>
+                  <p className="text-xs text-slate-400">Create and manage user accounts and roles.</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                    <input className="px-3 py-2 border rounded-2xl text-xs" placeholder="Username" value={newUser.username} onChange={(e)=>setNewUser({...newUser, username:e.target.value})} />
+                    <input className="px-3 py-2 border rounded-2xl text-xs" placeholder="Password" type="password" value={newUser.password} onChange={(e)=>setNewUser({...newUser, password:e.target.value})} />
+                    <select className="px-3 py-2 border rounded-2xl text-xs" value={newUser.role} onChange={(e)=>setNewUser({...newUser, role:e.target.value})}>
+                      <option>Admin</option><option>Manager</option><option>Chef</option><option>Waiter</option><option>Cashier</option>
+                    </select>
+                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-2xl text-xs" onClick={async ()=>{
+                      try{
+                        const res = await api.post('/users', newUser);
+                        if(res.data && res.data.success){
+                          setUsers([res.data.data,...users]);
+                          setNewUser({ username:'', password:'', role:'Waiter', phone:'', email:'' });
+                          toast.success('✅ User created');
+                        }
+                      }catch(err){toast.error(err?.response?.data?.message || 'Could not create user');}
+                    }}>➕ Add User</button>
+                  </div>
+
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="text-left text-slate-500">
+                        <tr><th className="pb-2">Username</th><th>Role</th><th>Phone</th><th>Email</th><th>Active</th><th></th></tr>
+                      </thead>
+                      <tbody>
+                        {users.map(u=> (
+                          <tr key={u._id} className="border-t">
+                            <td className="py-2 font-bold">{u.username}</td>
+                            <td>
+                              <select className="text-xs px-2 py-1 border rounded-2xl" value={u.role} onChange={async (e)=>{
+                                try{ const {data} = await api.put(`/users/${u._id}`, { role: e.target.value }); if(data.success){ setUsers(users.map(x=> x._id===u._id? data.data: x)); toast.success('Role updated'); }}catch(err){toast.error('Could not update');}
+                              }}>
+                                <option>Admin</option><option>Manager</option><option>Chef</option><option>Waiter</option><option>Cashier</option>
+                              </select>
+                            </td>
+                            <td><input className="text-xs px-2 py-1 border rounded-2xl" value={u.phone||''} onChange={(e)=> setUsers(users.map(x=> x._id===u._id? {...x, phone: e.target.value}: x))} onBlur={async ()=>{ try{ await api.put(`/users/${u._id}`, { phone: users.find(x=>x._id===u._id).phone }); toast.success('Saved'); }catch{toast.error('Save failed')} }} /></td>
+                            <td><input className="text-xs px-2 py-1 border rounded-2xl" value={u.email||''} onChange={(e)=> setUsers(users.map(x=> x._id===u._id? {...x, email: e.target.value}: x))} onBlur={async ()=>{ try{ await api.put(`/users/${u._id}`, { email: users.find(x=>x._id===u._id).email }); toast.success('Saved'); }catch{toast.error('Save failed')} }} /></td>
+                            <td>
+                              <input type="checkbox" checked={!!u.isActive} onChange={async (e)=>{ try{ const {data} = await api.put(`/users/${u._id}`, { isActive: e.target.checked }); if(data.success) setUsers(users.map(x=> x._id===u._id? data.data: x)); }catch{toast.error('Could not update active state')} }} />
+                            </td>
+                            <td className="text-right">
+                              <button className="text-red-600 text-xs" onClick={async ()=>{ if(!confirm('Delete user?')) return; try{ await api.delete(`/users/${u._id}`); setUsers(users.filter(x=> x._id!==u._id)); toast.success('Deleted'); }catch{toast.error('Delete failed')} }}>Delete</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-16 text-center space-y-3">
+                  <span className="text-5xl select-none block">🔒</span>
+                  <h4 className="text-sm font-extrabold text-slate-800">Admin Access Required</h4>
+                  <p className="text-xs text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">Only Admin users can manage users and roles.</p>
+                </div>
+              )}
+            </div>
+            ) : (
             <div className="py-16 text-center space-y-3 animate-[fadeIn_0.2s_ease-out]">
               <span className="text-5xl select-none block animate-pulse">🔒</span>
               <h4 className="text-sm font-extrabold text-slate-800">Locked in Demo Mode</h4>
