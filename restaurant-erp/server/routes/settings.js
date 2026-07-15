@@ -27,10 +27,10 @@ router.get('/', authorize('Admin', 'Manager'), async (req, res) => {
 // @access Admin only
 router.put('/', authorize('Admin'), async (req, res) => {
   try {
-    const { name, email, phone, address, currency, gstRate, gstin, payment } = req.body;
+    const { name, email, phone, address, currency, gstRate, gstin, payment, printer } = req.body;
     const doc = await Settings.findOneAndUpdate(
       { key: 'main' },
-      { name, email, phone, address, currency, gstRate, gstin, payment },
+      { name, email, phone, address, currency, gstRate, gstin, payment, printer },
       { new: true, upsert: true, runValidators: true }
     );
     res.json({ success: true, data: doc });

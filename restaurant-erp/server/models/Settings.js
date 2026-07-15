@@ -24,6 +24,14 @@ const settingsSchema = new mongoose.Schema({
     stripePublishableKey: { type: String, default: '' },
     stripeSecretKey:      { type: String, default: '' },
   },
+  // Local / Network printer configuration
+  printer: {
+    enabled: { type: Boolean, default: false },
+    type:    { type: String, default: 'local' }, // 'local' or 'network'
+    name:    { type: String, default: '' },
+    ip:      { type: String, default: '' },
+    port:    { type: Number, default: 9100 },
+  },
 
   // Role permissions map — stored as JSON object
   rolePermissions: {

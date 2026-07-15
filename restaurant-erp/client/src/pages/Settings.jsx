@@ -29,6 +29,16 @@ const Settings = () => {
       stripeSecretKey: '',
     };
   });
+  const [printerSettings, setPrinterSettings] = useState(() => {
+    const saved = localStorage.getItem('rms_printer_settings');
+    return saved ? JSON.parse(saved) : {
+      enabled: false,
+      type: 'local',
+      name: '',
+      ip: '',
+      port: 9100,
+    };
+  });
   const [notifPermission, setNotifPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
   );
@@ -69,6 +79,10 @@ const Settings = () => {
                   if (data.data.payment !== undefined) {
                     setPaymentSettings(data.data.payment);
                     localStorage.setItem('rms_payment_settings', JSON.stringify(data.data.payment));
+                  }
+                  if (data.data.printer !== undefined) {
+                    setPrinterSettings(data.data.printer);
+                    localStorage.setItem('rms_printer_settings', JSON.stringify(data.data.printer));
                   }
         }
       } catch {
@@ -508,6 +522,74 @@ const Settings = () => {
                   <h4 className="text-sm font-extrabold text-slate-800">Admin Access Required</h4>
                   <p className="text-xs text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">
                     Only Admin users can configure payment integrations.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : activeTab === 'Printer Settings' ? (
+            <div className="space-y-6 max-w-xl animate-[fadeIn_0.2s_ease-out]">
+              {isAdmin ? (
+                <div className="bg-slate-50 border border-slate-150/60 rounded-3xl p-5 space-y-5">
+                  <div>
+                    <h4 className="text-xs font-black text-slate-800">Printer Settings</h4>
+                    <p className="text-[10.5px] text-slate-400 font-bold mt-0.5 leading-relaxed">Configure local or network printers used for receipts and kitchen slips.</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3">
+                      <input type="checkbox" checked={printerSettings.enabled} onChange={(e) => setPrinterSettings({ ...printerSettings, enabled: e.target.checked })} />
+                      <span className="text-xs font-black text-slate-700">Enable Printing</span>
+                    </label>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Printer Type</label>
+                        <select value={printerSettings.type} onChange={(e) => setPrinterSettings({ ...printerSettings, type: e.target.value })} className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold">
+                          <option value="local">Local (Browser / Connected)</option>
+                          <option value="network">Network (IP)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Printer Name</label>
+                        <input type="text" value={printerSettings.name} onChange={(e) => setPrinterSettings({ ...printerSettings, name: e.target.value })} className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold" />
+                      </div>
+                    </div>
+
+                    {printerSettings.type === 'network' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Printer IP</label>
+                          <input type="text" value={printerSettings.ip} onChange={(e) => setPrinterSettings({ ...printerSettings, ip: e.target.value })} className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Port</label>
+                          <input type="number" value={printerSettings.port} onChange={(e) => setPrinterSettings({ ...printerSettings, port: parseInt(e.target.value || '0', 10) })} className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold" />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button onClick={async () => {
+                        localStorage.setItem('rms_printer_settings', JSON.stringify(printerSettings));
+                        try {
+                          await api.put('/settings', { ...settings, printer: printerSettings });
+                          toast.success('✅ Printer settings saved!');
+                        } catch (err) {
+                          toast.warning('⚠️ Saved locally (server offline)');
+                        }
+                      }} className="py-3.5 px-4 bg-indigo-600 hover:bg-[#0F286B] text-white font-extrabold rounded-2xl text-xs transition-all shadow-md">💾 Save Printer Settings</button>
+
+                      <button onClick={() => { toast.info('🖨️ Test print simulated (browser demo)'); }} className="py-3.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold rounded-2xl text-xs transition-all border border-emerald-200">🧪 Test Print</button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-16 text-center space-y-3">
+                  <span className="text-5xl select-none block">🔒</span>
+                  <h4 className="text-sm font-extrabold text-slate-800">Admin Access Required</h4>
+                  <p className="text-xs text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">
+                    Only Admin users can configure printer integrations.
                   </p>
                 </div>
               )}
