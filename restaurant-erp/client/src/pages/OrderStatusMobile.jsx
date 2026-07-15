@@ -22,6 +22,7 @@ const Step = ({ title, subtitle, active }) => (
 
 const OrderStatusMobile = () => {
   const [order, setOrder] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     try {
@@ -39,6 +40,19 @@ const OrderStatusMobile = () => {
     { key: 'Ready', title: 'Ready', subtitle: 'Ready to serve' },
     { key: 'Served', title: 'Served', subtitle: 'Enjoy your meal' },
   ];
+
+  const handleFeedback = (score, emoji) => {
+    const entry = { id: order?.id || null, score, emoji, timestamp: Date.now() };
+    try {
+      const raw = localStorage.getItem('feedbacks');
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.unshift(entry);
+      localStorage.setItem('feedbacks', JSON.stringify(arr));
+    } catch (e) {
+      console.error('save feedback failed', e);
+    }
+    setSubmitted(true);
+  };
 
   return (
     <div className="max-w-md mx-auto p-4 min-h-screen bg-slate-50">
@@ -64,10 +78,35 @@ const OrderStatusMobile = () => {
           ))}
         </div>
 
-        <div className="mt-5 flex items-center justify-between">
-          <button onClick={() => window.history.back()} className="px-4 py-2 rounded-2xl bg-white border border-slate-100 text-slate-700 font-bold">Back</button>
-          <button onClick={() => alert('Help requested') } className="px-4 py-2 rounded-2xl bg-orange-500 text-white font-black">Contact Support</button>
-        </div>
+        {!submitted ? (
+          <>
+            <div className="mt-5">
+              <p className="text-sm font-black text-slate-800 mb-2">We appreciate your feedback</p>
+              <div className="flex items-center gap-3">
+                <button onClick={() => handleFeedback(1,'😡')} className="w-9 h-9 rounded-full bg-red-400">😡</button>
+                <button onClick={() => handleFeedback(2,'😕')} className="w-9 h-9 rounded-full bg-orange-400">😕</button>
+                <button onClick={() => handleFeedback(3,'🙂')} className="w-9 h-9 rounded-full bg-emerald-400">🙂</button>
+                <button onClick={() => handleFeedback(4,'😊')} className="w-9 h-9 rounded-full bg-blue-400">😊</button>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between">
+              <button onClick={() => window.history.back()} className="px-4 py-2 rounded-2xl bg-white border border-slate-100 text-slate-700 font-bold">Back</button>
+              <button onClick={() => alert('Help requested') } className="px-4 py-2 rounded-2xl bg-orange-500 text-white font-black">Contact Support</button>
+            </div>
+          </>
+        ) : (
+          <div className="mt-5 text-center">
+            <div className="w-24 h-24 mx-auto rounded-full bg-emerald-100 flex items-center justify-center shadow-md">
+              <div className="text-4xl">✓</div>
+            </div>
+            <h3 className="text-xl font-extrabold mt-4">Thank You!</h3>
+            <p className="text-sm text-slate-400 mt-2">We appreciate your feedback. Visit us again!</p>
+            <div className="mt-5">
+              <button onClick={() => { window.location.href = '/qr-order/1' }} className="w-full bg-orange-500 text-white font-black py-3 rounded-2xl">BACK TO MENU</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

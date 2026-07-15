@@ -20,6 +20,7 @@ import Reports from './pages/Reports';
 import AIHub from './pages/AIHub';
 import Settings from './pages/Settings';
 import DigitalTwin from './pages/DigitalTwin';
+import AdminFeedback from './pages/AdminFeedback';
 
 import QRLogin from './pages/QRLogin';
 import CustomerMenu from './pages/CustomerMenu';
@@ -89,6 +90,7 @@ function App() {
             <Route path="ai-hub" element={<AIHub />} />
             <Route path="settings" element={<Settings />} />
             <Route path="digital-twin" element={<DigitalTwin />} />
+            <Route path="feedbacks" element={<AdminFeedback />} />
           </Route>
 
           {/* Catch-all Redirect */}
