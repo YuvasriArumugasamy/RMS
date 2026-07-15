@@ -547,7 +547,85 @@ const CustomerMenu = () => {
 
   // Cart helpers
   const addToCart = (item) => {
-    const cartItem = { ...item  const submitFeedback = () => {
+    const cartItem = { ...item, qty: 1, customizations: {}, specialNote: '' };
+    setCart(prev => [...prev, cartItem]);
+  };
+
+  const updateQty = (index, delta) => {
+    setCart(prev => prev.map((item, i) => i === index ? { ...item, qty: Math.max(1, item.qty + delta) } : item));
+  };
+
+  const removeFromCart = (index) => {
+    setCart(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const cartSubtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const discount = appliedCoupon ? appliedCoupon.discount : 0;
+  const finalSubtotal = Math.max(0, cartSubtotal - discount);
+  const finalGst = gst(finalSubtotal);
+  const finalService = serviceCharge(finalSubtotal);
+  const finalTotal = finalSubtotal + finalGst + finalService;
+
+  const placeOrder = async () => {
+    if (!cart.length || isPlacingOrder) return;
+    setIsPlacingOrder(true);
+
+    const orderPayload = {
+      type: orderType === 'Dine In' ? 'Dine-in (QR)' : 'Takeaway (QR)',
+      table: orderType === 'Dine In' ? tableInfo.name : 'N/A',
+      items: cart.map(i => ({
+        id: i.id,
+        menuItemId: i.menuItemId || i.id,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        category: i.category,
+        image: i.image,
+        specialNote: i.specialNote || '',
+      })),
+      subtotal: finalSubtotal,
+      gst: finalGst,
+      total: finalTotal,
+      guestCount: 1,
+      specialInstructions,
+      appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
+    };
+
+    try {
+      const res = await axios.post(`${API_URL}/orders/qr`, orderPayload);
+      if (res.data.success) {
+        const newOrder = { ...res.data.data, id: res.data.data._id };
+        setPlacedOrders(prev => [newOrder, ...prev]);
+        setSelectedOrder(newOrder);
+        setCart([]);
+        setSpecialInstructions('');
+        setAppliedCoupon(null);
+        setIsPlacingOrder(false);
+        setStage('tracking');
+        return;
+      }
+    } catch {
+      toast.error('Order placement failed. Please try again.');
+    }
+
+    const localOrder = {
+      id: `ORD-QR-${Date.now().toString().slice(-4)}`,
+      ...orderPayload,
+      status: 'Pending',
+      timestamp: fmtTime(), date: fmtDate(),
+    };
+    const all = JSON.parse(localStorage.getItem('orders') || '[]');
+    localStorage.setItem('orders', JSON.stringify([localOrder, ...all]));
+    setPlacedOrders(prev => [localOrder, ...prev]);
+    setSelectedOrder(localOrder);
+    setCart([]);
+    setSpecialInstructions('');
+    setAppliedCoupon(null);
+    setStage('tracking');
+    setIsPlacingOrder(false);
+  };
+
+  const submitFeedback = () => {
     const feedbacks = JSON.parse(localStorage.getItem('customerFeedbacks') || '[]');
     feedbacks.unshift({ 
       table: tableInfo.name, 
