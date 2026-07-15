@@ -377,11 +377,11 @@ const CustomerMenu = () => {
     }
   }, [menu]);
 
-  // Voice UI Panel (shown as bottom sheet on menu stage)
+  // Voice UI Panel (shown as centered modal on menu stage)
   const VoicePanel = () => (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setVoiceOpen(false)}/>
-      <div className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl p-6 pb-10 z-10 shadow-2xl">
+      <div className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 z-10 shadow-2xl">
         <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5"/>
 
         {/* Close Button */}
