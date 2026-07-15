@@ -696,7 +696,7 @@ const CustomerMenu = () => {
 
     return (
       <div className="relative min-h-screen w-full overflow-y-auto bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-16 select-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
-        <style dangerouslySetInnerHTML={{__html: \`
+        <style>{`
           @keyframes floatBlob1 {
             0% { transform: translate(0px, 0px) scale(1); }
             50% { transform: translate(20px, -20px) scale(1.06); }
@@ -713,7 +713,7 @@ const CustomerMenu = () => {
           .animate-blob2 {
             animation: floatBlob2 15s infinite ease-in-out;
           }
-        \`}} />
+        `}</style>
 
         <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0 animate-blob1" />
         <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90 animate-blob2" />
@@ -727,9 +727,9 @@ const CustomerMenu = () => {
         </div>
 
         <div
-          className={\`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_20px_50px_rgba(255,122,0,0.12)] px-6 pt-12 pb-5 transition-all duration-700 ease-out \${
+          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_20px_50px_rgba(255,122,0,0.12)] px-6 pt-12 pb-5 transition-all duration-700 ease-out ${
             showWelcomeContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }\`}
+          }`}
         >
           <div className="absolute -top-12 left-1/2 -translate-x-1/2">
             <div className="rounded-full bg-white p-1.5 shadow-md shadow-orange-200 ring-4 ring-white flex items-center justify-center">
@@ -804,11 +804,11 @@ const CustomerMenu = () => {
               <button
                 key={code}
                 onClick={() => handleLanguageSelect(code)}
-                className={\`rounded-full px-4 py-2 text-[10px] font-extrabold border transition-all cursor-pointer select-none \${
+                className={`rounded-full px-4 py-2 text-[10px] font-extrabold border transition-all cursor-pointer select-none ${
                   lang === code
                     ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-md shadow-orange-500/20 scale-105 active:scale-95"
                     : "bg-white/80 backdrop-blur-sm text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/10 active:scale-95"
-                }\`}
+                }`}
               >
                 {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
               </button>
