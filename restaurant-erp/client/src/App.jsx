@@ -24,6 +24,7 @@ import DigitalTwin from './pages/DigitalTwin';
 import QRLogin from './pages/QRLogin';
 import CustomerMenu from './pages/CustomerMenu';
 import QRManagement from './pages/QRManagement';
+import OrderStatusMobile from './pages/OrderStatusMobile';
 
 // Auth Guard Component
 const PrivateRoute = ({ children }) => {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/qr-login" element={<QRLogin />} />
+          <Route path="/order-status-mobile" element={<OrderStatusMobile />} />
           {/* Customer-facing QR ordering — public, no auth */}
           <Route path="/qr-order/:tableId" element={<CustomerMenu />} />
 
