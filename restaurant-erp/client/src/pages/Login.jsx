@@ -632,7 +632,7 @@ const Login = () => {
   );
 
   return (
-    <div className="min-h-screen md:fixed md:inset-0 md:overflow-hidden overflow-y-auto bg-[#f97316]">
+    <div className="h-screen overflow-hidden md:fixed md:inset-0 bg-[#f97316]">
 
       {/* â•â• DESKTOP â•â• */}
       <div className="hidden md:flex h-full w-full">
@@ -679,10 +679,10 @@ const Login = () => {
         </div>
       </div>
 
-      {/* â•â• MOBILE â•â• */}
-      <div className="md:hidden flex flex-col min-h-screen w-full bg-[#f97316] pb-8">
-        {/* Orange top - fixed height so logo never gets cut */}
-        <div className="relative flex-shrink-0 h-40">
+      {/* ══ MOBILE ══ */}
+      <div className="md:hidden h-full flex flex-col w-full bg-[#f97316]">
+        {/* Orange top */}
+        <div className="relative flex-shrink-0 h-36">
           <div className="absolute right-0 top-0 bottom-0 w-[55%] overflow-hidden rounded-bl-[70px]">
             <img src={chefImage} alt="Chef" className="w-full h-full object-cover" style={{objectPosition:'55% top'}}/>
             <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#f97316]/70"/>
@@ -718,15 +718,7 @@ const Login = () => {
           ) : view === 'ticket-success' ? (
             <TicketSuccessContent onBack={()=>setView('login')}/>
           ) : (
-            <>
-              <LoginFormContent {...formProps}/>
-              <div className="h-10 flex-shrink-0">
-                <svg viewBox="0 0 410 40" preserveAspectRatio="none" className="w-full h-full block">
-                  <path d="M0,16 Q102,0 205,16 T410,16 L410,40 L0,40 Z" fill="#f97316"/>
-                  <path d="M0,26 Q102,10 205,26 T410,26 L410,40 L0,40 Z" fill="#1e3a8a"/>
-                </svg>
-              </div>
-            </>
+            <LoginFormContent {...formProps}/>
           )}
         </div>
       </div>
