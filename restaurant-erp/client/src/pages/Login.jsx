@@ -688,7 +688,7 @@ const Login = () => {
             alt="Chef"
             className="absolute right-0 top-0 w-[65%] h-full object-cover"
             style={{
-              objectPosition: '55% top',
+              objectPosition: '60% 40%',
               clipPath: 'ellipse(80% 68% at 93% 68%)',
             }}
           />
