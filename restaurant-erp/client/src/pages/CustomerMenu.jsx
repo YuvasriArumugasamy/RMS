@@ -547,95 +547,78 @@ const CustomerMenu = () => {
 
   // Cart helpers
   const addToCart = (item) => {
-    const cartItem = { ...item, qty: 1, customizations: {}, specialNote: '' };
-    setCart(prev => [...prev, cartItem]);
-  };
-
-  const updateQty = (index, delta) => {
-    setCart(prev => prev.map((item, i) => i === index ? { ...item, qty: Math.max(1, item.qty + delta) } : item));
-  };
-
-  const removeFromCart = (index) => {
-    setCart(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const cartSubtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const discount = appliedCoupon ? appliedCoupon.discount : 0;
-  const finalSubtotal = Math.max(0, cartSubtotal - discount);
-  const finalGst = gst(finalSubtotal);
-  const finalService = serviceCharge(finalSubtotal);
-  const finalTotal = finalSubtotal + finalGst + finalService;
-
-  const placeOrder = async () => {
-    if (!cart.length || isPlacingOrder) return;
-    setIsPlacingOrder(true);
-
-    const orderPayload = {
-      type: orderType === 'Dine In' ? 'Dine-in (QR)' : 'Takeaway (QR)',
-      table: orderType === 'Dine In' ? tableInfo.name : 'N/A',
-      items: cart.map(i => ({
-        id: i.id,
-        menuItemId: i.menuItemId || i.id,
-        name: i.name,
-        price: i.price,
-        qty: i.qty,
-        category: i.category,
-        image: i.image,
-        specialNote: i.specialNote || '',
-      })),
-      subtotal: finalSubtotal,
-      gst: finalGst,
-      total: finalTotal,
-      guestCount: 1,
-      specialInstructions,
-      appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
-    };
-
-    try {
-      const res = await axios.post(`${API_URL}/orders/qr`, orderPayload);
-      if (res.data.success) {
-        const newOrder = { ...res.data.data, id: res.data.data._id };
-        setPlacedOrders(prev => [newOrder, ...prev]);
-        setSelectedOrder(newOrder);
-        setCart([]);
-        setSpecialInstructions('');
-        setAppliedCoupon(null);
-        setIsPlacingOrder(false);
-        setStage('tracking');
-        return;
-      }
-    } catch {
-      toast.error('Order placement failed. Please try again.');
-    }
-
-    const localOrder = {
-      id: `ORD-QR-${Date.now().toString().slice(-4)}`,
-      ...orderPayload,
-      status: 'Pending',
-      timestamp: fmtTime(), date: fmtDate(),
-    };
-    const all = JSON.parse(localStorage.getItem('orders') || '[]');
-    localStorage.setItem('orders', JSON.stringify([localOrder, ...all]));
-    setPlacedOrders(prev => [localOrder, ...prev]);
-    setSelectedOrder(localOrder);
-    setCart([]);
-    setSpecialInstructions('');
-    setAppliedCoupon(null);
-    setStage('tracking');
-    setIsPlacingOrder(false);
-  };
-
-  const submitFeedback = () => {
+    const cartItem = { ...item  const submitFeedback = () => {
     const feedbacks = JSON.parse(localStorage.getItem('customerFeedbacks') || '[]');
     feedbacks.unshift({ 
-      table: tableInfo.n  const renderWelcomeStage = () => {
+      table: tableInfo.name, 
+      ratings, 
+      comment: feedbackText, 
+      date: fmtDate(), 
+      time: fmtTime() 
+    });
+    localStorage.setItem('customerFeedbacks', JSON.stringify(feedbacks));
+    setRatings({ foodQuality: 0, service: 0, ambience: 0 });
+    setFeedbackText('');
+    setStage('thankYou');
+  };
+
+  const filteredMenu = menu.filter(item => {
+    if (activeCategory === 'Favorites') {
+      return favorites.includes(item.id || item._id) && item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    const matchCategory = activeCategory === 'All' || item.category === activeCategory;
+    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchSearch;
+  }).sort((a, b) => {
+    const isNonVegA = ['chicken', 'biryani', 'fish', 'prawn', 'meat', 'mutton', 'egg'].some(keyword => a.name.toLowerCase().includes(keyword));
+    const isNonVegB = ['chicken', 'biryani', 'fish', 'prawn', 'meat', 'mutton', 'egg'].some(keyword => b.name.toLowerCase().includes(keyword));
+    const ratingA = (a.name.charCodeAt(0) % 5) * 0.2 + 4.1;
+    const ratingB = (b.name.charCodeAt(0) % 5) * 0.2 + 4.1;
+    const prepTimeA = PREP_TIMES[a.category] ?? PREP_TIMES.default;
+    const prepTimeB = PREP_TIMES[b.category] ?? PREP_TIMES.default;
+    const isSpecialA = a.isCombo || a.name.toLowerCase().includes('naan') || a.name.toLowerCase().includes('special');
+    const isSpecialB = b.isCombo || b.name.toLowerCase().includes('naan') || b.name.toLowerCase().includes('special');
+
+    switch (sortBy) {
+      case 'Best Selling':
+        return (b.name.length * 3 + b.price) - (a.name.length * 3 + a.price);
+      case 'New Arrivals':
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      case 'Price: Low to High':
+        return a.price - b.price;
+      case 'Price: High to Low':
+        return b.price - a.price;
+      case 'Highest Rated':
+        return ratingB - ratingA;
+      case 'Fastest to Prepare':
+        return prepTimeA - prepTimeB;
+      case 'Veg First':
+        if (isNonVegA && !isNonVegB) return 1;
+        if (!isNonVegA && isNonVegB) return -1;
+        return 0;
+      case 'Non-Veg First':
+        if (isNonVegA && !isNonVegB) return -1;
+        if (!isNonVegA && isNonVegB) return 1;
+        return 0;
+      case "Today's Special":
+        if (isSpecialA && !isSpecialB) return -1;
+        if (!isSpecialA && isSpecialB) return 1;
+        return 0;
+      case 'Popular':
+      default:
+        return 0;
+    }
+  });
+
+  /* ── STAGE: WELCOME ── */
+  const renderWelcomeStage = () => {
     const handleLanguageSelect = (code) => {
       setLang(code);
     };
 
     return (
       <div className="relative min-h-screen w-full overflow-y-auto bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-16 select-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
-        <style dangerouslySetInnerHTML={{__html: `
+        <style dangerouslySetInnerHTML={{__html: \`
           @keyframes floatBlob1 {
             0% { transform: translate(0px, 0px) scale(1); }
             50% { transform: translate(20px, -20px) scale(1.06); }
@@ -652,7 +635,7 @@ const CustomerMenu = () => {
           .animate-blob2 {
             animation: floatBlob2 15s infinite ease-in-out;
           }
-        `}} />
+        \`}} />
 
         <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 opacity-90 blur-0 animate-blob1" />
         <div className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-orange-400 via-orange-300 to-amber-200 opacity-90 animate-blob2" />
@@ -666,9 +649,9 @@ const CustomerMenu = () => {
         </div>
 
         <div
-          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_20px_50px_rgba(255,122,0,0.12)] px-6 pt-12 pb-5 transition-all duration-700 ease-out ${
+          className={\`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_20px_50px_rgba(255,122,0,0.12)] px-6 pt-12 pb-5 transition-all duration-700 ease-out \${
             showWelcomeContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
+          }\`}
         >
           <div className="absolute -top-12 left-1/2 -translate-x-1/2">
             <div className="rounded-full bg-white p-1.5 shadow-md shadow-orange-200 ring-4 ring-white flex items-center justify-center">
@@ -743,59 +726,11 @@ const CustomerMenu = () => {
               <button
                 key={code}
                 onClick={() => handleLanguageSelect(code)}
-                className={`rounded-full px-4 py-2 text-[10px] font-extrabold border transition-all cursor-pointer select-none ${
+                className={\`rounded-full px-4 py-2 text-[10px] font-extrabold border transition-all cursor-pointer select-none \${
                   lang === code
                     ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-md shadow-orange-500/20 scale-105 active:scale-95"
                     : "bg-white/80 backdrop-blur-sm text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/10 active:scale-95"
-                }`}
-              >
-                {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };lassName="text-[10px] text-gray-550 font-bold mt-1">Scan</span>
-            </div>
-            
-            <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
-
-            <div className="flex flex-col items-center gap-1">
-              <img src={orderStepImg} alt="Order" className="w-10 h-10 object-contain" />
-              <span className="text-[10px] text-gray-550 font-bold mt-1">Order</span>
-            </div>
-
-            <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
-
-            <div className="flex flex-col items-center gap-1">
-              <img src={enjoyStepImg} alt="Enjoy" className="w-10 h-10 object-contain" />
-              <span className="text-[10px] text-gray-550 font-bold mt-1">Enjoy</span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setStage('menu')}
-            className="mt-5 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-5.5 py-3 text-white font-extrabold text-xs shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
-          >
-            <span className="mx-auto">{t.startOrdering}</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-orange-500 ml-2 shadow-inner font-black">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </span>
-          </button>
-
-          <div className="mt-4 flex items-center justify-center gap-3">
-            {Object.keys(LANGS).map((code) => (
-              <button
-                key={code}
-                onClick={() => handleLanguageSelect(code)}
-                className={`rounded-full px-5 py-2.5 text-[10.5px] font-extrabold border transition-all cursor-pointer select-none ${
-                  lang === code
-                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-lg shadow-orange-500/20 scale-105 active:scale-95"
-                    : "bg-white/80 backdrop-blur-sm text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/10 active:scale-95"
-                }`}
+                }\`}
               >
                 {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
               </button>
