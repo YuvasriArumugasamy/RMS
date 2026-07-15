@@ -689,7 +689,9 @@ const StaffPerformance = () => {
       {/* Full table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
         <h3 className="text-sm font-bold text-slate-800 mb-4">All Staff Performance</h3>
-        <div className="overflow-x-auto">
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -721,6 +723,58 @@ const StaffPerformance = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {scored.map((s,i) => (
+            <div key={s.id} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-3xl flex items-center justify-center text-lg font-black text-white ${i===0?'bg-amber-500':i===1?'bg-slate-500':'bg-orange-500'}`}>
+                    {medals[i]||i+1}
+                  </div>
+                  <div>
+                    <p className="font-extrabold text-slate-900">{s.name}</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">{s.role}</p>
+                  </div>
+                </div>
+                <div className={`text-[10px] font-black px-2.5 py-1 rounded-full ${s.score>=80?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700'}`}>
+                  {s.score} pts
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Attendance</p>
+                  <p className="mt-2 font-black text-slate-800">{s.attendance}%</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Orders</p>
+                  <p className="mt-2 font-black text-slate-800">{s.ordersHandled}</p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Avg Service</p>
+                  <p className="mt-2 font-black text-slate-800">{s.serviceTime} min</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Rating</p>
+                  <p className="mt-2 font-black text-amber-600">{s.customerRating}/5</p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Upselling</p>
+                  <p className="mt-2 font-black text-emerald-600">{s.upselling}%</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Score</p>
+                  <p className={`mt-2 font-black ${s.score>=80?'text-emerald-700':s.score>=60?'text-amber-700':'text-red-700'}`}>{s.score}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
