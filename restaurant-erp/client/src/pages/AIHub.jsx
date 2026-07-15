@@ -531,7 +531,9 @@ const ProfitAnalyzer = () => {
       {/* Item table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
         <h3 className="text-sm font-bold text-slate-800 mb-4">Per-Item Profit Analysis</h3>
-        <div className="overflow-x-auto">
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -575,6 +577,46 @@ const ProfitAnalyzer = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {analysis.map(item => (
+            <div key={item.id} className={`rounded-3xl border p-4 shadow-sm ${item.profitPct >= 50 ? 'border-emerald-200 bg-emerald-50/30' : item.profitPct >= 30 ? 'border-amber-200 bg-amber-50/30' : 'border-slate-200 bg-white'}`}>
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">
+                  <MenuItemImage src={item.image} alt={item.name} imgClassName="w-full h-full object-contain" emojiClassName="text-base" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-extrabold text-sm text-slate-900">{item.name}</h4>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Sold {item.sold} • Revenue ₹{item.revenue}</p>
+                </div>
+                <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border uppercase tracking-wider ${item.profitPct >= 50 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : item.profitPct >= 30 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                  {item.profitPct >= 50 ? 'High Margin' : item.profitPct >= 30 ? 'Healthy' : 'Low Margin'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-4 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Sell</p>
+                  <p className="mt-2 font-black text-slate-900">₹{item.price}</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Cost</p>
+                  <p className="mt-2 font-black text-slate-900">₹{item.cost}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Profit</p>
+                  <p className="mt-2 font-black text-emerald-700">₹{item.profit}</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-3 border border-slate-100">
+                  <p className="text-[8px] uppercase tracking-wider text-slate-400">Margin</p>
+                  <p className={`mt-2 font-black ${item.profitPct >= 50 ? 'text-emerald-700' : item.profitPct >= 30 ? 'text-amber-700' : 'text-red-700'}`}>{item.profitPct}%</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
