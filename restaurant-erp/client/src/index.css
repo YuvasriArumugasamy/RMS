@@ -136,7 +136,18 @@
 }
 
 @keyframes scanLine {
-  0%   { top: 20%; opacity: 1; }
-  50%  { top: 75%; opacity: 0.8; }
-  100% { top: 20%; opacity: 1; }
+  0%   { top: 15%; opacity: 1; }
+  50%  { top: 80%; opacity: 0.9; }
+  100% { top: 15%; opacity: 1; }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #f97316, #fb923c, #f97316, transparent);
+  box-shadow: 0 0 8px 2px rgba(249, 115, 22, 0.6);
+  top: 15%;
+  animation: scanLine 2s ease-in-out infinite;
 }

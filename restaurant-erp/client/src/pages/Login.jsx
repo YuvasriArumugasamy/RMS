@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import chefImage  from '../assets/ChatGPT Image Jul 2, 2026, 12_34_37 PM.png';
 import centerLogo from '../assets/Screenshot 2026-07-02 173735.png';
+import QRCode from 'react-qr-code';
 
 const ROLES = ['Admin','Manager','Chef','Waiter','Cashier'];
 
@@ -373,7 +374,7 @@ const FaceIDViewContent = ({ onBack }) => {
       </p>
 
       {/* Camera / status area */}
-      <div className="relative w-full rounded-2xl overflow-hidden mb-4" style={{background:'#0f172a', aspectRatio:'4/3', maxHeight:'220px'}}>
+      <div className="relative w-full rounded-2xl overflow-hidden mb-4" style={{background:'#0f172a', height:'200px'}}>
         {/* Live video */}
         <video ref={videoRef} autoPlay playsInline muted
           className={`w-full h-full object-cover ${status === 'active' ? 'opacity-100' : 'opacity-0'}`}
@@ -426,8 +427,7 @@ const FaceIDViewContent = ({ onBack }) => {
             <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-[#f97316] rounded-br-md"/>
             {/* Scanning line */}
             {scanning && (
-              <div className="absolute left-0 right-0 h-0.5 bg-[#f97316]/70"
-                style={{animation: 'scanLine 2s ease-in-out infinite', top: '30%'}}/>
+              <div className="scan-line"/>
             )}
             <div className="absolute bottom-2 left-0 right-0 text-center">
               <span className="text-[10px] text-white/70 font-semibold bg-black/30 px-2 py-0.5 rounded-full">
@@ -491,7 +491,7 @@ const QRViewContent = ({ onBack }) => (
       <div className="absolute -top-2 -right-2 w-7 h-7 border-t-[3px] border-r-[3px] border-[#f97316] rounded-tr-md"/>
       <div className="absolute -bottom-2 -left-2 w-7 h-7 border-b-[3px] border-l-[3px] border-[#f97316] rounded-bl-md"/>
       <div className="absolute -bottom-2 -right-2 w-7 h-7 border-b-[3px] border-r-[3px] border-[#f97316] rounded-br-md"/>
-      <div className="w-[180px] h-[180px] p-1 bg-white"><QRCodeSVG/></div>
+      <div className="w-[180px] h-[180px] p-2 bg-white"><QRCode value={`${window.location.origin}/qr-login`} size={164} level="H" fgColor="#1e3a8a" bgColor="#ffffff" style={{width:'100%',height:'auto'}}/></div>
     </div>
     {/* Info */}
     <div className="w-full bg-orange-50 border border-orange-100 rounded-2xl p-3.5 flex items-start gap-3 mb-5">
