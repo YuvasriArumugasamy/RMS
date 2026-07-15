@@ -18,6 +18,17 @@ const Settings = () => {
   const [gstin, setGstin] = useState(() => {
     return localStorage.getItem('rms_gstin') || '33AAAAA1111A1Z1';
   });
+  const [paymentSettings, setPaymentSettings] = useState(() => {
+    const saved = localStorage.getItem('rms_payment_settings');
+    return saved ? JSON.parse(saved) : {
+      provider: 'razorpay',
+      mode: 'test',
+      razorpayKeyId: '',
+      razorpayKeySecret: '',
+      stripePublishableKey: '',
+      stripeSecretKey: '',
+    };
+  });
   const [notifPermission, setNotifPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
   );
@@ -37,7 +48,7 @@ const Settings = () => {
     const loadSettings = async () => {
       try {
         const { data } = await api.get('/settings');
-        if (data.success && data.data) {
+          if (data.success && data.data) {
           const s = {
             name:     data.data.name,
             email:    data.data.email,
@@ -55,6 +66,10 @@ const Settings = () => {
             setGstin(data.data.gstin);
             localStorage.setItem('rms_gstin', data.data.gstin);
           }
+                  if (data.data.payment !== undefined) {
+                    setPaymentSettings(data.data.payment);
+                    localStorage.setItem('rms_payment_settings', JSON.stringify(data.data.payment));
+                  }
         }
       } catch {
         // offline — keep localStorage values
@@ -384,6 +399,115 @@ const Settings = () => {
                   <h4 className="text-sm font-extrabold text-slate-800">Admin Access Required</h4>
                   <p className="text-xs text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">
                     Only Admin users can modify GST rate and business tax settings.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : activeTab === 'Payment Settings' ? (
+            <div className="space-y-6 max-w-xl animate-[fadeIn_0.2s_ease-out]">
+              {isAdmin ? (
+                <div className="bg-slate-50 border border-slate-150/60 rounded-3xl p-5 space-y-5">
+                  <div>
+                    <h4 className="text-xs font-black text-slate-800">Payment Gateway</h4>
+                    <p className="text-[10.5px] text-slate-400 font-bold mt-0.5 leading-relaxed">Configure your payment provider and credentials.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Provider</label>
+                      <select
+                        value={paymentSettings.provider}
+                        onChange={(e) => setPaymentSettings({ ...paymentSettings, provider: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-xs font-bold cursor-pointer"
+                      >
+                        <option value="razorpay">Razorpay</option>
+                        <option value="stripe">Stripe</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Mode</label>
+                      <select
+                        value={paymentSettings.mode}
+                        onChange={(e) => setPaymentSettings({ ...paymentSettings, mode: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-xs font-bold cursor-pointer"
+                      >
+                        <option value="test">Test</option>
+                        <option value="live">Live</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {paymentSettings.provider === 'razorpay' && (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Razorpay Key ID</label>
+                        <input
+                          type="text"
+                          value={paymentSettings.razorpayKeyId}
+                          onChange={(e) => setPaymentSettings({ ...paymentSettings, razorpayKeyId: e.target.value })}
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-505 text-xs font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Razorpay Key Secret</label>
+                        <input
+                          type="password"
+                          value={paymentSettings.razorpayKeySecret}
+                          onChange={(e) => setPaymentSettings({ ...paymentSettings, razorpayKeySecret: e.target.value })}
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-505 text-xs font-bold"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentSettings.provider === 'stripe' && (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Stripe Publishable Key</label>
+                        <input
+                          type="text"
+                          value={paymentSettings.stripePublishableKey}
+                          onChange={(e) => setPaymentSettings({ ...paymentSettings, stripePublishableKey: e.target.value })}
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-505 text-xs font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Stripe Secret Key</label>
+                        <input
+                          type="password"
+                          value={paymentSettings.stripeSecretKey}
+                          onChange={(e) => setPaymentSettings({ ...paymentSettings, stripeSecretKey: e.target.value })}
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-505 text-xs font-bold"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={async () => {
+                      localStorage.setItem('rms_payment_settings', JSON.stringify(paymentSettings));
+                      try {
+                        await api.put('/settings', {
+                          ...settings,
+                          payment: paymentSettings,
+                        });
+                        toast.success('✅ Payment settings saved!');
+                      } catch (err) {
+                        toast.warning('⚠️ Saved locally (server offline)');
+                      }
+                    }}
+                    className="w-full py-3.5 bg-indigo-600 hover:bg-[#0F286B] text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-indigo-600/10 cursor-pointer active:scale-95"
+                  >
+                    💾 Save Payment Settings
+                  </button>
+                </div>
+              ) : (
+                <div className="py-16 text-center space-y-3">
+                  <span className="text-5xl select-none block">🔒</span>
+                  <h4 className="text-sm font-extrabold text-slate-800">Admin Access Required</h4>
+                  <p className="text-xs text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">
+                    Only Admin users can configure payment integrations.
                   </p>
                 </div>
               )}

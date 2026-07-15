@@ -13,6 +13,18 @@ const settingsSchema = new mongoose.Schema({
   gstRate:  { type: Number, default: 5 },
   gstin:    { type: String, default: '33AAAAA1111A1Z1' },
 
+  // Payment gateway configuration (store provider + credentials)
+  payment: {
+    provider: { type: String, default: 'razorpay' },
+    mode:     { type: String, default: 'test' }, // 'test' or 'live'
+    // Razorpay
+    razorpayKeyId:     { type: String, default: '' },
+    razorpayKeySecret: { type: String, default: '' },
+    // Stripe
+    stripePublishableKey: { type: String, default: '' },
+    stripeSecretKey:      { type: String, default: '' },
+  },
+
   // Role permissions map — stored as JSON object
   rolePermissions: {
     type: mongoose.Schema.Types.Mixed,
