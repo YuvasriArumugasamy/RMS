@@ -5,6 +5,7 @@ import { api } from '../context/AuthContext';
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [newUser, setNewUser] = useState({ username: '', password: '', role: 'Waiter', phone: '', email: '' });
 
   const load = async () => {
@@ -21,8 +22,16 @@ export default function UserManagement() {
   useEffect(() => { load(); }, []);
 
   const addUser = async () => {
+    const username = (newUser.username || '').trim();
+    const password = newUser.password || '';
+    if (!username) return toast.error('Enter a username');
+    if (!password || password.length < 3) return toast.error('Password too short (min 3 chars)');
+    const exists = users.some(u => (u.username || '').toLowerCase() === username.toLowerCase());
+    if (exists) return toast.error('Username already exists');
+
+    setSaving(true);
     try {
-      const res = await api.post('/users', newUser);
+      const res = await api.post('/users', { ...newUser, username });
       if (res.data && res.data.success) {
         setUsers([res.data.data, ...users]);
         setNewUser({ username: '', password: '', role: 'Waiter', phone: '', email: '' });
@@ -30,6 +39,8 @@ export default function UserManagement() {
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Could not create user');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -63,7 +74,7 @@ export default function UserManagement() {
         <select value={newUser.role} onChange={e=>setNewUser({...newUser, role:e.target.value})} className="px-3 py-2 border rounded-2xl text-xs">
           <option>Admin</option><option>Manager</option><option>Chef</option><option>Waiter</option><option>Cashier</option>
         </select>
-        <button onClick={addUser} className="px-4 py-2 bg-indigo-600 text-white rounded-2xl text-xs">➕ Add User</button>
+        <button onClick={addUser} disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-2xl text-xs disabled:opacity-60">{saving ? 'Adding...' : '➕ Add User'}</button>
       </div>
 
       <div className="mt-2 bg-white border rounded-2xl p-3">
