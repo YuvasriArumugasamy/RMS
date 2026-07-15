@@ -471,7 +471,11 @@ const FaceIDViewContent = ({ onBack }) => {
           </button>
         ))}
       </div>
-/* â”€â”€ QR View Content â”€â”€ */
+    </div>
+  );
+};
+
+/* ── QR View Content ── */
 const QRViewContent = ({ onBack }) => (
   <div className="flex flex-col items-center px-8 pt-6 pb-6 h-full overflow-y-auto" style={{scrollbarWidth:'none'}}>
     <button onClick={onBack} className="flex items-center gap-1.5 text-gray-700 font-semibold text-sm mb-4 hover:text-gray-900 transition self-start">
