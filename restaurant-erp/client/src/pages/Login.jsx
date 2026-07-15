@@ -449,7 +449,7 @@ const LoginFormContent = ({ role, setRole, email, setEmail, password, setPasswor
     { l:'Offline',   m:'Offline', qr:false, sid:false, fid:false, off:true, ic:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6s4-2 11-2 11 2 11 2"/><path d="M1 12s4-2 11-2 11 2 11 2"/><line x1="2" y1="2" x2="22" y2="22"/></svg> },
   ];
   return (
-    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-3" style={{scrollbarWidth:'none',msOverflowStyle:'none'}}>
+    <div className="flex-1 overflow-y-auto px-6 pt-10 md:pt-2 pb-3" style={{scrollbarWidth:'none',msOverflowStyle:'none'}}>
       {/* Brand */}
       <div className="text-center mb-3">
         <p className="text-[10px] text-[#f97316] font-semibold tracking-[0.18em] uppercase">Welcome to</p>
