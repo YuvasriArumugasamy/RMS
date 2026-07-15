@@ -5,7 +5,6 @@ import axios from 'axios';
 import QRCode from 'react-qr-code';
 import { toast } from 'react-toastify';
 import MenuItemImage from '../components/MenuItemImage';
-import logoImage from '../assets/Screenshot 2026-07-02 173735.png';
 import bannerBgImage from '../assets/ChatGPT Image Jul 10, 2026, 06_08_46 PM.png';
 import scanStepImg from '../assets/Screenshot 2026-07-11 201657.png';
 import orderStepImg from '../assets/Screenshot 2026-07-11 201635.png';
@@ -2260,7 +2259,7 @@ const CustomerMenu = () => {
       }`}>
         <div className="absolute -top-12 left-1/2 -translate-x-1/2">
           <div className="rounded-full bg-white p-1.5 shadow-md shadow-orange-200 ring-4 ring-white flex items-center justify-center">
-            <img src={logoImage} alt="Resto Logo" className="w-20 h-20 rounded-full object-cover" />
+            <img src={chefImage} alt="Resto Logo" className="w-20 h-20 rounded-full object-cover" />
           </div>
         </div>
 
@@ -2378,7 +2377,6 @@ const CustomerMenu = () => {
           setActiveCategory={setActiveCategory}
           isDrawerOpen={isDrawerOpen}
           setIsDrawerOpen={setIsDrawerOpen}
-          logoImage={logoImage}
           bannerBgImage={bannerBgImage}
         >
           {stage === 'menu' && renderMenuStage()}
@@ -2589,7 +2587,7 @@ const CustomerMenu = () => {
 };
 
 /* ── APP SHELL AND BOTTOM NAV DEFINITIONS (OUTSIDE TO PRESERVE SCROLL) ── */
-const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, setActiveCategory, logoImage }) => {
+const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, setActiveCategory }) => {
   const items = [
     { 
       id: 'menu', 
@@ -2660,7 +2658,7 @@ const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, set
             >
               <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center ring-4 ring-white shadow-xl active:scale-95 transition-transform overflow-hidden border border-slate-100/50">
                 <img 
-                  src={logoImage} 
+                  src={chefImage}
                   alt="Scan Menu" 
                   className="w-full h-full object-cover rounded-full" 
                 />
@@ -2706,7 +2704,7 @@ const BottomNav = ({ t, cart, placedOrders, activeCategory, stage, setStage, set
 
 const AppShell = ({ 
   children, t, cart, placedOrders, favorites, activeCategory, stage, setStage, 
-  setActiveCategory, isDrawerOpen, setIsDrawerOpen, logoImage, bannerBgImage 
+  setActiveCategory, isDrawerOpen, setIsDrawerOpen, bannerBgImage 
 }) => {
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
@@ -2905,7 +2903,6 @@ const AppShell = ({
             stage={stage}
             setStage={setStage}
             setActiveCategory={setActiveCategory}
-            logoImage={logoImage}
           />
         </div>
       </div>
