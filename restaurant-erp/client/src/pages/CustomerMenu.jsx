@@ -628,74 +628,13 @@ const CustomerMenu = () => {
   const submitFeedback = () => {
     const feedbacks = JSON.parse(localStorage.getItem('customerFeedbacks') || '[]');
     feedbacks.unshift({ 
-      table: tableInfo.name, 
-      ratings, 
-      comment: feedbackText, 
-      date: fmtDate(), 
-      time: fmtTime() 
-    });
-    localStorage.setItem('customerFeedbacks', JSON.stringify(feedbacks));
-    setRatings({ foodQuality: 0, service: 0, ambience: 0 });
-    setFeedbackText('');
-    setStage('thankYou');
-  };
-
-  const filteredMenu = menu.filter(item => {
-    if (activeCategory === 'Favorites') {
-      return favorites.includes(item.id || item._id) && item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    }
-    const matchCategory = activeCategory === 'All' || item.category === activeCategory;
-    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCategory && matchSearch;
-  }).sort((a, b) => {
-    const isNonVegA = ['chicken', 'biryani', 'fish', 'prawn', 'meat', 'mutton', 'egg'].some(keyword => a.name.toLowerCase().includes(keyword));
-    const isNonVegB = ['chicken', 'biryani', 'fish', 'prawn', 'meat', 'mutton', 'egg'].some(keyword => b.name.toLowerCase().includes(keyword));
-    const ratingA = (a.name.charCodeAt(0) % 5) * 0.2 + 4.1;
-    const ratingB = (b.name.charCodeAt(0) % 5) * 0.2 + 4.1;
-    const prepTimeA = PREP_TIMES[a.category] ?? PREP_TIMES.default;
-    const prepTimeB = PREP_TIMES[b.category] ?? PREP_TIMES.default;
-    const isSpecialA = a.isCombo || a.name.toLowerCase().includes('naan') || a.name.toLowerCase().includes('special');
-    const isSpecialB = b.isCombo || b.name.toLowerCase().includes('naan') || b.name.toLowerCase().includes('special');
-
-    switch (sortBy) {
-      case 'Best Selling':
-        return (b.name.length * 3 + b.price) - (a.name.length * 3 + a.price);
-      case 'New Arrivals':
-        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-      case 'Price: Low to High':
-        return a.price - b.price;
-      case 'Price: High to Low':
-        return b.price - a.price;
-      case 'Highest Rated':
-        return ratingB - ratingA;
-      case 'Fastest to Prepare':
-        return prepTimeA - prepTimeB;
-      case 'Veg First':
-        if (isNonVegA && !isNonVegB) return 1;
-        if (!isNonVegA && isNonVegB) return -1;
-        return 0;
-      case 'Non-Veg First':
-        if (isNonVegA && !isNonVegB) return -1;
-        if (!isNonVegA && isNonVegB) return 1;
-        return 0;
-      case "Today's Special":
-        if (isSpecialA && !isSpecialB) return -1;
-        if (!isSpecialA && isSpecialB) return 1;
-        return 0;
-      case 'Popular':
-      default:
-        return 0;
-    }
-  });
-
-  /* ── STAGE: WELCOME ── */
-  const renderWelcomeStage = () => {
+      table: tableInfo.n  const renderWelcomeStage = () => {
     const handleLanguageSelect = (code) => {
       setLang(code);
     };
 
     return (
-      <div className="relative h-screen w-full overflow-hidden bg-[#FFFBF7] flex flex-col items-center justify-center px-4 select-none">
+      <div className="relative min-h-screen w-full overflow-y-auto bg-[#FFFBF7] flex flex-col items-center justify-center px-4 py-16 select-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes floatBlob1 {
             0% { transform: translate(0px, 0px) scale(1); }
@@ -727,49 +666,97 @@ const CustomerMenu = () => {
         </div>
 
         <div
-          className={`relative z-10 w-full max-w-sm rounded-[2.2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_24px_60px_rgba(255,122,0,0.15)] px-6 pt-14 pb-6 transition-all duration-700 ease-out ${
+          className={`relative z-10 w-full max-w-sm rounded-[2rem] bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_20px_50px_rgba(255,122,0,0.12)] px-6 pt-12 pb-5 transition-all duration-700 ease-out ${
             showWelcomeContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="absolute -top-14 left-1/2 -translate-x-1/2">
-            <div className="rounded-full bg-white p-1.5 shadow-lg shadow-orange-200 ring-4 ring-white flex items-center justify-center">
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2">
+            <div className="rounded-full bg-white p-1.5 shadow-md shadow-orange-200 ring-4 ring-white flex items-center justify-center">
               <img 
                 src={logoImage} 
                 alt="Resto Logo" 
-                className="w-24 h-24 rounded-full object-cover" 
+                className="w-20 h-20 rounded-full object-cover" 
               />
             </div>
           </div>
 
-          <div className="text-center mt-4 px-2">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-orange-600 leading-tight">
+          <div className="text-center mt-2 px-2">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-orange-600 leading-tight">
               {t.welcome}
             </h1>
-            <p className="mt-1.5 text-gray-550 text-[11px] font-semibold tracking-wide">{t.subtitle}</p>
+            <p className="mt-1 text-gray-550 text-[10.5px] font-semibold tracking-wide">{t.subtitle}</p>
           </div>
 
-          <div className="mt-5 rounded-2xl bg-white shadow-sm border border-orange-50 py-4.5 px-4 text-center">
-            <p className="text-orange-500 font-bold tracking-wide text-[10px] mb-1.5">
+          <div className="mt-4 rounded-xl bg-white shadow-sm border border-orange-50 py-3.5 px-4 text-center">
+            <p className="text-orange-500 font-bold tracking-wide text-[9.5px] mb-1">
               {t.tableLabel}
             </p>
-            <p className="text-6xl font-black text-gray-900 tabular-nums leading-none my-1">
+            <p className="text-5xl font-black text-gray-900 tabular-nums leading-none my-0.5">
               {'0' + (tableInfo.name.match(/\d+/)?.[0] || tableId)}
             </p>
 
-            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1.5 border border-green-100 shadow-sm text-green-700">
-              <svg className="w-4 h-4 text-green-600 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3.5 py-1 border border-green-100 shadow-sm text-green-700">
+              <svg className="w-3.5 h-3.5 text-green-600 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-bold text-[10px] uppercase tracking-wider">
+              <span className="font-bold text-[9px] uppercase tracking-wider">
                 {t.scanSuccess}
               </span>
             </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-4 select-none">
-            <div className="flex flex-col items-center gap-1">
-              <img src={scanStepImg} alt="Scan" className="w-10 h-10 object-contain" />
-              <span className="text-[10px] text-gray-550 font-bold mt-1">Scan</span>
+          <div className="mt-4 flex items-center justify-center gap-3.5 select-none">
+            <div className="flex flex-col items-center gap-0.5">
+              <img src={scanStepImg} alt="Scan" className="w-8 h-8 object-contain" />
+              <span className="text-[9.5px] text-gray-555 font-bold mt-0.5">Scan</span>
+            </div>
+            
+            <span className="text-orange-400 font-bold text-xs mb-3">&raquo;</span>
+
+            <div className="flex flex-col items-center gap-0.5">
+              <img src={orderStepImg} alt="Order" className="w-8 h-8 object-contain" />
+              <span className="text-[9.5px] text-gray-555 font-bold mt-0.5">Order</span>
+            </div>
+
+            <span className="text-orange-400 font-bold text-xs mb-3">&raquo;</span>
+
+            <div className="flex flex-col items-center gap-0.5">
+              <img src={enjoyStepImg} alt="Enjoy" className="w-8 h-8 object-contain" />
+              <span className="text-[9.5px] text-gray-555 font-bold mt-0.5">Enjoy</span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setStage('menu')}
+            className="mt-4 w-full flex items-center justify-between rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-5 py-2.5 text-white font-extrabold text-[11px] shadow-md shadow-orange-200 active:scale-[0.98] transition-transform cursor-pointer uppercase tracking-wider"
+          >
+            <span className="mx-auto">{t.startOrdering}</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-orange-500 ml-2 shadow-inner font-black">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </span>
+          </button>
+
+          <div className="mt-3.5 flex items-center justify-center gap-2.5">
+            {Object.keys(LANGS).map((code) => (
+              <button
+                key={code}
+                onClick={() => handleLanguageSelect(code)}
+                className={`rounded-full px-4 py-2 text-[10px] font-extrabold border transition-all cursor-pointer select-none ${
+                  lang === code
+                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-md shadow-orange-500/20 scale-105 active:scale-95"
+                    : "bg-white/80 backdrop-blur-sm text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/10 active:scale-95"
+                }`}
+              >
+                {code === 'en' ? 'English' : code === 'ta' ? 'தமிழ்' : 'हिंदी'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };lassName="text-[10px] text-gray-550 font-bold mt-1">Scan</span>
             </div>
             
             <span className="text-orange-400 font-bold text-xs mb-3.5">&raquo;</span>
