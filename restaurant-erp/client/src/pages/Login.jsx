@@ -316,6 +316,17 @@ const OfflineViewContent = ({ onBack, altLogin }) => {
           <button key={l} type="button" onClick={()=> v!=='offline' ? onBack(v) : null}
             className={`flex flex-col items-center justify-center py-2.5 border rounded-2xl transition-all gap-1.5 ${v==='offline'?'border-orange-300 bg-orange-50':'border-gray-200 hover:border-orange-400'}`}>
             <span className={v==='offline'?'text-[#f97316]':'text-[#1e3a8a]'}>{ic}</span>
+            <span className={`text-[9px] font-bold ${v==='offline'?'text-[#f97316]':'text-gray-600'}`}>{l}</span>
+          </button>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px] text-gray-400 text-center">
+        Having trouble? <a href="#" className="text-[#f97316] font-bold">Contact admin</a>
+      </p>
+    </div>
+  );
+};
+
 /* ── Face ID View Content ── */
 const FaceIDViewContent = ({ onBack }) => {
   const videoRef = useRef(null);
