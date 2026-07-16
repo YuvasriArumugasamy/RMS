@@ -5,6 +5,7 @@ const MenuItem = require('./models/MenuItem');
 const Table = require('./models/Table');
 const Ingredient = require('./models/Ingredient');
 const Staff = require('./models/Staff');
+const Customer = require('./models/Customer');
 
 const seedDatabase = async () => {
   try {
@@ -16,6 +17,7 @@ const seedDatabase = async () => {
     await Table.deleteMany({});
     await Ingredient.deleteMany({});
     await Staff.deleteMany({});
+    await Customer.deleteMany({});
     console.log('🗑️  Cleared existing data');
 
     // ── Users ──────────────────────────────────────────────
@@ -120,6 +122,19 @@ const seedDatabase = async () => {
       { name: 'Caramel Banana Waffle',  category: 'Waffles', price: 289, available: true, image: m('caramel-banana-waffle.png'),description: 'Golden waffle with caramel sauce, fresh banana & ice cream',     recipe: [{ ingredientId: ing[4]._id, qty: 0.1 }] },
     ]);
     console.log('✅ Created 37 menu items across 9 categories');
+
+    // ── Customers ──────────────────────────────────────────
+    await Customer.create([
+      { name: 'Arun Kumar',    phone: '9876543210', email: 'arun@gmail.com',   totalOrders: 12, totalSpend: 3840, loyaltyPoints: 384, feedback: [{ rating: 5, comment: 'Amazing food and service!', date: '10/07/2026' }] },
+      { name: 'Priya Sharma',  phone: '9876543211', email: 'priya@gmail.com',  totalOrders: 8,  totalSpend: 2200, loyaltyPoints: 220, feedback: [{ rating: 4, comment: 'Great biryani, will come again.', date: '09/07/2026' }] },
+      { name: 'Ravi Kannan',   phone: '9876543212', email: '',                 totalOrders: 5,  totalSpend: 1450, loyaltyPoints: 145, feedback: [] },
+      { name: 'Meena Devi',    phone: '9876543213', email: 'meena@gmail.com',  totalOrders: 20, totalSpend: 6200, loyaltyPoints: 620, feedback: [{ rating: 5, comment: 'Best waffles in town!', date: '08/07/2026' }] },
+      { name: 'Suresh Babu',   phone: '9876543214', email: '',                 totalOrders: 3,  totalSpend: 750,  loyaltyPoints: 75,  feedback: [] },
+      { name: 'Kavitha Raj',   phone: '9876543215', email: 'kavitha@gmail.com',totalOrders: 15, totalSpend: 4800, loyaltyPoints: 480, feedback: [{ rating: 4, comment: 'Love the pizza options!', date: '07/07/2026' }] },
+      { name: 'Deepak Singh',  phone: '9876543216', email: '',                 totalOrders: 7,  totalSpend: 2100, loyaltyPoints: 210, feedback: [] },
+      { name: 'Anitha Nair',   phone: '9876543217', email: 'anitha@gmail.com', totalOrders: 25, totalSpend: 7500, loyaltyPoints: 750, feedback: [{ rating: 5, comment: 'Excellent! Always consistent quality.', date: '06/07/2026' }] },
+    ]);
+    console.log('✅ Created 8 sample customers');
 
     // ── Tables ─────────────────────────────────────────────
     await Table.create([
