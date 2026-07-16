@@ -458,21 +458,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ── Row 4: Quick Actions ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label:'New Order',      icon:'🛒', path:'/orders',   color:'bg-[#f97316] text-white'        },
-          { label:'Kitchen Display', icon:'🍳', path:'/kitchen',  color:'bg-[#1e3a8a] text-white'        },
-          { label:'Billing',        icon:'💳', path:'/billing',  color:'bg-emerald-600 text-white'       },
-          { label:'Reports',        icon:'📊', path:'/reports',  color:'bg-indigo-600 text-white'        },
-        ].map(({ label, icon, path, color }) => (
-          <button key={label} onClick={() => navigate(path)}
-            className={`${color} rounded-2xl p-4 flex items-center gap-3 font-bold text-sm shadow-md hover:opacity-90 hover:-translate-y-0.5 transition-all`}>
-            <span className="text-2xl">{icon}</span>
-            <span>{label}</span>
-          </button>
-        ))}
-      </div>
 
     </div>
   );
