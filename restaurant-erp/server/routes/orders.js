@@ -16,7 +16,7 @@ const router = express.Router();
 // ─────────────────────────────────────────────────────────────
 router.post('/qr', async (req, res) => {
   try {
-    const { table, items, subtotal, gst, total, guestCount, specialInstructions } = req.body;
+    const { table, items, subtotal, gst, total, guestCount, specialInstructions, customerPhone, customerName } = req.body;
 
     if (!table || !items || !items.length) {
       return res.status(400).json({ success: false, message: 'Table and items are required.' });
@@ -38,6 +38,8 @@ router.post('/qr', async (req, res) => {
       total: total || 0,
       guestCount: guestCount || 1,
       requestType: '',
+      customerPhone: customerPhone || '',
+      customerName: customerName || '',
       // No createdBy — QR orders are anonymous
     });
 
@@ -127,11 +129,14 @@ router.post('/', async (req, res) => {
     const { type, table, items, subtotal, gst, total, guestCount, requestType, waiterName } = req.body;
 
     // Create order
+    const { customerPhone, customerName } = req.body;
     const order = await Order.create({
       type, table, items, subtotal, gst, total,
       guestCount: guestCount || 1,
       requestType: requestType || '',
       waiterName: waiterName || '',
+      customerPhone: customerPhone || '',
+      customerName: customerName || '',
       createdBy: req.user._id,
     });
 

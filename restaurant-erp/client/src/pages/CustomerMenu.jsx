@@ -113,6 +113,8 @@ const CustomerMenu = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [coupons, setCoupons] = useState([]);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [ratings, setRatings] = useState({ foodQuality: 0, service: 0, ambience: 0 });
   const [feedbackText, setFeedbackText] = useState('');
   const [tableInfo, setTableInfo] = useState({ id: tableId, name: `Table ${tableId}` });
@@ -587,6 +589,8 @@ const CustomerMenu = () => {
       guestCount: 1,
       specialInstructions,
       appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
+      customerName: customerName.trim() || undefined,
+      customerPhone: customerPhone.trim() || undefined,
     };
 
     try {
@@ -1557,6 +1561,30 @@ const CustomerMenu = () => {
             <div className="flex justify-between items-center text-xs font-black text-slate-800">
               <span className="text-sm font-black text-slate-650">Grand Total</span>
               <span className="text-xl text-orange-650 font-black tracking-tight">₹{finalTotal}</span>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Customer Name</label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={e => setCustomerName(e.target.value)}
+                placeholder="Enter your name"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-900 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 transition-all"
+              />
+            </div>
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">WhatsApp Number</label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={e => setCustomerPhone(e.target.value)}
+                placeholder="+91 98765 43210"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-900 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 transition-all"
+              />
+              <p className="text-[9px] text-slate-400 mt-2">Enter your WhatsApp number to receive payment confirmation and invoice.</p>
             </div>
           </div>
 

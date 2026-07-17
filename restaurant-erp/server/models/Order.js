@@ -22,6 +22,7 @@ const orderSchema = new mongoose.Schema({
   billingStatus: { type: String, enum: ['Unpaid', 'Paid'], default: 'Unpaid' },
   paymentMethod: { type: String, enum: ['Cash', 'Card', 'UPI', 'Wallet', 'Other'], default: 'Cash' },
   paidAt:        { type: Date },
+  customerName:  { type: String, default: '' },
   customerPhone: { type: String, default: '' },
   waiterName:    { type: String, default: '' },
   guestCount:    { type: Number, default: 1 },

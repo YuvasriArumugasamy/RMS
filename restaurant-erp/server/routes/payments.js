@@ -4,7 +4,10 @@ const Razorpay = require('razorpay');
 const Order = require('../models/Order');
 const Table = require('../models/Table');
 const Customer = require('../models/Customer');
+const Settings = require('../models/Settings');
 const logger = require('../utils/logger');
+const { generateInvoicePdf } = require('../utils/pdfGenerator');
+const { sendWhatsAppMessage } = require('../utils/whatsappSender');
 
 const router = express.Router();
 
@@ -133,7 +136,27 @@ router.post('/verify-payment', async (req, res) => {
       }
     }
 
-    // Side Effect 3: Emit Socket.io updates to staff & table room
+    // Side Effect 3: Send invoice over WhatsApp when phone is available
+    let whatsappStatus = { sent: false, error: null };
+    if (order.customerPhone) {
+      try {
+        const settings = await Settings.findOne({ key: 'main' });
+        const pdfBuffer = await generateInvoicePdf(order, settings || {});
+        const message = `🍽️ ${settings?.name || 'RMS Restaurant'}\n\nHello${order.customerName ? ` ${order.customerName}` : ''} 👋\n\n✅ Payment Successful\n\nOrder ID : ${order.orderId}\nAmount : ₹${order.total}\n\n📄 Your invoice is attached.\n\nThank you for dining with us! ❤️\nHave a great day!`;
+        await sendWhatsAppMessage({
+          toPhone: order.customerPhone,
+          message,
+          pdfBuffer,
+          filename: `Invoice_${order.orderId || order._id}.pdf`,
+        });
+        whatsappStatus.sent = true;
+      } catch (waErr) {
+        whatsappStatus.error = waErr.message || 'Unable to send WhatsApp message';
+        logger.error('WhatsApp send error:', waErr);
+      }
+    }
+
+    // Side Effect 4: Emit Socket.io updates to staff & table room
     const io = req.app.get('io');
     if (io) {
       // Notify staff desk
@@ -167,7 +190,8 @@ router.post('/verify-payment', async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Payment verified and order finalized successfully',
-      data: order
+      data: order,
+      whatsapp: whatsappStatus,
     });
   } catch (err) {
     logger.error('Razorpay verify-payment error:', err);
