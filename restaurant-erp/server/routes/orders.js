@@ -210,7 +210,7 @@ router.put('/:id/status', authorize('Admin', 'Manager', 'Chef', 'Waiter'), async
 // @access  Private (Cashier, Admin, Manager)
 router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req, res) => {
   try {
-    const { paymentMethod, discount, finalTotal } = req.body;
+    const { paymentMethod, discount, finalTotal, customerPhone } = req.body;
 
     const updateData = {
       billingStatus: 'Paid',
@@ -223,6 +223,10 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
     if (discount > 0) {
       updateData.discount = discount;
       updateData.total = finalTotal || undefined;
+    }
+
+    if (customerPhone) {
+      updateData.customerPhone = customerPhone;
     }
 
     const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -246,13 +250,20 @@ router.put('/:id/billing', authorize('Admin', 'Manager', 'Cashier'), async (req,
     // 🏆 Auto-update customer loyalty points if customerPhone is set
     if (order.customerPhone) {
       try {
-        const customer = await Customer.findOne({ phone: order.customerPhone });
-        if (customer) {
-          customer.totalSpend   = (customer.totalSpend   || 0) + (order.total || 0);
-          customer.totalOrders  = (customer.totalOrders  || 0) + 1;
-          customer.loyaltyPoints = Math.floor(customer.totalSpend / 10); // ₹10 = 1 point
-          await customer.save();
+        let customer = await Customer.findOne({ phone: order.customerPhone });
+        if (!customer) {
+          customer = new Customer({
+            name: order.customerName || `Customer-${order.customerPhone.substring(order.customerPhone.length - 4)}`,
+            phone: order.customerPhone,
+            totalSpend: 0,
+            totalOrders: 0,
+            loyaltyPoints: 0
+          });
         }
+        customer.totalSpend   = (customer.totalSpend   || 0) + (order.total || 0);
+        customer.totalOrders  = (customer.totalOrders  || 0) + 1;
+        customer.loyaltyPoints = Math.floor(customer.totalSpend / 10); // ₹10 = 1 point
+        await customer.save();
       } catch (loyaltyErr) {
         logger.error('Loyalty update error (non-critical):', loyaltyErr.message);
       }

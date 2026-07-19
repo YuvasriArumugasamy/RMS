@@ -21,6 +21,8 @@ const Billing = () => {
   const [showPayModal, setShowPayModal] = useState(false);
   const [payingOrder, setPayingOrder] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState('Cash');
+  const [payModalPhone, setPayModalPhone] = useState('');
+  const [sendWaCheckbox, setSendWaCheckbox] = useState(true);
 
   // ── Coupon state ────────────────────────────────────────────────────
   const [couponCode, setCouponCode] = useState('');
@@ -83,6 +85,8 @@ const Billing = () => {
     setAppliedCoupon(null);
     setCouponCode('');
     setActiveCouponOrder(order);
+    setPayModalPhone(order.customerPhone || '');
+    setSendWaCheckbox(true);
     setShowPayModal(true);
   };
 
@@ -123,6 +127,7 @@ const Billing = () => {
         paymentMethod: selectedMethod,
         discount,
         finalTotal,
+        customerPhone: payModalPhone.trim() || undefined,
       });
       // Redeem coupon usage count
       if (appliedCoupon) {
@@ -131,16 +136,28 @@ const Billing = () => {
       setOrders(prev => prev.map(o =>
         (o._id || o.id) === id
           ? { ...o, billingStatus: 'Paid', status: 'Completed', paymentMethod: selectedMethod,
-              paidAt: new Date().toISOString(), discount, total: finalTotal }
+              paidAt: new Date().toISOString(), discount, total: finalTotal, customerPhone: payModalPhone.trim() }
           : o
       ));
       const methodEmoji = PAYMENT_METHODS.find(m => m.id === selectedMethod)?.icon || '💵';
       toast.success(`${methodEmoji} Paid via ${selectedMethod}${discount > 0 ? ` · Saved ₹${discount}` : ''} — ${payingOrder.orderId || id}`);
+      
+      // WhatsApp share redirect
+      if (sendWaCheckbox && payModalPhone.trim()) {
+        const rawPhone = payModalPhone.replace(/\D/g, '');
+        const phone = rawPhone.length === 10 ? '91' + rawPhone : rawPhone;
+        if (phone) {
+          const itemsMsg = payingOrder.items.map(i => `${i.qty}x ${i.name} ₹${i.price * i.qty}`).join('\n');
+          const msg = `🧾 *Invoice from RMS Restaurant*\n\nOrder: *#${(payingOrder.orderId || id).substring((payingOrder.orderId || id).length - 8).toUpperCase()}*\nTable: ${payingOrder.table || 'N/A'}\n\n${itemsMsg}\n\n*Total: ₹${finalTotal}*\n\nThank you for dining with us! 🙏`;
+          const encoded = encodeURIComponent(msg);
+          window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+        }
+      }
     } catch {
       setOrders(prev => {
         const updated = prev.map(o =>
           (o._id || o.id) === id
-            ? { ...o, billingStatus: 'Paid', paymentMethod: selectedMethod, discount, total: finalTotal }
+            ? { ...o, billingStatus: 'Paid', paymentMethod: selectedMethod, discount, total: finalTotal, customerPhone: payModalPhone.trim() }
             : o
         );
         localStorage.setItem('orders', JSON.stringify(updated));
@@ -785,6 +802,29 @@ const Billing = () => {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* WhatsApp Receipt Fields */}
+            <div className="space-y-2 border-t border-slate-100 pt-3.5">
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">📞 Customer Phone (for WhatsApp Receipt)</label>
+              <input 
+                type="tel" 
+                placeholder="Enter phone number (e.g. 9876543210)"
+                value={payModalPhone}
+                onChange={e => setPayModalPhone(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
+              />
+              {payModalPhone.trim() && (
+                <label className="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-bold cursor-pointer">
+                  <input 
+                    type="checkbox"
+                    checked={sendWaCheckbox}
+                    onChange={e => setSendWaCheckbox(e.target.checked)}
+                    className="w-3.5 h-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <span>Send receipt via WhatsApp</span>
+                </label>
+              )}
             </div>
 
             {/* Actions confirm */}
