@@ -207,6 +207,7 @@ const Billing = () => {
       discount: discount.toFixed(2),
       gst: gst.toFixed(2),
       total: total.toFixed(2),
+      customerPhone: order.customerPhone || '',
     });
     setShowInvoiceModal(true);
   };
@@ -672,7 +673,11 @@ const Billing = () => {
                 Download PDF
               </button>
               <button 
-                onClick={() => { setShowInvoiceModal(false); setShowWhatsAppModal(true); }} 
+                onClick={() => { 
+                  setWhatsappNumber(activeInvoice.customerPhone || '');
+                  setShowInvoiceModal(false); 
+                  setShowWhatsAppModal(true); 
+                }} 
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all flex justify-center items-center gap-2 cursor-pointer shadow-sm"
               >
                 WhatsApp Share
