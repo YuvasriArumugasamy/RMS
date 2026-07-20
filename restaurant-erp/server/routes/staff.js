@@ -104,7 +104,7 @@ router.post('/clock-in', async (req, res) => {
   try {
     const staff = await findOrCreateStaffForUser(req.user);
     const today = new Date().toISOString().split('T')[0];
-    const nowStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const nowStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
 
     let existingIdx = (staff.attendance || []).findIndex(a => a.date === today);
     if (existingIdx > -1) {
@@ -142,7 +142,7 @@ router.post('/clock-out', async (req, res) => {
   try {
     const staff = await findOrCreateStaffForUser(req.user);
     const today = new Date().toISOString().split('T')[0];
-    const nowStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const nowStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
 
     let existingIdx = (staff.attendance || []).findIndex(a => a.date === today);
     let totalHrs = 0;
