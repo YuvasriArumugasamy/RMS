@@ -5,6 +5,7 @@ import { useSocket } from '../context/SocketContext';
 import { toast } from 'react-toastify';
 import MenuItemImage from './MenuItemImage';
 import { getOrderTypeConfig } from '../utils/orderType';
+import { useAttendance } from '../hooks/useAttendance';
 
 const pageMeta = {
   '/':          { title: 'Operational Dashboard',       sub: 'Real-time restaurant overview' },
@@ -397,6 +398,8 @@ const Header = ({ onOpenMobileSidebar }) => {
     return () => { cleanupNew?.(); cleanupStatus?.(); };
   }, [on]);
 
+  const { isClockedIn, clockInTime, clockIn, clockOut, actionLoading } = useAttendance();
+
   const meta = pageMeta[location.pathname] || { title: 'Smart Restaurant ERP', sub: '' };
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   const roleBadge = roleColors[user?.role] || 'bg-gray-100 text-gray-600 border-gray-200';
@@ -443,6 +446,34 @@ const Header = ({ onOpenMobileSidebar }) => {
           </div>
 
           <div className="w-px h-5 bg-slate-200 hidden sm:block" />
+
+          {/* Self Attendance Clock In / Clock Out Button */}
+          {user && (
+            <div className="relative">
+              {isClockedIn ? (
+                <button
+                  disabled={actionLoading}
+                  onClick={clockOut}
+                  title={`Clocked in at ${clockInTime}. Click to Clock Out.`}
+                  className="flex items-center gap-1.5 text-xs font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  <span>Clock Out</span>
+                  <span className="text-[10px] font-bold opacity-75 hidden md:inline">({clockInTime})</span>
+                </button>
+              ) : (
+                <button
+                  disabled={actionLoading}
+                  onClick={clockIn}
+                  title="Click to Clock In for your shift"
+                  className="flex items-center gap-1.5 text-xs font-black bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span>Clock In</span>
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Active orders badge → opens popup */}
           <div className="relative hidden sm:block">

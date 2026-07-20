@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
-  date:   { type: String, required: true },
-  status: { type: String, enum: ['Present', 'Absent', 'Leave'], required: true },
+  date:         { type: String, required: true },
+  status:       { type: String, enum: ['Present', 'Absent', 'Leave', 'Clocked-In', 'Clocked-Out'], required: true },
+  clockInTime:  { type: String, default: '' },
+  clockOutTime: { type: String, default: '' },
+  totalHours:   { type: Number, default: 0 },
 }, { _id: false });
 
 const staffSchema = new mongoose.Schema({
