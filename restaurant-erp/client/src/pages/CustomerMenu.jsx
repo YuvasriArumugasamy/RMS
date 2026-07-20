@@ -568,6 +568,14 @@ const CustomerMenu = () => {
 
   const placeOrder = async () => {
     if (!cart.length || isPlacingOrder) return;
+    if (!customerName.trim()) {
+      toast.error('Please enter your name to confirm order');
+      return;
+    }
+    if (!customerPhone.trim()) {
+      toast.error('Please enter your WhatsApp / Phone number to confirm order');
+      return;
+    }
     setIsPlacingOrder(true);
 
     const orderPayload = {
@@ -1566,45 +1574,58 @@ const CustomerMenu = () => {
 
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Customer Name</label>
+              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                Customer Name <span className="text-red-500 font-bold ml-0.5">*</span>
+              </label>
               <input
                 type="text"
                 value={customerName}
                 onChange={e => setCustomerName(e.target.value)}
                 placeholder="Enter your name"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-900 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 transition-all"
+                required
               />
             </div>
             <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">WhatsApp Number</label>
+              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                WhatsApp Number <span className="text-red-500 font-bold ml-0.5">*</span>
+              </label>
               <input
                 type="tel"
                 value={customerPhone}
                 onChange={e => setCustomerPhone(e.target.value)}
                 placeholder="+91 98765 43210"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-900 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 transition-all"
+                required
               />
               <p className="text-[9px] text-slate-400 mt-2">Enter your WhatsApp number to receive payment confirmation and invoice.</p>
             </div>
           </div>
 
-          <button 
-            onClick={placeOrder} 
-            disabled={isPlacingOrder}
-            className="w-full py-4.5 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2xl text-xs shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group uppercase tracking-widest mt-6 sm:mt-0"
-          >
-            {isPlacingOrder ? (
-              <>
-                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
-                <span>Placing Order...</span>
-              </>
-            ) : (
-              <>
-                <span>Confirm & Place Order</span>
-                <span className="w-5 h-5 bg-white text-orange-600 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transform group-hover:scale-110 transition-transform duration-250">✓</span>
-              </>
+          <div>
+            <button 
+              onClick={placeOrder} 
+              disabled={isPlacingOrder || !customerName.trim() || !customerPhone.trim()}
+              className="w-full py-4.5 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-2xl text-xs shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group uppercase tracking-widest mt-6 sm:mt-0"
+            >
+              {isPlacingOrder ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                  <span>Placing Order...</span>
+                </>
+              ) : (
+                <>
+                  <span>Confirm & Place Order</span>
+                  <span className="w-5 h-5 bg-white text-orange-600 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transform group-hover:scale-110 transition-transform duration-250">✓</span>
+                </>
+              )}
+            </button>
+            {(!customerName.trim() || !customerPhone.trim()) && (
+              <p className="text-[10px] text-amber-600 font-bold text-center mt-2">
+                ⚠️ Please fill in Customer Name & WhatsApp Number to place order
+              </p>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </>
