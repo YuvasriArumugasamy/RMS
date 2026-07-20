@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
+import { getOrderTypeConfig, getChartColorsForLabels } from '../utils/orderType';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale,
@@ -247,15 +248,24 @@ const Reports = () => {
 
   // ── Chart 3: Order type Doughnut ─────────────────────────────────────────
   const typeMap = {};
-  filteredOrders.forEach(o => { typeMap[o.type || 'Dine-in'] = (typeMap[o.type || 'Dine-in'] || 0) + 1; });
-  const typeLabels = Object.keys(typeMap).length > 0 ? Object.keys(typeMap) : ['Dine-in', 'Takeaway', 'QR'];
-  const typeValues = Object.keys(typeMap).length > 0 ? Object.values(typeMap) : [60, 25, 15];
+  const typeRevenueMap = {};
+  filteredOrders.forEach(o => {
+    const t = o.type || 'Dine-in';
+    typeMap[t] = (typeMap[t] || 0) + 1;
+    typeRevenueMap[t] = (typeRevenueMap[t] || 0) + (o.total || 0);
+  });
+
+  const typeLabels = Object.keys(typeMap).length > 0 
+    ? Object.keys(typeMap) 
+    : ['Dine-in (QR)', 'Dine-in', 'Takeaway'];
+    
+  const typeValues = Object.keys(typeMap).length > 0 ? Object.values(typeMap) : [0, 0, 0];
 
   const orderTypeDoughnut = {
     labels: typeLabels,
     datasets: [{
       data: typeValues,
-      backgroundColor: ['rgba(99,102,241,0.9)', 'rgba(249,115,22,0.9)', 'rgba(16,185,129,0.9)', 'rgba(59,130,246,0.9)'],
+      backgroundColor: getChartColorsForLabels(typeLabels),
       borderColor: '#fff',
       borderWidth: 3,
       hoverOffset: 6,
@@ -438,12 +448,39 @@ const Reports = () => {
 
         {/* Order Type Doughnut */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-          <div>
-            <h3 className="text-base font-bold text-slate-800">Order Split</h3>
-            <p className="text-xs text-slate-400 font-medium">By order type</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-base font-bold text-slate-800">Order Split</h3>
+              <p className="text-xs text-slate-400 font-medium">By order type</p>
+            </div>
+            <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+              {filteredOrders.length} Total
+            </span>
           </div>
-          <div className="h-64 flex items-center justify-center">
+          <div className="h-52 flex items-center justify-center">
             <Doughnut data={orderTypeDoughnut} options={doughnutOptions}/>
+          </div>
+
+          {/* Breakdown summary */}
+          <div className="pt-2 border-t border-slate-100 space-y-2">
+            {typeLabels.map((lbl) => {
+              const cfg = getOrderTypeConfig(lbl);
+              const count = typeMap[lbl] || 0;
+              const rev = typeRevenueMap[lbl] || 0;
+              const pct = filteredOrders.length > 0 ? ((count / filteredOrders.length) * 100).toFixed(0) : 0;
+              return (
+                <div key={lbl} className="flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full`} style={{ backgroundColor: cfg.color }} />
+                    <span className="font-extrabold text-slate-700">{cfg.icon} {lbl}</span>
+                  </div>
+                  <div className="text-right flex items-center gap-3">
+                    <span className="text-slate-400 font-semibold">{count} orders ({pct}%)</span>
+                    <span className="font-extrabold text-slate-850">₹{rev.toLocaleString()}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

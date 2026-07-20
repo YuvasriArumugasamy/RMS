@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
+import { getOrderTypeConfig } from '../utils/orderType';
 
 const CustomerCRM = () => {
   const [customers, setCustomers]           = useState([]);
@@ -289,8 +290,13 @@ const CustomerCRM = () => {
                       <div key={o._id || o.orderId} className="flex items-center justify-between p-3.5 border border-slate-100 bg-white hover:bg-slate-50/30 rounded-2xl shadow-sm transition-all duration-200">
                         <div className="min-w-0">
                           <p className="text-xs font-black text-slate-800">#{o.orderId?.substring(o.orderId.length - 8).toUpperCase() || o.id?.substring(0,8).toUpperCase()}</p>
-                          <p className="text-[9.5px] text-slate-400 font-bold mt-0.5">
-                            {o.date || new Date(o.createdAt).toLocaleDateString('en-IN')} · {o.type} {o.table !== 'N/A' && `· Table ${o.table}`}
+                          <p className="text-[9.5px] text-slate-400 font-bold mt-0.5 flex items-center gap-1.5">
+                            <span>{o.date || new Date(o.createdAt).toLocaleDateString('en-IN')}</span>
+                            <span>·</span>
+                            <span className={`px-1.5 py-0.2 rounded border text-[8.5px] font-black ${getOrderTypeConfig(o.type).badgeBg}`}>
+                              {getOrderTypeConfig(o.type).icon} {o.type}
+                            </span>
+                            {o.table !== 'N/A' && <span>· Table {o.table}</span>}
                           </p>
                           <p className="text-[9.5px] text-slate-500 font-bold mt-1 truncate max-w-[280px] bg-slate-50/70 border border-slate-100/50 px-2 py-0.5 rounded-lg w-fit">
                             {(o.items||[]).map(i=>`${i.qty}x ${i.name}`).join(', ')}

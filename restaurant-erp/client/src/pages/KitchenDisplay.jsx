@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useSocket } from '../context/SocketContext';
 import { api } from '../context/AuthContext';
+import { getOrderTypeConfig } from '../utils/orderType';
 
 const KitchenDisplay = () => {
   const [orders, setOrders] = useState([]);
@@ -188,8 +189,8 @@ const KitchenDisplay = () => {
                     <div className="flex justify-between items-start border-b border-slate-50 pb-2.5">
                       <div>
                         <h4 className="font-extrabold text-slate-800 text-sm">{o.orderId || id.substring(id.length - 8).toUpperCase()}</h4>
-                        <span className="text-[9px] text-[#f97316] font-black uppercase tracking-wider block mt-0.5">
-                          {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
+                        <span className={`text-[8.5px] font-black uppercase tracking-wider inline-flex items-center gap-1 px-2 py-0.5 rounded-full border mt-1 ${getOrderTypeConfig(o.type).badgeBg}`}>
+                          {getOrderTypeConfig(o.type).icon} {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
                         </span>
                         {o.waiterName && (
                           <span className="mt-1 inline-flex items-center gap-1 text-[8.5px] font-black text-indigo-650 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">
@@ -265,8 +266,8 @@ const KitchenDisplay = () => {
                     <div className="flex justify-between items-start border-b border-slate-50 pb-2.5">
                       <div>
                         <h4 className="font-extrabold text-slate-800 text-sm">{o.orderId || id.substring(id.length - 8).toUpperCase()}</h4>
-                        <span className="text-[9px] text-[#f97316] font-black uppercase tracking-wider block mt-0.5">
-                          {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
+                        <span className={`text-[8.5px] font-black uppercase tracking-wider inline-flex items-center gap-1 px-2 py-0.5 rounded-full border mt-1 ${getOrderTypeConfig(o.type).badgeBg}`}>
+                          {getOrderTypeConfig(o.type).icon} {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
                         </span>
                         {o.waiterName && (
                           <span className="mt-1 inline-flex items-center gap-1 text-[8.5px] font-black text-indigo-650 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">
@@ -340,8 +341,8 @@ const KitchenDisplay = () => {
                     <div className="flex justify-between items-start border-b border-slate-50 pb-2.5">
                       <div>
                         <h4 className="font-extrabold text-slate-800 text-sm">{o.orderId || id.substring(id.length - 8).toUpperCase()}</h4>
-                        <span className="text-[9px] text-[#f97316] font-black uppercase tracking-wider block mt-0.5">
-                          {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
+                        <span className={`text-[8.5px] font-black uppercase tracking-wider inline-flex items-center gap-1 px-2 py-0.5 rounded-full border mt-1 ${getOrderTypeConfig(o.type).badgeBg}`}>
+                          {getOrderTypeConfig(o.type).icon} {o.type} {o.table !== 'N/A' && `(Table ${o.table})`}
                         </span>
                         {o.waiterName && (
                           <span className="mt-1 inline-flex items-center gap-1 text-[8.5px] font-black text-indigo-650 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">

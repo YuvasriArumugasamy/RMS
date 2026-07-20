@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { getOrderTypeConfig, isDineIn } from '../utils/orderType';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -429,7 +430,7 @@ const Billing = () => {
               unpaidOrders.map(o => {
                 const id = o._id || o.id;
                 const isSelected = selectedOrders.includes(id);
-                const isDineIn = o.type?.toLowerCase() === 'dine-in';
+                const typeCfg = getOrderTypeConfig(o.type);
                 const formattedTable = o.table !== 'N/A' ? (o.table.toUpperCase().includes('TABLE') ? o.table : `Table ${o.table}`) : '';
 
                 return (
@@ -461,15 +462,9 @@ const Billing = () => {
                         <div className="space-y-1">
                           <span className="font-extrabold text-slate-800 text-sm block tracking-tight">#{id.substring(id.length - 8).toUpperCase()}</span>
                           <div className="flex items-center gap-1.5">
-                            {isDineIn ? (
-                              <span className="bg-orange-50 text-orange-700 border border-orange-100 rounded-full px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider flex items-center gap-1">
-                                🍽️ Dine-in {formattedTable && `· ${formattedTable}`}
-                              </span>
-                            ) : (
-                              <span className="bg-blue-50 text-blue-700 border border-blue-100 rounded-full px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider flex items-center gap-1">
-                                🛍️ Takeaway
-                              </span>
-                            )}
+                            <span className={`border rounded-full px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider flex items-center gap-1 ${typeCfg.badgeBg}`}>
+                              {typeCfg.icon} {typeCfg.label} {formattedTable && `· ${formattedTable}`}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -537,20 +532,15 @@ const Billing = () => {
             ) : (
               paidOrders.map(o => {
                 const id = o._id || o.id;
+                const typeCfg = getOrderTypeConfig(o.type);
                 return (
                   <div key={id} className="p-4.5 border border-slate-100/70 bg-white hover:bg-slate-50/20 rounded-3xl transition-all duration-300 flex justify-between items-center group shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.025)]">
                     <div className="space-y-1.5 min-w-0">
                       <span className="font-extrabold text-slate-800 text-sm block tracking-tight">#{id.substring(id.length - 8).toUpperCase()}</span>
                       <div className="flex items-center gap-2">
-                        {o.type?.toLowerCase() === 'dine-in' ? (
-                          <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
-                            🍽️ Dine-in
-                          </span>
-                        ) : (
-                          <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
-                            🛍️ Takeaway
-                          </span>
-                        )}
+                        <span className={`rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider border ${typeCfg.badgeBg}`}>
+                          {typeCfg.icon} {typeCfg.label}
+                        </span>
                         
                         {o.paymentMethod && (
                           <span className={`text-[8.5px] font-black uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1 leading-none ${

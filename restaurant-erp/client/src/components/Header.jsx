@@ -4,6 +4,7 @@ import { useAuth, api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { toast } from 'react-toastify';
 import MenuItemImage from './MenuItemImage';
+import { getOrderTypeConfig } from '../utils/orderType';
 
 const pageMeta = {
   '/':          { title: 'Operational Dashboard',       sub: 'Real-time restaurant overview' },
@@ -76,9 +77,9 @@ const ActiveOrdersPopup = ({ orders, onClose, onViewAll }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-extrabold text-slate-800">{order.orderId || `#${order.id}`}</p>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                    {order.type === 'Dine-in' ? `🍽️ ${order.table}` : '🥡 Takeaway'}
-                    {' · '}{order.items?.length || 0} items
+                  <p className="text-[10px] font-semibold text-slate-500 mt-0.5 flex items-center gap-1">
+                    <span>{getOrderTypeConfig(order.type).icon} {order.type} {order.table && order.table !== 'N/A' ? `· ${order.table}` : ''}</span>
+                    <span>· {order.items?.length || 0} items</span>
                   </p>
                 </div>
                 <div className="text-right">

@@ -6,6 +6,7 @@ import { useSocket } from '../context/SocketContext';
 import { SkeletonTableRow } from '../components/LoadingSkeleton';
 import { useVoiceOrder } from '../hooks/useVoiceOrder';
 import MenuItemImage from '../components/MenuItemImage';
+import { getOrderTypeConfig } from '../utils/orderType';
 
 const OrderManagement = () => {
   const { on, connected } = useSocket();
@@ -644,8 +645,8 @@ const OrderManagement = () => {
                     <div className="space-y-3.5 flex-1">
                       <div>
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Type</span>
-                        <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-700 bg-slate-50/80 p-2 rounded-xl border border-slate-100 w-fit">
-                          <span>🍽️</span>
+                        <div className={`flex items-center gap-1.5 text-xs font-extrabold p-2 rounded-xl border w-fit ${getOrderTypeConfig(o.type).badgeBg}`}>
+                          <span>{getOrderTypeConfig(o.type).icon}</span>
                           <span>{o.type} {o.table !== 'N/A' && `(Table ${o.table.match(/\d+/)?.[0] || o.table})`}</span>
                         </div>
                       </div>

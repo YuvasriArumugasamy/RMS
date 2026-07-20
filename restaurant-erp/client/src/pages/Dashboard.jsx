@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { getOrderTypeConfig, getChartColorsForLabels } from '../utils/orderType';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale,
@@ -206,13 +207,20 @@ const Dashboard = () => {
 
   // ── Order type split ────────────────────────────────────────────────────
   const typeMap = {};
-  orders.forEach(o => { typeMap[o.type || 'Dine-in'] = (typeMap[o.type || 'Dine-in'] || 0) + 1; });
+  orders.forEach(o => { 
+    const t = o.type || 'Dine-in';
+    typeMap[t] = (typeMap[t] || 0) + 1; 
+  });
+
+  const splitLabels = Object.keys(typeMap).length > 0 
+    ? Object.keys(typeMap) 
+    : ['Dine-in (QR)', 'Dine-in', 'Takeaway'];
 
   const orderSplitData = {
-    labels: Object.keys(typeMap).length > 0 ? Object.keys(typeMap) : ['Dine-in','Takeaway','QR'],
+    labels: splitLabels,
     datasets: [{
-      data: Object.keys(typeMap).length > 0 ? Object.values(typeMap) : [0,0,0],
-      backgroundColor: ['rgba(99,102,241,0.9)','rgba(249,115,22,0.9)','rgba(16,185,129,0.9)','rgba(59,130,246,0.9)'],
+      data: Object.keys(typeMap).length > 0 ? Object.values(typeMap) : [0, 0, 0],
+      backgroundColor: getChartColorsForLabels(splitLabels),
       borderWidth: 0,
       hoverOffset: 6,
     }],
@@ -339,8 +347,11 @@ const Dashboard = () => {
                           <span className="text-[11px] font-black text-slate-800 truncate">{o.orderId || o.id}</span>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border flex-shrink-0 ${statusStyle}`}>{o.status}</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-semibold truncate">
-                          {o.type}{o.table !== 'N/A' ? ` · ${o.table}` : ''}
+                        <p className="text-[10px] font-semibold truncate flex items-center gap-1">
+                          <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-extrabold border ${getOrderTypeConfig(o.type).badgeBg}`}>
+                            {getOrderTypeConfig(o.type).icon} {o.type}
+                          </span>
+                          {o.table !== 'N/A' && <span className="text-slate-500">· {o.table}</span>}
                         </p>
                         <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
                           {(o.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
@@ -368,12 +379,16 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="text-xs">
-                    {activeOrders.slice(0, 15).map(o => (
-                      <tr key={o._id || o.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition">
-                        <td className="py-2.5 font-bold text-slate-800">{o.orderId || o.id}</td>
-                        <td className="py-2.5 text-slate-500 font-semibold">
-                          {o.type} {o.table !== 'N/A' && `(${o.table})`}
-                        </td>
+                    {activeOrders.slice(0, 15).map(o => {
+                      const typeCfg = getOrderTypeConfig(o.type);
+                      return (
+                        <tr key={o._id || o.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition">
+                          <td className="py-2.5 font-bold text-slate-800">{o.orderId || o.id}</td>
+                          <td className="py-2.5">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black border ${typeCfg.badgeBg}`}>
+                              {typeCfg.icon} {o.type} {o.table !== 'N/A' && `(${o.table})`}
+                            </span>
+                          </td>
                         <td className="py-2.5 text-slate-500 font-medium max-w-[160px] truncate">
                           {(o.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}
                         </td>
@@ -389,7 +404,8 @@ const Dashboard = () => {
                           </span>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
