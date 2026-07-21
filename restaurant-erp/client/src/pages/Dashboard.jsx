@@ -194,32 +194,49 @@ const Dashboard = () => {
   const doughnutOpts = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%',
+    cutout: '70%',
     plugins: {
-      legend: { position: 'bottom', labels: { font: { size: 10, weight: '600' }, usePointStyle: true, padding: 12, color: '#64748b' } },
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: { size: 11, weight: '600' },
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 12,
+          color: '#475569',
+        },
+      },
       tooltip: {
         backgroundColor: '#0f172a',
         bodyColor: '#cbd5e1',
-        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} orders` },
+        callbacks: {
+          label: ctx => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(0) : 0;
+            return ` ${ctx.label}: ${ctx.parsed} orders (${pct}%)`;
+          },
+        },
       },
     },
   };
 
   // ── Order type split ────────────────────────────────────────────────────
   const typeMap = {};
+  const typeRevenueMap = {};
   orders.forEach(o => { 
     const t = o.type || 'Dine-in';
     typeMap[t] = (typeMap[t] || 0) + 1; 
+    typeRevenueMap[t] = (typeRevenueMap[t] || 0) + (o.total || 0);
   });
 
   const splitLabels = Object.keys(typeMap).length > 0 
     ? Object.keys(typeMap) 
-    : ['Dine-in (QR)', 'Dine-in', 'Takeaway'];
+    : ['Dine-in (QR)', 'Dine-in'];
 
   const orderSplitData = {
     labels: splitLabels,
     datasets: [{
-      data: Object.keys(typeMap).length > 0 ? Object.values(typeMap) : [0, 0, 0],
+      data: Object.keys(typeMap).length > 0 ? Object.values(typeMap) : [0, 0],
       backgroundColor: getChartColorsForLabels(splitLabels),
       borderWidth: 0,
       hoverOffset: 6,
@@ -294,18 +311,54 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Order Type Split */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3">
-          <div>
-            <h3 className="text-sm font-bold text-slate-800">Order Type Split</h3>
-            <p className="text-[10px] text-slate-400 font-medium">All time distribution</p>
+        {/* Order Split */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3 flex flex-col justify-between">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Order Split</h3>
+              <p className="text-[10px] text-slate-400 font-medium">By order type</p>
+            </div>
+            <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200/50">
+              {orders.length} Total
+            </span>
           </div>
-          <div className="h-48 flex items-center justify-center">
+
+          <div className="h-44 flex items-center justify-center my-1">
             {orders.length === 0 ? (
               <p className="text-xs text-slate-400 font-medium">No orders yet</p>
             ) : (
               <Doughnut data={orderSplitData} options={doughnutOpts}/>
             )}
+          </div>
+
+          {/* Breakdown summary matching Image 2 */}
+          <div className="pt-3 border-t border-slate-100 space-y-2">
+            {splitLabels.map((lbl) => {
+              const cfg = getOrderTypeConfig(lbl);
+              const count = typeMap[lbl] || 0;
+              const rev = typeRevenueMap[lbl] || 0;
+              const totalCount = orders.length;
+              const pct = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
+              return (
+                <div key={lbl} className="flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cfg.color }} />
+                    <span className="font-extrabold text-slate-800 flex items-center gap-1">
+                      <span>{cfg.icon}</span>
+                      <span>{lbl}</span>
+                    </span>
+                  </div>
+                  <div className="text-right flex items-center gap-3">
+                    <span className="text-slate-400 font-semibold text-[11px]">
+                      {count} orders ({pct}%)
+                    </span>
+                    <span className="font-extrabold text-slate-900 text-xs">
+                      ₹{rev.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
