@@ -23,6 +23,7 @@
   "build": {
     "appId": "com.rms.restaurant",
     "productName": "RMS Restaurant ERP",
+    "icon": "public/favicon.png",
     "files": [
       "dist/**/*",
       "electron.cjs"
@@ -31,7 +32,8 @@
       "output": "dist_electron"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "public/favicon.png"
     }
   },
   "devDependencies": {

@@ -1,5 +1,15 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const fs = require('fs');
+
+// Sync Chef image.png to public favicon.png as app icon
+try {
+  const chefImage = path.join(__dirname, 'src', 'assets', 'image.png');
+  const targetFavicon = path.join(__dirname, 'public', 'favicon.png');
+  if (fs.existsSync(chefImage)) {
+    fs.copyFileSync(chefImage, targetFavicon);
+  }
+} catch (e) {}
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
@@ -10,6 +20,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: 'RMS Restaurant ERP',
+    icon: path.join(__dirname, 'public', 'favicon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,

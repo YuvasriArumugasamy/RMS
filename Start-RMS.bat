@@ -12,7 +12,11 @@ start "RMS Server" /min npm start
 :: 2. Wait 3 seconds for Server to initialize
 timeout /t 3 /nobreak >nul
 
-:: 3. Launch Electron Desktop Client
+:: 3. Sync Chef Icon
+cd /d "%~dp0restaurant-erp"
+node copy_chef_icon.js
+
+:: 4. Launch Electron Desktop Client
 cd /d "%~dp0restaurant-erp\client"
 npm run electron:dev
 
