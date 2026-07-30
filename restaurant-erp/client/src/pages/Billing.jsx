@@ -382,7 +382,8 @@ const Billing = () => {
     const total = activeInvoice.total || 0;
     const msg = `🧾 *Invoice from RMS Restaurant*\n\nOrder: *${orderId}*\nTable: ${activeInvoice.table || 'N/A'}\n\n${items}\n\n*Total: ₹${total}*\n\nThank you for dining with us! 🙏`;
     const encoded = encodeURIComponent(msg);
-    const phone = whatsappNumber.replace(/\D/g, '');
+    const rawPhone = whatsappNumber.replace(/\D/g, '');
+    const phone = rawPhone.length === 10 ? '91' + rawPhone : rawPhone;
     window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
     toast.success(`📱 WhatsApp opened for ${whatsappNumber}`);
     setShowWhatsAppModal(false);
