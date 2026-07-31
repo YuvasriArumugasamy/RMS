@@ -102,6 +102,86 @@ router.get('/qr-status', async (req, res) => {
 // All routes below require authentication
 router.use(protect);
 
+// @route   POST /api/orders/merge
+// @desc    Merge multiple orders into a single bill
+// @access  Private
+router.post('/merge', async (req, res) => {
+  try {
+    const { orderIds } = req.body;
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length < 2) {
+      return res.status(400).json({ success: false, message: 'Please select at least 2 orders to merge.' });
+    }
+
+    const targetOrders = await Order.find({
+      $or: [
+        { _id: { $in: orderIds.filter(id => id && String(id).length === 24) } },
+        { orderId: { $in: orderIds } }
+      ]
+    });
+
+    if (!targetOrders || targetOrders.length < 2) {
+      return res.status(404).json({ success: false, message: 'Could not find selected orders in system.' });
+    }
+
+    // Combine items
+    const itemMap = {};
+    let subtotal = 0;
+    let gst = 0;
+    let total = 0;
+    const tables = new Set();
+
+    targetOrders.forEach(o => {
+      if (o.table && o.table !== 'N/A') tables.add(o.table);
+      subtotal += o.subtotal || 0;
+      gst += o.gst || 0;
+      total += o.total || 0;
+
+      (o.items || []).forEach(item => {
+        const key = item.name;
+        if (itemMap[key]) {
+          itemMap[key].qty += item.qty || 1;
+        } else {
+          itemMap[key] = {
+            name: item.name,
+            price: item.price || 0,
+            qty: item.qty || 1,
+            menuItemId: item.menuItemId || null
+          };
+        }
+      });
+    });
+
+    const mergedItems = Object.values(itemMap);
+    const tableStr = tables.size > 0 ? Array.from(tables).join(', ') : 'N/A';
+
+    const mergedOrder = await Order.create({
+      type: 'Merged Bill',
+      table: tableStr,
+      items: mergedItems,
+      subtotal,
+      gst,
+      total,
+      billingStatus: 'Unpaid',
+      status: 'Served',
+      createdBy: req.user ? req.user._id : null
+    });
+
+    // Delete original component orders
+    await Order.deleteMany({ _id: { $in: targetOrders.map(o => o._id) } });
+
+    // Emit live socket update
+    const io = req.app.get('io');
+    if (io) {
+      io.to('staff').emit('billing-update', { merged: true, newOrderId: mergedOrder.orderId });
+    }
+
+    res.json({ success: true, data: mergedOrder });
+  } catch (err) {
+    if (logger && logger.error) logger.error('Merge orders error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error merging bills' });
+  }
+});
+
 // @route   GET /api/orders
 // @desc    Get all orders (with optional status filter)
 // @access  Private
