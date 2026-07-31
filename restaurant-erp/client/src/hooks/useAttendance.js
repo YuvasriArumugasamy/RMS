@@ -41,12 +41,12 @@ export const useAttendance = () => {
     try {
       const { data } = await api.post('/staff/clock-in');
       if (data.success) {
-        toast.success(data.message || '✅ Clocked in successfully!');
+        toast.success(data.message || '✅ Checked in successfully!');
         await fetchMyAttendance();
         return true;
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to clock in');
+      toast.error(err?.response?.data?.message || 'Failed to check in');
       return false;
     } finally {
       setActionLoading(false);
@@ -58,12 +58,12 @@ export const useAttendance = () => {
     try {
       const { data } = await api.post('/staff/clock-out');
       if (data.success) {
-        toast.info(data.message || '⏱️ Clocked out successfully!');
+        toast.info(data.message || '⏱️ Checked out successfully!');
         await fetchMyAttendance();
         return true;
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to clock out');
+      toast.error(err?.response?.data?.message || 'Failed to check out');
       return false;
     } finally {
       setActionLoading(false);

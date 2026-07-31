@@ -398,8 +398,8 @@ const StaffManagement = () => {
                   <tr className="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
                     <th className="pb-3">Employee</th>
                     <th className="pb-3">Role</th>
-                    <th className="pb-3">Clock In</th>
-                    <th className="pb-3">Clock Out</th>
+                    <th className="pb-3">Check In</th>
+                    <th className="pb-3">Check Out</th>
                     <th className="pb-3">Duration</th>
                     <th className="pb-3 text-center">Status</th>
                     <th className="pb-3 text-right">Actions</th>
@@ -916,7 +916,7 @@ const StaffManagement = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Clock In Time</label>
+                  <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Check In Time</label>
                   <input
                     type="text"
                     placeholder="e.g. 09:15 AM"
@@ -926,7 +926,7 @@ const StaffManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Clock Out Time</label>
+                  <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Check Out Time</label>
                   <input
                     type="text"
                     placeholder="e.g. 05:30 PM"

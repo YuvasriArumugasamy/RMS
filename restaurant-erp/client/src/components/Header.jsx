@@ -447,29 +447,29 @@ const Header = ({ onOpenMobileSidebar }) => {
 
           <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
-          {/* Self Attendance Clock In / Clock Out Button */}
+          {/* Self Attendance Check In / Check Out Button */}
           {user && (
             <div className="relative">
               {isClockedIn ? (
                 <button
                   disabled={actionLoading}
                   onClick={clockOut}
-                  title={`Clocked in at ${clockInTime}. Click to Clock Out.`}
+                  title={`Checked in at ${clockInTime}. Click to Check Out.`}
                   className="flex items-center gap-1.5 text-xs font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
                 >
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                  <span>Clock Out</span>
+                  <span>Check Out</span>
                   <span className="text-[10px] font-bold opacity-75 hidden md:inline">({clockInTime})</span>
                 </button>
               ) : (
                 <button
                   disabled={actionLoading}
                   onClick={clockIn}
-                  title="Click to Clock In for your shift"
+                  title="Click to Check In for your shift"
                   className="flex items-center gap-1.5 text-xs font-black bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>Clock In</span>
+                  <span>Check In</span>
                 </button>
               )}
             </div>
