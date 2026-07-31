@@ -612,23 +612,23 @@ const Billing = () => {
                     </div>
                     
                     {/* Bottom Row: Action Buttons */}
-                    <div className="flex items-center gap-2 pt-2.5 border-t border-slate-50">
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-50">
                       <button 
                         onClick={() => openInvoice(o)} 
-                        className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm" 
+                        className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm whitespace-nowrap" 
                         title="View & Print Invoice"
                       >
                         <span>🖨️ Print</span>
                       </button>
                       <button 
                         onClick={() => downloadPDF(o)} 
-                        className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm" 
+                        className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm whitespace-nowrap" 
                         title="Download PDF Receipt"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                         </svg>
-                        <span>Download PDF</span>
+                        <span>PDF</span>
                       </button>
                     </div>
                   </div>
