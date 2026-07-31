@@ -133,12 +133,19 @@ const OrderManagement = () => {
 
   // ── Cart helpers ──────────────────────────────────────────
   const addToCart = useCallback((item, qty = 1) => {
+    let isFirstTime = false;
     setCart(prev => {
-      const existing = prev.find(i => (i._id || i.id) === (item._id || item.id));
-      if (existing) return prev.map(i => (i._id || i.id) === (item._id || item.id) ? { ...i, qty: i.qty + qty } : i);
-      return [...prev, { ...item, id: item._id || item.id, qty }];
+      const itemId = item._id || item.id;
+      const existing = prev.find(i => (i._id || i.id) === itemId);
+      if (existing) {
+        return prev.map(i => (i._id || i.id) === itemId ? { ...i, qty: i.qty + qty } : i);
+      }
+      isFirstTime = true;
+      return [...prev, { ...item, id: itemId, qty }];
     });
-    toast.success(`🛒 Added ${item.name} to bill!`, { autoClose: 1000, toastId: `add-${item.id || item._id}` });
+    if (isFirstTime) {
+      toast.success(`🛒 Added ${item.name} to bill!`, { autoClose: 1000, toastId: `add-${item.id || item._id}` });
+    }
   }, []);
 
   const removeFromCartByItem = useCallback((item) => {
