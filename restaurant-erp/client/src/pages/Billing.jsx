@@ -215,174 +215,201 @@ const Billing = () => {
 
   // ── Generate & Download Receipt PDF ───────────────────────────────
   const downloadPDF = (order) => {
-    const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-    const cleanText = (str) => String(str || '').replace(/[^\x20-\x7E]/g, '').trim();
+    try {
+      if (!order) {
+        toast.error('❌ Order data unavailable');
+        return;
+      }
+      const doc = new jsPDF({ format: 'a4', unit: 'mm' });
+      const cleanText = (str) => String(str || '').replace(/[^\x20-\x7E]/g, '').trim();
 
-    const orderId = cleanText(order.orderId || order._id || order.id);
-    const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
-    const orderTime = new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const rawId = String(order.orderId || order._id || order.id || 'ORDER');
+      const orderId = cleanText(rawId);
+      
+      let orderDate = '';
+      let orderTime = '';
+      if (order.createdAt) {
+        const d = new Date(order.createdAt);
+        if (!isNaN(d.getTime())) {
+          orderDate = d.toLocaleDateString('en-IN');
+          orderTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+      }
+      if (!orderDate) orderDate = order.date || new Date().toLocaleDateString('en-IN');
+      if (!orderTime) orderTime = order.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const restaurantName = 'RMS RESTAURANT';
-    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const gst = subtotal * gstRate;
-    const discount = order.discount || 0;
-    const total = order.total || (subtotal + gst - discount);
+      const restaurantName = 'RMS RESTAURANT';
+      const items = Array.isArray(order.items) ? order.items : [];
+      const subtotal = Number(order.subtotal !== undefined ? order.subtotal : items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 1)), 0)) || 0;
+      const gst = Number(order.gst !== undefined ? order.gst : subtotal * gstRate) || 0;
+      const discount = Number(order.discount) || 0;
+      const total = Number(order.total !== undefined ? order.total : (subtotal + gst - discount)) || 0;
 
-    const pageW = doc.internal.pageSize.width;
+      const pageW = doc.internal.pageSize.width;
 
-    // Header styling
-    doc.setFillColor(30, 40, 107);
-    doc.rect(0, 0, pageW, 25, 'F');
+      // Header styling
+      doc.setFillColor(30, 40, 107);
+      doc.rect(0, 0, pageW, 25, 'F');
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text(restaurantName, 14, 16);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('TAX RECEIPT & INVOICE', pageW - 14, 16, { align: 'right' });
-
-    // Meta details block
-    doc.setTextColor(51, 65, 85);
-    doc.setFontSize(9);
-    doc.text(`Order Ref: ${orderId}`, 14, 35);
-    doc.text(`Date: ${orderDate} ${orderTime}`, 14, 40);
-    const typeStr = cleanText(order.type);
-    const tableStr = order.table && order.table !== 'N/A' ? `(Table: ${cleanText(order.table)})` : '';
-    doc.text(`Service Type: ${typeStr} ${tableStr}`, 14, 45);
-
-    // Auto-table body formatting
-    const columns = [
-      { header: 'No.', dataKey: 'no' },
-      { header: 'Item Name', dataKey: 'name' },
-      { header: 'Qty', dataKey: 'qty' },
-      { header: 'Rate', dataKey: 'rate' },
-      { header: 'Amount', dataKey: 'amount' }
-    ];
-
-    const rows = order.items.map((item, idx) => ({
-      no: idx + 1,
-      name: cleanText(item.name),
-      qty: item.qty,
-      rate: `Rs. ${item.price.toFixed(2)}`,
-      amount: `Rs. ${(item.qty * item.price).toFixed(2)}`
-    }));
-
-    autoTable(doc, {
-      columns: columns,
-      body: rows,
-      startY: 52,
-      margin: { left: 14, right: 14 },
-      headStyles: { fillColor: [30, 40, 107], textColor: [255, 255, 255], fontStyle: 'bold' },
-      bodyStyles: { textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      columnStyles: {
-        0: { cellWidth: 14 },
-        1: { cellWidth: 'auto' },
-        2: { cellWidth: 18, halign: 'center' },
-        3: { cellWidth: 32, halign: 'right' },
-        4: { cellWidth: 35, halign: 'right' }
-      },
-      theme: 'grid'
-    });
-
-    let ty = doc.lastAutoTable.finalY + 10;
-    const boxW = 85;
-    const boxX = pageW - 14 - boxW;
-    const lineH = 6;
-
-    // Subtotals pricing box
-    doc.setDrawColor(226, 232, 240);
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(boxX, ty - 4, boxW, (discount > 0 ? 4 : 3) * lineH + 4, 2, 2, 'FD');
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(100, 116, 139);
-
-    doc.text('Subtotal:', boxX + 4, ty);
-    doc.text(`Rs. ${subtotal.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
-    ty += lineH;
-
-    if (discount > 0) {
-      doc.setTextColor(22, 163, 74);
-      doc.text('Discount:', boxX + 4, ty);
-      doc.text(`- Rs. ${discount.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
-      ty += lineH;
-    }
-
-    doc.setTextColor(71, 85, 105);
-    doc.text(`GST (${gstRatePercent}%):`, boxX + 4, ty);
-    doc.text(`Rs. ${gst.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
-    ty += lineH;
-
-    // Divider line
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.4);
-    doc.line(boxX, ty, boxX + boxW, ty);
-    ty += 5;
-
-    // Grand total box
-    doc.setFillColor(30, 40, 107);
-    doc.roundedRect(boxX, ty - 4, boxW, 11, 2, 2, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(255, 255, 255);
-    doc.text('TOTAL:', boxX + 4, ty + 4);
-    doc.text(`Rs. ${total.toFixed(2)}`, boxX + boxW - 5, ty + 4, { align: 'right' });
-
-    ty += 16;
-
-    // Payment method row
-    if (order.paymentMethod) {
-      const pmColors = {
-        Cash:   [22, 163, 74],
-        Card:   [37, 99, 235],
-        UPI:    [124, 58, 237],
-        Wallet: [217, 119, 6],
-        Other:  [100, 116, 139],
-      };
-      const pmColor = pmColors[order.paymentMethod] || [100, 116, 139];
-      doc.setFillColor(...pmColor);
-      doc.roundedRect(boxX, ty - 3, boxW, 8, 1.5, 1.5, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
       doc.setTextColor(255, 255, 255);
-      doc.text(`Paid via: ${cleanText(order.paymentMethod)}`, boxX + boxW / 2, ty + 2.5, { align: 'center' });
-      ty += 12;
-    } else {
-      ty += 4;
-    }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text(restaurantName, 14, 16);
 
-    // Thank you banner
-    doc.setFillColor(254, 243, 199);
-    doc.roundedRect(14, ty, pageW - 28, 14, 2, 2, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(180, 83, 9);
-    doc.text('Thank you for dining with us!', pageW / 2, ty + 5.5, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.text('Please visit us again. For queries, contact us at the above details.', pageW / 2, ty + 10, { align: 'center' });
-
-    // Page footer layout
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(14, 285, pageW - 14, 285);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(148, 163, 184);
-      doc.text(`${restaurantName} - Tax Invoice - ${orderId}`, 14, 290);
-      doc.text(`Page ${i} of ${pageCount}`, pageW - 14, 290, { align: 'right' });
-    }
+      doc.setFontSize(8);
+      doc.text('TAX RECEIPT & INVOICE', pageW - 14, 16, { align: 'right' });
 
-    const fileName = `Invoice_${orderId.substring(orderId.length - 8).toUpperCase()}_${orderDate.replace(/\//g, '-')}.pdf`;
-    doc.save(fileName);
-    toast.success(`📥 Invoice downloaded: ${fileName}`);
+      // Meta details block
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(9);
+      doc.text(`Order Ref: ${orderId}`, 14, 35);
+      doc.text(`Date: ${orderDate} ${orderTime}`, 14, 40);
+      const typeStr = cleanText(order.type || 'Dine-in');
+      const tableStr = order.table && order.table !== 'N/A' ? `(Table: ${cleanText(order.table)})` : '';
+      doc.text(`Service Type: ${typeStr} ${tableStr}`, 14, 45);
+
+      // Auto-table body formatting
+      const columns = [
+        { header: 'No.', dataKey: 'no' },
+        { header: 'Item Name', dataKey: 'name' },
+        { header: 'Qty', dataKey: 'qty' },
+        { header: 'Rate', dataKey: 'rate' },
+        { header: 'Amount', dataKey: 'amount' }
+      ];
+
+      const rows = items.map((item, idx) => {
+        const price = Number(item.price) || 0;
+        const qty = Number(item.qty) || 1;
+        return {
+          no: idx + 1,
+          name: cleanText(item.name || 'Item'),
+          qty: qty,
+          rate: `Rs. ${price.toFixed(2)}`,
+          amount: `Rs. ${(qty * price).toFixed(2)}`
+        };
+      });
+
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 52,
+        margin: { left: 14, right: 14 },
+        headStyles: { fillColor: [30, 40, 107], textColor: [255, 255, 255], fontStyle: 'bold' },
+        bodyStyles: { textColor: [51, 65, 85] },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { cellWidth: 14 },
+          1: { cellWidth: 'auto' },
+          2: { cellWidth: 18, halign: 'center' },
+          3: { cellWidth: 32, halign: 'right' },
+          4: { cellWidth: 35, halign: 'right' }
+        },
+        theme: 'grid'
+      });
+
+      let ty = doc.lastAutoTable.finalY + 10;
+      const boxW = 85;
+      const boxX = pageW - 14 - boxW;
+      const lineH = 6;
+
+      // Subtotals pricing box
+      doc.setDrawColor(226, 232, 240);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(boxX, ty - 4, boxW, (discount > 0 ? 4 : 3) * lineH + 4, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+
+      doc.text('Subtotal:', boxX + 4, ty);
+      doc.text(`Rs. ${subtotal.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
+      ty += lineH;
+
+      if (discount > 0) {
+        doc.setTextColor(22, 163, 74);
+        doc.text('Discount:', boxX + 4, ty);
+        doc.text(`- Rs. ${discount.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
+        ty += lineH;
+      }
+
+      doc.setTextColor(71, 85, 105);
+      doc.text(`GST (${gstRatePercent}%):`, boxX + 4, ty);
+      doc.text(`Rs. ${gst.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
+      ty += lineH;
+
+      // Divider line
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.4);
+      doc.line(boxX, ty, boxX + boxW, ty);
+      ty += 5;
+
+      // Grand total box
+      doc.setFillColor(30, 40, 107);
+      doc.roundedRect(boxX, ty - 4, boxW, 11, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text('TOTAL:', boxX + 4, ty + 4);
+      doc.text(`Rs. ${total.toFixed(2)}`, boxX + boxW - 5, ty + 4, { align: 'right' });
+
+      ty += 16;
+
+      // Payment method row
+      if (order.paymentMethod) {
+        const pmColors = {
+          Cash:   [22, 163, 74],
+          Card:   [37, 99, 235],
+          UPI:    [124, 58, 237],
+          Wallet: [217, 119, 6],
+          Other:  [100, 116, 139],
+        };
+        const pmColor = pmColors[order.paymentMethod] || [100, 116, 139];
+        doc.setFillColor(...pmColor);
+        doc.roundedRect(boxX, ty - 3, boxW, 8, 1.5, 1.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(255, 255, 255);
+        doc.text(`Paid via: ${cleanText(order.paymentMethod)}`, boxX + boxW / 2, ty + 2.5, { align: 'center' });
+        ty += 12;
+      } else {
+        ty += 4;
+      }
+
+      // Thank you banner
+      doc.setFillColor(254, 243, 199);
+      doc.roundedRect(14, ty, pageW - 28, 14, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(180, 83, 9);
+      doc.text('Thank you for dining with us!', pageW / 2, ty + 5.5, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.text('Please visit us again. For queries, contact us at the above details.', pageW / 2, ty + 10, { align: 'center' });
+
+      // Page footer layout
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.3);
+        doc.line(14, 285, pageW - 14, 285);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`${restaurantName} - Tax Invoice - ${orderId}`, 14, 290);
+        doc.text(`Page ${i} of ${pageCount}`, pageW - 14, 290, { align: 'right' });
+      }
+
+      const idSuffix = orderId.length >= 8 ? orderId.substring(orderId.length - 8).toUpperCase() : orderId;
+      const cleanDateStr = String(orderDate).replace(/[\/\\]/g, '-');
+      const fileName = `Invoice_${idSuffix}_${cleanDateStr}.pdf`;
+      doc.save(fileName);
+      toast.success(`📥 Invoice downloaded: ${fileName}`);
+    } catch (err) {
+      console.error('PDF download error:', err);
+      toast.error(`❌ PDF Download Error: ${err.message || err}`);
+    }
   };
 
   const handleWhatsAppSend = (e) => {
