@@ -216,7 +216,9 @@ const Billing = () => {
   // ── Generate & Download Receipt PDF ───────────────────────────────
   const downloadPDF = (order) => {
     const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-    const orderId = order.orderId || order._id || order.id;
+    const cleanText = (str) => String(str || '').replace(/[^\x20-\x7E]/g, '').trim();
+
+    const orderId = cleanText(order.orderId || order._id || order.id);
     const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
     const orderTime = new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -246,7 +248,9 @@ const Billing = () => {
     doc.setFontSize(9);
     doc.text(`Order Ref: ${orderId}`, 14, 35);
     doc.text(`Date: ${orderDate} ${orderTime}`, 14, 40);
-    doc.text(`Service Type: ${order.type} ${order.table !== 'N/A' ? `(Table: ${order.table})` : ''}`, 14, 45);
+    const typeStr = cleanText(order.type);
+    const tableStr = order.table && order.table !== 'N/A' ? `(Table: ${cleanText(order.table)})` : '';
+    doc.text(`Service Type: ${typeStr} ${tableStr}`, 14, 45);
 
     // Auto-table body formatting
     const columns = [
@@ -259,7 +263,7 @@ const Billing = () => {
 
     const rows = order.items.map((item, idx) => ({
       no: idx + 1,
-      name: item.name,
+      name: cleanText(item.name),
       qty: item.qty,
       rate: `Rs. ${item.price.toFixed(2)}`,
       amount: `Rs. ${(item.qty * item.price).toFixed(2)}`
@@ -345,7 +349,7 @@ const Billing = () => {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(255, 255, 255);
-      doc.text(`Paid via: ${order.paymentMethod}`, boxX + boxW / 2, ty + 2.5, { align: 'center' });
+      doc.text(`Paid via: ${cleanText(order.paymentMethod)}`, boxX + boxW / 2, ty + 2.5, { align: 'center' });
       ty += 12;
     } else {
       ty += 4;
@@ -357,7 +361,7 @@ const Billing = () => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(180, 83, 9);
-    doc.text('Thank you for dining with us! 🙏', pageW / 2, ty + 5.5, { align: 'center' });
+    doc.text('Thank you for dining with us!', pageW / 2, ty + 5.5, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.text('Please visit us again. For queries, contact us at the above details.', pageW / 2, ty + 10, { align: 'center' });
@@ -372,7 +376,7 @@ const Billing = () => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
-      doc.text(`${restaurantName} · Tax Invoice · ${orderId}`, 14, 290);
+      doc.text(`${restaurantName} - Tax Invoice - ${orderId}`, 14, 290);
       doc.text(`Page ${i} of ${pageCount}`, pageW - 14, 290, { align: 'right' });
     }
 
