@@ -261,8 +261,8 @@ const Billing = () => {
       no: idx + 1,
       name: item.name,
       qty: item.qty,
-      rate: `₹ ${item.price.toFixed(2)}`,
-      amount: `₹ ${(item.qty * item.price).toFixed(2)}`
+      rate: `Rs. ${item.price.toFixed(2)}`,
+      amount: `Rs. ${(item.qty * item.price).toFixed(2)}`
     }));
 
     autoTable(doc, {
@@ -273,37 +273,44 @@ const Billing = () => {
       headStyles: { fillColor: [30, 40, 107], textColor: [255, 255, 255], fontStyle: 'bold' },
       bodyStyles: { textColor: [51, 65, 85] },
       alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 14 },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 18, halign: 'center' },
+        3: { cellWidth: 32, halign: 'right' },
+        4: { cellWidth: 35, halign: 'right' }
+      },
       theme: 'grid'
     });
 
     let ty = doc.lastAutoTable.finalY + 10;
-    const boxW = 80;
+    const boxW = 85;
     const boxX = pageW - 14 - boxW;
-    const lineH = 5.5;
+    const lineH = 6;
 
     // Subtotals pricing box
     doc.setDrawColor(226, 232, 240);
     doc.setFillColor(248, 250, 252);
-    doc.roundedRect(boxX, ty - 4, boxW, (discount > 0 ? 4 : 3) * lineH + 5, 2, 2, 'FD');
+    doc.roundedRect(boxX, ty - 4, boxW, (discount > 0 ? 4 : 3) * lineH + 4, 2, 2, 'FD');
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
     doc.setTextColor(100, 116, 139);
 
-    doc.text('Subtotal:',          boxX + 2, ty);
-    doc.text(`₹ ${subtotal.toFixed(2)}`, boxX + boxW - 2, ty, { align: 'right' });
+    doc.text('Subtotal:', boxX + 4, ty);
+    doc.text(`Rs. ${subtotal.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
     ty += lineH;
 
     if (discount > 0) {
       doc.setTextColor(22, 163, 74);
-      doc.text('Discount:',       boxX + 2, ty);
-      doc.text(`- ₹ ${discount.toFixed(2)}`, boxX + boxW - 2, ty, { align: 'right' });
+      doc.text('Discount:', boxX + 4, ty);
+      doc.text(`- Rs. ${discount.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
       ty += lineH;
     }
 
     doc.setTextColor(71, 85, 105);
-    doc.text(`GST (${gstRatePercent}%):`,        boxX + 2, ty);
-    doc.text(`₹ ${gst.toFixed(2)}`, boxX + boxW - 2, ty, { align: 'right' });
+    doc.text(`GST (${gstRatePercent}%):`, boxX + 4, ty);
+    doc.text(`Rs. ${gst.toFixed(2)}`, boxX + boxW - 5, ty, { align: 'right' });
     ty += lineH;
 
     // Divider line
@@ -319,7 +326,7 @@ const Billing = () => {
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
     doc.text('TOTAL:', boxX + 4, ty + 4);
-    doc.text(`₹ ${total.toFixed(2)}`, boxX + boxW - 4, ty + 4, { align: 'right' });
+    doc.text(`Rs. ${total.toFixed(2)}`, boxX + boxW - 5, ty + 4, { align: 'right' });
 
     ty += 16;
 
@@ -338,7 +345,7 @@ const Billing = () => {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(255, 255, 255);
-      doc.text(`Paid via: ${order.paymentMethod}`, pageW / 2, ty + 2.5, { align: 'center' });
+      doc.text(`Paid via: ${order.paymentMethod}`, boxX + boxW / 2, ty + 2.5, { align: 'center' });
       ty += 12;
     } else {
       ty += 4;
