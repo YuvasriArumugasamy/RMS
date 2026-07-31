@@ -609,23 +609,24 @@ const Billing = () => {
                         </span>
                       </div>
                       
-                      {/* Action hover buttons */}
-                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* Action buttons - always visible */}
+                      <div className="flex items-center gap-1.5">
                         <button 
                           onClick={() => openInvoice(o)} 
-                          className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl cursor-pointer transition-all active:scale-90 shadow-sm" 
-                          title="View Invoice"
+                          className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-[10px] cursor-pointer transition-all active:scale-95 shadow-sm flex items-center gap-1" 
+                          title="View & Print Invoice"
                         >
-                          📄
+                          <span>🖨️ Print</span>
                         </button>
                         <button 
                           onClick={() => downloadPDF(o)} 
-                          className="w-8 h-8 flex items-center justify-center bg-indigo-50 hover:bg-indigo-650 text-indigo-600 hover:text-white rounded-xl cursor-pointer transition-all active:scale-90 shadow-sm" 
-                          title="Download Receipt"
+                          className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-[10px] cursor-pointer transition-all active:scale-95 shadow-sm flex items-center gap-1" 
+                          title="Download PDF Receipt"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                           </svg>
+                          <span>PDF</span>
                         </button>
                       </div>
                     </div>
