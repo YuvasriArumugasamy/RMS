@@ -364,7 +364,7 @@ const Dashboard = () => {
       </div>
 
       {/* ── Row 3: Live Queue + Top Items + Alerts ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
         {/* Live Active Queue */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-3">
@@ -385,7 +385,7 @@ const Dashboard = () => {
           ) : (
             <>
               {/* ── MOBILE: Card list ── */}
-              <div className="sm:hidden space-y-2 max-h-72 overflow-y-auto pr-0.5" style={{scrollbarWidth:'none'}}>
+              <div className="sm:hidden space-y-2 max-h-[480px] overflow-y-auto pr-0.5" style={{scrollbarWidth:'none'}}>
                 {activeOrders.slice(0, 15).map(o => {
                   const statusStyle =
                     o.status === 'Ready'     ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
@@ -420,7 +420,7 @@ const Dashboard = () => {
               </div>
 
               {/* ── DESKTOP: Table ── */}
-              <div className="hidden sm:block overflow-x-auto max-h-64 overflow-y-auto">
+              <div className="hidden sm:block overflow-x-auto max-h-[500px] overflow-y-auto">
                 <table className="w-full text-left">
                   <thead className="sticky top-0 bg-white">
                     <tr className="text-slate-400 text-[9px] font-bold uppercase tracking-wider border-b border-slate-100">
