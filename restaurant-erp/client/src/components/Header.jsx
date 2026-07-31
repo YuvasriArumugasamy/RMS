@@ -325,7 +325,7 @@ const QuickOrderModal = ({ onClose, onOrderPlaced }) => {
               <button
                 onClick={placeOrder}
                 disabled={placing}
-                className="px-5 py-2.5 bg-[#f97316] hover:bg-orange-600 disabled:opacity-60 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-400/25 transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none text-white text-xs font-bold rounded-xl shadow-md shadow-orange-400/25 transition-all cursor-pointer flex items-center gap-1.5"
               >
                 {placing ? (
                   <><svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Placing...</>

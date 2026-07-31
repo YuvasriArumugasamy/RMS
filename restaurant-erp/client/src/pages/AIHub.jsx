@@ -259,7 +259,7 @@ const AIHub = () => {
                   placeholder="Ask about sales, stock, orders, staff..."
                   className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200/60 focus:bg-white rounded-2xl text-xs font-bold focus:outline-none focus:border-orange-500 transition-all"/>
                 <button type="submit" disabled={!input.trim() || thinking}
-                  className="px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-650 hover:from-orange-600 hover:to-orange-700 disabled:opacity-60 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-orange-400/20 flex items-center gap-1.5 cursor-pointer">
+                  className="px-5 py-3 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-orange-500/25 flex items-center gap-1.5 cursor-pointer">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                   Send
                 </button>

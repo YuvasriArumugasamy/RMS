@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ConfirmModal from './ConfirmModal';
 
 const navItems = [
   {
@@ -174,6 +176,7 @@ const roleColorMap = {
 const Sidebar = ({ onClose }) => {
   const { user, logout, permissions } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const visibleItems = navItems.filter((item) => {
     if (!permissions || permissions.length === 0) {
@@ -188,76 +191,90 @@ const Sidebar = ({ onClose }) => {
     return permissions.includes(item.perm);
   });
 
-  const handleLogout = () => {
+  const handleConfirmLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const initials = user?.username ? user.username.slice(0, 2).toUpperCase() : 'US';
   const roleBadge = roleColorMap[user?.role] || 'bg-gray-600 text-white';
 
   return (
-    <aside className="w-64 h-full bg-[#1e3a8a] flex flex-col border-r border-white/5 shadow-2xl">
+    <>
+      <aside className="w-64 h-full bg-[#1e3a8a] flex flex-col border-r border-white/5 shadow-2xl">
 
-      {/* ── Brand ── */}
-      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between w-full">
-        <div className="flex items-center gap-1.5">
-          <span className="text-2xl font-black text-[#f97316]">R</span>
-          <span className="text-2xl font-black text-white">MS</span>
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-tight">Restaurant<br/>Management<br/>System</span>
+        {/* ── Brand ── */}
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between w-full">
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl font-black text-[#f97316]">R</span>
+            <span className="text-2xl font-black text-white">MS</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-tight">Restaurant<br/>Management<br/>System</span>
+          </div>
+          {onClose && (
+            <button 
+              onClick={onClose}
+              className="md:hidden w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-white text-xs hover:bg-white/20 transition-all cursor-pointer"
+            >
+              ✕
+            </button>
+          )}
         </div>
-        {onClose && (
-          <button 
-            onClick={onClose}
-            className="md:hidden w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-white text-xs hover:bg-white/20 transition-all cursor-pointer"
+
+        {/* ── Nav ── */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5 scrollbar-thin scrollbar-thumb-white/10">
+          {visibleItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-[#f97316] text-white shadow-md shadow-orange-500/25'
+                    : 'text-white/90 hover:text-white hover:bg-white/10'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={`flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-white/70 group-hover:text-orange-400'}`}>
+                    {item.icon}
+                  </span>
+                  <span className="truncate">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* ── Logout ── */}
+        <div className="p-4 border-t border-white/5">
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-slate-400 border border-white/10 hover:bg-red-900/30 hover:text-red-400 hover:border-red-900/50 transition-all cursor-pointer active:scale-95"
           >
-            ✕
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign Out
           </button>
-        )}
-      </div>
+        </div>
+      </aside>
 
-      {/* ── Nav ── */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5 scrollbar-thin scrollbar-thumb-white/10">
-        {visibleItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
-                isActive
-                  ? 'bg-[#f97316] text-white shadow-md shadow-orange-500/25'
-                  : 'text-white/90 hover:text-white hover:bg-white/10'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <span className={`flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-white/70 group-hover:text-orange-400'}`}>
-                  {item.icon}
-                </span>
-                <span className="truncate">{item.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* ── Logout ── */}
-      <div className="p-4 border-t border-white/5">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-slate-400 border border-white/10 hover:bg-red-900/30 hover:text-red-400 hover:border-red-900/50 transition-all"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Sign Out
-        </button>
-      </div>
-    </aside>
+      {/* ── Sign Out Confirmation Modal ── */}
+      {showLogoutModal && (
+        <ConfirmModal
+          title="Sign Out Confirmation"
+          message="Are you sure you want to sign out? You will be redirected to the login page."
+          confirmLabel="Sign Out"
+          confirmColor="red"
+          onConfirm={handleConfirmLogout}
+          onClose={() => setShowLogoutModal(false)}
+        />
+      )}
+    </>
   );
 };
 

@@ -352,7 +352,7 @@ const Settings = () => {
 
                 {notifPermission === 'granted' && (
                   <button onClick={() => new Notification('Test Notification 🧪', { body: 'RMS notifications are working!', icon: '/favicon.png' })}
-                    className="w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold rounded-2xl text-xs transition-all border border-emerald-200 cursor-pointer active:scale-95">
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-emerald-600/20 cursor-pointer active:scale-95">
                     🧪 Send Test Notification
                   </button>
                 )}
