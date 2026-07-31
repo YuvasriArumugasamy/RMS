@@ -475,28 +475,34 @@ const Billing = () => {
                 return (
                   <div 
                     key={id} 
-                    className={`p-5 border rounded-3xl transition-all duration-350 relative flex flex-col gap-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] ${
+                    className={`p-5 border rounded-3xl transition-all duration-300 relative flex flex-col gap-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] ${
                       isSelected 
-                        ? 'border-indigo-500 bg-indigo-50/15 ring-1 ring-indigo-500/25' 
+                        ? 'border-emerald-500 bg-emerald-50/15 ring-2 ring-emerald-500/20' 
                         : 'border-slate-100/80 bg-white hover:bg-slate-50/40'
                     }`}
                   >
                     {/* Top Row: Order ID, Type Badge and Price */}
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
-                        <label className="relative flex items-center justify-center shrink-0 cursor-pointer">
-                          <input 
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleOrderSelection(id)}
-                            className="peer sr-only"
-                          />
-                          <span className="w-5 h-5 rounded-full border-2 border-slate-200 peer-checked:border-indigo-650 peer-checked:bg-indigo-650 flex items-center justify-center transition-all shadow-sm">
-                            <svg className="w-3 h-3 text-white scale-0 peer-checked:scale-100 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                          </span>
-                        </label>
+                        <button 
+                          type="button"
+                          onClick={() => toggleOrderSelection(id)}
+                          className="relative flex items-center justify-center shrink-0 cursor-pointer focus:outline-none"
+                        >
+                          <div 
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm ${
+                              isSelected 
+                                ? 'border-emerald-500 bg-emerald-500 shadow-md shadow-emerald-500/30 scale-105' 
+                                : 'border-slate-300 bg-white hover:border-emerald-400'
+                            }`}
+                          >
+                            {isSelected && (
+                              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                            )}
+                          </div>
+                        </button>
                         
                         <div className="space-y-1">
                           <span className="font-extrabold text-slate-800 text-sm block tracking-tight">#{id.substring(id.length - 8).toUpperCase()}</span>
