@@ -776,9 +776,12 @@ const StaffManagement = () => {
                   <input
                     type="tel"
                     required
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    placeholder="9876543210"
                     className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none"
                     value={editPhone}
-                    onChange={(e) => setEditPhone(e.target.value)}
+                    onChange={(e) => setEditPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   />
                 </div>
               </div>
@@ -852,10 +855,12 @@ const StaffManagement = () => {
                   <input
                     type="tel"
                     required
-                    placeholder="98765xxxxx"
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    placeholder="9876543210"
                     className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                     value={newStaffPhone}
-                    onChange={(e) => setNewStaffPhone(e.target.value)}
+                    onChange={(e) => setNewStaffPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   />
                 </div>
               </div>

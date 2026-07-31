@@ -378,7 +378,7 @@ const CustomerCRM = () => {
               </div>
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Phone (unique)</label>
-                <input required type="tel" placeholder="+91 9999999999" value={addForm.phone} onChange={e => setAddForm(f => ({...f, phone: e.target.value}))}
+                <input required type="tel" maxLength={10} pattern="[0-9]{10}" placeholder="9876543210" value={addForm.phone} onChange={e => setAddForm(f => ({...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10)}))}
                   className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"/>
               </div>
               <div>

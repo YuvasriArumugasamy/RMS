@@ -669,9 +669,11 @@ const TableManagement = () => {
                 <input 
                   required 
                   type="tel" 
-                  placeholder="e.g. +91 9876543210"
+                  maxLength={10}
+                  pattern="[0-9]{10}"
+                  placeholder="e.g. 9876543210"
                   value={resForm.customerPhone}
-                  onChange={e => setResForm(f => ({...f, customerPhone: e.target.value}))}
+                  onChange={e => setResForm(f => ({...f, customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10)}))}
                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                 />
               </div>

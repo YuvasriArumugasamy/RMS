@@ -1592,9 +1592,11 @@ const CustomerMenu = () => {
               </label>
               <input
                 type="tel"
+                maxLength={10}
+                pattern="[0-9]{10}"
                 value={customerPhone}
-                onChange={e => setCustomerPhone(e.target.value)}
-                placeholder="+91 98765 43210"
+                onChange={e => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                placeholder="e.g. 9876543210"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-900 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 transition-all"
                 required
               />

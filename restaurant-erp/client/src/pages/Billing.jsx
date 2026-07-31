@@ -814,9 +814,11 @@ const Billing = () => {
                 <input 
                   type="tel" 
                   required
-                  placeholder="e.g. +91 9988776655"
+                  maxLength={10}
+                  pattern="[0-9]{10}"
+                  placeholder="e.g. 9876543210"
                   value={whatsappNumber}
-                  onChange={e => setWhatsappNumber(e.target.value)}
+                  onChange={e => setWhatsappNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -918,9 +920,11 @@ const Billing = () => {
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">📞 Customer Phone (for WhatsApp Receipt)</label>
               <input 
                 type="tel" 
-                placeholder="Enter phone number (e.g. 9876543210)"
+                maxLength={10}
+                pattern="[0-9]{10}"
+                placeholder="Enter 10-digit phone number"
                 value={payModalPhone}
-                onChange={e => setPayModalPhone(e.target.value)}
+                onChange={e => setPayModalPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
               />
               {payModalPhone.trim() && (

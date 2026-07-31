@@ -458,7 +458,7 @@ const InventoryManagement = () => {
                 <input
                   type="text"
                   required
-                  placeholder="+91 9988776655"
+                  placeholder="e.g. 9876543210"
                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500"
                   value={newSupplier.contact}
                   onChange={(e) => setNewSupplier({ ...newSupplier, contact: e.target.value })}
