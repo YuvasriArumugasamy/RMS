@@ -126,11 +126,13 @@ const AIHub = () => {
   const [input, setInput]       = useState('');
   const [thinking, setThinking] = useState(false);
   const [activeTab, setActiveTab] = useState('ai'); // 'ai' | 'theft' | 'waste'
-  const bottomRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior:'smooth' });
-  }, [messages]);
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages, thinking]);
 
   const askAI = (question) => {
     if (!question.trim()) return;
@@ -224,11 +226,11 @@ const AIHub = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 bg-slate-50/30">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 bg-slate-50/30">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.sender === 'User' ? 'justify-end' : 'justify-start'}`}>
                   {msg.sender === 'AI' && (
-                    <div className="w-7 h-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white text-[9.5px] font-black flex-shrink-0 mr-2 mt-0.5">AI</div>
+                    <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[9.5px] font-black flex-shrink-0 mr-2 mt-0.5">AI</div>
                   )}
                   <div className={`max-w-[80%] p-3.5 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.015)] ${
                     msg.sender === 'User'
@@ -241,7 +243,7 @@ const AIHub = () => {
               ))}
               {thinking && (
                 <div className="flex justify-start">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white text-[9.5px] font-black flex-shrink-0 mr-2">AI</div>
+                  <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[9.5px] font-black flex-shrink-0 mr-2">AI</div>
                   <div className="bg-white border border-slate-100 px-4 py-3.5 rounded-2xl rounded-bl-sm shadow-[0_8px_30px_rgba(0,0,0,0.01)]">
                     <div className="flex gap-1.5 select-none">
                       {[0,1,2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{animationDelay:`${i*150}ms`}}/>)}
@@ -249,7 +251,6 @@ const AIHub = () => {
                   </div>
                 </div>
               )}
-              <div ref={bottomRef}/>
             </div>
 
             {/* Input */}
@@ -259,9 +260,9 @@ const AIHub = () => {
                   placeholder="Ask about sales, stock, orders, staff..."
                   className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200/60 focus:bg-white rounded-2xl text-xs font-bold focus:outline-none focus:border-orange-500 transition-all"/>
                 <button type="submit" disabled={!input.trim() || thinking}
-                  className="px-5 py-3 bg-[#f97316] hover:bg-orange-600 active:bg-orange-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-orange-500/25 flex items-center gap-1.5 cursor-pointer">
+                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-white font-extrabold rounded-2xl text-xs transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5 cursor-pointer shrink-0">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
-                  Send
+                  <span>Send</span>
                 </button>
               </form>
             </div>
