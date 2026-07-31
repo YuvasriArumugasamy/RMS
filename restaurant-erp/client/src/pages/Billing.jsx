@@ -579,56 +579,57 @@ const Billing = () => {
                 const id = o._id || o.id;
                 const typeCfg = getOrderTypeConfig(o.type);
                 return (
-                  <div key={id} className="p-4.5 border border-slate-100/70 bg-white hover:bg-slate-50/20 rounded-3xl transition-all duration-300 flex justify-between items-center group shadow-[0_8px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.025)]">
-                    <div className="space-y-1.5 min-w-0">
-                      <span className="font-extrabold text-slate-800 text-sm block tracking-tight">#{id.substring(id.length - 8).toUpperCase()}</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wider border ${typeCfg.badgeBg}`}>
-                          {typeCfg.icon} {typeCfg.label}
-                        </span>
-                        
-                        {o.paymentMethod && (
-                          <span className={`text-[8.5px] font-black uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1 leading-none ${
-                            o.paymentMethod === 'Cash'   ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                            o.paymentMethod === 'Card'   ? 'bg-blue-50    text-blue-700    border-blue-100'    :
-                            o.paymentMethod === 'UPI'    ? 'bg-violet-50  text-violet-700  border-violet-100'  :
-                            o.paymentMethod === 'Wallet' ? 'bg-amber-50   text-amber-700   border-amber-100'   :
-                            'bg-slate-50 text-slate-650 border-slate-200'
-                          }`}>
-                            {PAYMENT_METHODS.find(m => m.id === o.paymentMethod)?.icon} {o.paymentMethod}
+                  <div key={id} className="p-4 border border-slate-100/80 bg-white hover:bg-slate-50/40 rounded-3xl transition-all duration-300 flex flex-col gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.015)]">
+                    {/* Top Row: Order ID, Type & Payment Badges + Price */}
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <span className="font-extrabold text-slate-800 text-sm block tracking-tight truncate">#{id.substring(id.length - 8).toUpperCase()}</span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={`rounded-full px-2.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider border flex items-center gap-1 ${typeCfg.badgeBg}`}>
+                            {typeCfg.icon} {typeCfg.label}
                           </span>
-                        )}
+                          
+                          {o.paymentMethod && (
+                            <span className={`text-[8.5px] font-black uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1 leading-none ${
+                              o.paymentMethod === 'Cash'   ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                              o.paymentMethod === 'Card'   ? 'bg-blue-50    text-blue-700    border-blue-100'    :
+                              o.paymentMethod === 'UPI'    ? 'bg-violet-50  text-violet-700  border-violet-100'  :
+                              o.paymentMethod === 'Wallet' ? 'bg-amber-50   text-amber-700   border-amber-100'   :
+                              'bg-slate-50 text-slate-650 border-slate-200'
+                            }`}>
+                              {PAYMENT_METHODS.find(m => m.id === o.paymentMethod)?.icon} {o.paymentMethod}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="text-right shrink-0">
+                        <span className="font-black text-slate-850 text-base block tracking-tight">₹{o.total}</span>
+                        <span className="text-[9px] text-emerald-600 font-extrabold tracking-wide uppercase flex items-center justify-end gap-1 mt-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Settled
+                        </span>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-4 shrink-0">
-                      <div className="text-right">
-                        <span className="font-black text-slate-850 block text-sm tracking-tight">₹{o.total}</span>
-                        <span className="text-[9px] text-emerald-600 font-extrabold tracking-wide uppercase flex items-center justify-end gap-0.5">
-                          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> Settled
-                        </span>
-                      </div>
-                      
-                      {/* Action buttons - always visible */}
-                      <div className="flex items-center gap-1.5">
-                        <button 
-                          onClick={() => openInvoice(o)} 
-                          className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-[10px] cursor-pointer transition-all active:scale-95 shadow-sm flex items-center gap-1" 
-                          title="View & Print Invoice"
-                        >
-                          <span>🖨️ Print</span>
-                        </button>
-                        <button 
-                          onClick={() => downloadPDF(o)} 
-                          className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-[10px] cursor-pointer transition-all active:scale-95 shadow-sm flex items-center gap-1" 
-                          title="Download PDF Receipt"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                          </svg>
-                          <span>PDF</span>
-                        </button>
-                      </div>
+                    {/* Bottom Row: Action Buttons */}
+                    <div className="flex items-center gap-2 pt-2.5 border-t border-slate-50">
+                      <button 
+                        onClick={() => openInvoice(o)} 
+                        className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm" 
+                        title="View & Print Invoice"
+                      >
+                        <span>🖨️ Print</span>
+                      </button>
+                      <button 
+                        onClick={() => downloadPDF(o)} 
+                        className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm" 
+                        title="Download PDF Receipt"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        <span>Download PDF</span>
+                      </button>
                     </div>
                   </div>
                 );
