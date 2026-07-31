@@ -171,7 +171,11 @@ const Billing = () => {
   // ── Merge selected bills into a single invoice ──────────────────
   const mergeBills = async () => {
     if (selectedOrders.length < 2) {
-      toast.warning('⚠️ Select at least 2 orders to merge');
+      if (selectedOrders.length === 0) {
+        toast.warning('⚠️ Please select at least 2 unpaid bills using the checkboxes to merge');
+      } else {
+        toast.warning('⚠️ Select at least 1 more unpaid bill to merge');
+      }
       return;
     }
 
@@ -509,10 +513,22 @@ const Billing = () => {
         </div>
         <button
           onClick={mergeBills}
-          disabled={selectedOrders.length < 2}
-          className="px-5 py-3.5 bg-[#0F286B] disabled:bg-slate-200 hover:bg-[#1e3a8a] text-white disabled:text-slate-400 font-bold rounded-xl text-xs shadow-md disabled:shadow-none transition-all cursor-pointer shrink-0"
+          className={`px-5 py-3.5 font-extrabold rounded-xl text-xs shadow-md transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
+            selectedOrders.length >= 2
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/25 scale-[1.02] ring-2 ring-emerald-400/50'
+              : selectedOrders.length === 1
+              ? 'bg-slate-700 hover:bg-slate-800 text-white shadow-slate-700/20'
+              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'
+          }`}
         >
-          Merge Selected Bills 🔗
+          <span>
+            {selectedOrders.length >= 2
+              ? `Merge ${selectedOrders.length} Selected Bills`
+              : selectedOrders.length === 1
+              ? `Merge Selected Bills (1 Selected)`
+              : `Merge Selected Bills`}
+          </span>
+          <span className="text-sm">🔗</span>
         </button>
       </div>
 
@@ -521,12 +537,33 @@ const Billing = () => {
         
         <div className="bg-white p-5 rounded-3xl border border-slate-100 space-y-4 shadow-sm min-h-[500px]">
           <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-             <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"/>Unpaid Bills
-             </h3>
-             <span className="bg-red-50 text-red-650 font-black px-2.5 py-0.5 rounded-lg border border-red-100 text-[10px] uppercase">
-               {unpaidOrders.length} Pending
-             </span>
+             <div className="flex items-center gap-3">
+               <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"/>Unpaid Bills
+               </h3>
+               <span className="bg-red-50 text-red-650 font-black px-2.5 py-0.5 rounded-lg border border-red-100 text-[10px] uppercase">
+                 {unpaidOrders.length} Pending
+               </span>
+             </div>
+             {unpaidOrders.length > 0 && (
+               <div className="flex items-center gap-2">
+                 {selectedOrders.length > 0 ? (
+                   <button
+                     onClick={() => setSelectedOrders([])}
+                     className="text-[11px] font-bold text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+                   >
+                     Clear ({selectedOrders.length})
+                   </button>
+                 ) : (
+                   <button
+                     onClick={() => setSelectedOrders(unpaidOrders.map(o => o._id || o.id))}
+                     className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer"
+                   >
+                     Select All
+                   </button>
+                 )}
+               </div>
+             )}
           </div>
           
           <div className="space-y-3.5">
@@ -542,9 +579,10 @@ const Billing = () => {
                 return (
                   <div 
                     key={id} 
-                    className={`p-5 border rounded-3xl transition-all duration-300 relative flex flex-col gap-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] ${
+                    onClick={() => toggleOrderSelection(id)}
+                    className={`p-5 border rounded-3xl transition-all duration-300 relative flex flex-col gap-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.03)] cursor-pointer select-none ${
                       isSelected 
-                        ? 'border-emerald-500 bg-emerald-50/15 ring-2 ring-emerald-500/20' 
+                        ? 'border-emerald-500 bg-emerald-50/20 ring-2 ring-emerald-500/20' 
                         : 'border-slate-100/80 bg-white hover:bg-slate-50/40'
                     }`}
                   >
@@ -553,7 +591,7 @@ const Billing = () => {
                       <div className="flex items-center gap-3">
                         <button 
                           type="button"
-                          onClick={() => toggleOrderSelection(id)}
+                          onClick={(e) => { e.stopPropagation(); toggleOrderSelection(id); }}
                           className="relative flex items-center justify-center shrink-0 cursor-pointer focus:outline-none"
                         >
                           <div 
@@ -597,7 +635,7 @@ const Billing = () => {
                     </div>
 
                     {/* Bottom Actions Row */}
-                    <div className="flex gap-2.5 pt-2 border-t border-slate-50">
+                    <div className="flex gap-2.5 pt-2 border-t border-slate-50" onClick={(e) => e.stopPropagation()}>
                       <button 
                         onClick={() => openPayModal(o)} 
                         className="flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white font-black rounded-xl text-[10px] uppercase shadow-md shadow-emerald-500/10 transition-all cursor-pointer tracking-wider flex items-center justify-center gap-1"
