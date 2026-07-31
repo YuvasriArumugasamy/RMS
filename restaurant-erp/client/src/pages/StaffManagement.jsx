@@ -597,7 +597,7 @@ const StaffManagement = () => {
                           </button>
                           <button
                             onClick={() => setSelectedStaffForHistory(staff)}
-                            className="px-3.5 py-1.5 flex items-center justify-center gap-1 text-[10.5px] font-extrabold text-indigo-650 bg-indigo-50 hover:bg-indigo-650 hover:text-white border border-indigo-100 rounded-xl transition-all cursor-pointer"
+                            className="px-3.5 py-1.5 flex items-center justify-center gap-1 text-[10.5px] font-extrabold text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white border border-indigo-100 rounded-xl transition-all cursor-pointer"
                             title="View History"
                           >
                             📊 History
@@ -870,7 +870,7 @@ const StaffManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-emerald-650 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-emerald-500/10 cursor-pointer transition-all"
+                  className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold rounded-xl text-xs shadow-md shadow-emerald-600/20 cursor-pointer transition-all"
                 >
                   Add Employee
                 </button>
